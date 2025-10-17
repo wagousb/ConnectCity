@@ -1,5 +1,6 @@
 import React from 'react';
-import { HomeIcon, UsersIcon, BellIcon, BookmarkIcon, SettingsIcon } from './Icons';
+import { HomeIcon, UsersIcon, BellIcon, BookmarkIcon, SettingsIcon, LogoutIcon } from './Icons';
+import { supabase } from '../integrations/supabase/client';
 
 interface NavLinksProps {
   activeLink: string;
@@ -14,6 +15,13 @@ const NavLinks: React.FC<NavLinksProps> = ({ activeLink, onLinkClick }) => {
     { name: 'Salvos', icon: <BookmarkIcon className="h-6 w-6" /> },
     { name: 'Configurações', icon: <SettingsIcon className="h-6 w-6" /> },
   ];
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+        console.error('Error logging out:', error);
+    }
+  };
 
   return (
     <nav className="bg-white p-4 rounded-xl border border-slate-200">
@@ -38,6 +46,19 @@ const NavLinks: React.FC<NavLinksProps> = ({ activeLink, onLinkClick }) => {
           </li>
         ))}
       </ul>
+      <div className="mt-4 pt-4 border-t border-slate-200">
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            handleLogout();
+          }}
+          className="flex items-center space-x-4 p-3 rounded-lg font-semibold transition-colors duration-200 text-slate-600 hover:bg-red-50 hover:text-red-600"
+        >
+          <LogoutIcon className="h-6 w-6" />
+          <span>Sair</span>
+        </a>
+      </div>
     </nav>
   );
 };
