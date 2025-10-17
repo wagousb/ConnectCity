@@ -4,7 +4,7 @@ import Header from './components/Header';
 import LeftSidebar from './components/LeftSidebar';
 import MainContent from './components/MainContent';
 import RightSidebar from './components/RightSidebar';
-import { supabase } from '@/src/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import type { Session } from '@supabase/supabase-js';
 import Login from './pages/Login';
 
