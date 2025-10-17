@@ -1,6 +1,6 @@
 import React from 'react';
 import { HomeIcon, UsersIcon, BellIcon, BookmarkIcon, SettingsIcon, LogoutIcon } from './Icons';
-import { supabase } from '@/src/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 interface NavLinksProps {
   activeLink: string;
