@@ -66,4 +66,6 @@ export interface Notification {
   created_at: string;
   entity_id?: string; // e.g., post_id
   postTitle?: string;
+  comment_id?: string;
+  commentContent?: string;
 }

@@ -54,6 +54,21 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
             }
         }
 
+        const commentIds = data.map(n => n.comment_id).filter(Boolean);
+        let commentsMap = new Map<string, string>();
+
+        if (commentIds.length > 0) {
+            const { data: commentsData, error: commentsError } = await supabase
+                .from('comments')
+                .select('id, content')
+                .in('id', commentIds);
+            if (commentsError) {
+                console.error('Error fetching comments for notifications:', commentsError);
+            } else {
+                commentsMap = new Map(commentsData.map(c => [c.id, c.content]));
+            }
+        }
+
         const formattedNotifications: Notification[] = data
           .map(n => ({
             id: n.id,
@@ -62,6 +77,8 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
             created_at: n.created_at,
             entity_id: n.entity_id,
             postTitle: n.entity_id ? postTitlesMap.get(n.entity_id) : undefined,
+            comment_id: n.comment_id,
+            commentContent: n.comment_id ? commentsMap.get(n.comment_id) : undefined,
             actor: {
               id: n.actor.id,
               name: n.actor.name,
@@ -87,19 +104,20 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
   }, [user.id]);
 
   const renderNotification = (notification: Notification) => {
-    const { actor, type, created_at, entity_id, postTitle } = notification;
+    const { actor, type, created_at, entity_id, postTitle, commentContent } = notification;
     const time = timeAgo(created_at);
 
     const iconClasses = "h-6 w-6 text-white";
     let icon, text;
 
     const actorName = <span className="font-bold hover:underline" onClick={(e) => { e.stopPropagation(); onViewChange({ view: 'Profile', userId: actor.id })}}>{actor.name}</span>;
-    const ideaName = <span className="font-semibold text-slate-700">"{postTitle || 'uma ideia'}"</span>;
+    const ideaName = <span className="font-bold text-slate-700">"{postTitle || 'uma ideia'}"</span>;
+    const commentText = commentContent ? <span className="text-slate-500 italic">"{commentContent}"</span> : null;
 
     switch (type) {
       case 'comment':
         icon = <div className="bg-blue-500 p-2 rounded-full"><MessageCircleIcon className={iconClasses} /></div>;
-        text = <p className="text-slate-600">{actorName} deixou uma contribuição na ideia {ideaName}.</p>;
+        text = <p className="text-slate-600">{actorName} deixou uma contribuição na sua ideia {ideaName}{commentText && ': '}{commentText}</p>;
         break;
       case 'rating':
         icon = <div className="bg-amber-500 p-2 rounded-full"><StarIcon className={iconClasses} /></div>;
@@ -107,7 +125,7 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
         break;
       case 'reply':
         icon = <div className="bg-purple-500 p-2 rounded-full"><MessageCircleIcon className={iconClasses} /></div>;
-        text = <p className="text-slate-600">{actorName} respondeu à sua contribuição na ideia {ideaName}.</p>;
+        text = <p className="text-slate-600">{actorName} respondeu à sua contribuição na ideia {ideaName}{commentText && ': '}{commentText}</p>;
         break;
       case 'comment_agree':
         icon = <div className="bg-green-500 p-2 rounded-full"><ThumbsUpIcon className={iconClasses} /></div>;

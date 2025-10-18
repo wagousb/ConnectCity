@@ -63,12 +63,13 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
   const handlePostComment = async (content: string, parentId: string | null = null) => {
     if (!content.trim()) return;
     setIsPosting(true);
-    const { error } = await supabase.from('comments').insert({
+    const { data: newCommentData, error } = await supabase.from('comments').insert({
       post_id: postId,
       user_id: currentUser.id,
       content: content,
       parent_comment_id: parentId,
-    });
+    }).select().single();
+
     if (error) {
       console.error('Error posting comment:', error);
     } else {
@@ -81,7 +82,8 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
             user_id: postAuthorId,
             actor_id: currentUser.id,
             type: 'comment',
-            entity_id: postId
+            entity_id: postId,
+            comment_id: newCommentData.id
         });
       }
 
@@ -100,7 +102,8 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
                 user_id: parentComment.user_id,
                 actor_id: currentUser.id,
                 type: 'reply',
-                entity_id: postId
+                entity_id: postId,
+                comment_id: newCommentData.id
             });
         }
       }
