@@ -12,8 +12,8 @@ interface PostCardProps {
 const PostCard: React.FC<PostCardProps> = ({ post, onToggleSave, onToggleLike, onViewChange }) => {
   const getEntityBadgeColor = (entity: string) => {
     switch (entity) {
-      case 'Executivo': return 'bg-blue-100 text-blue-800';
-      case 'Legislativo': return 'bg-green-100 text-green-800';
+      case 'Poder Executivo (prefeitura)': return 'bg-blue-100 text-blue-800';
+      case 'Poder legislativo (Câmara dos vereadores)': return 'bg-green-100 text-green-800';
       case 'Secretaria': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-slate-100 text-slate-800';
     }

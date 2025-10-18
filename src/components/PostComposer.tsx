@@ -10,7 +10,7 @@ interface PostComposerProps {
 
 const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished }) => {
   const [title, setTitle] = useState('');
-  const [targetEntity, setTargetEntity] = useState('Executivo');
+  const [targetEntity, setTargetEntity] = useState('');
   const [description, setDescription] = useState('');
   
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -57,15 +57,15 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished }) =>
 
   const resetForm = () => {
     setTitle('');
-    setTargetEntity('Executivo');
+    setTargetEntity('');
     setDescription('');
     removeImage();
     removeDocument();
   };
 
   const handlePublish = async () => {
-    if (!title.trim() || !description.trim()) {
-        alert('Por favor, preencha o título e a descrição da ideia.');
+    if (!title.trim() || !description.trim() || !targetEntity) {
+        alert('Por favor, preencha todos os campos, incluindo o destino da ideia.');
         return;
     }
 
@@ -128,11 +128,13 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished }) =>
           <select
             value={targetEntity}
             onChange={(e) => setTargetEntity(e.target.value)}
-            className="w-full border-slate-200 border rounded-lg p-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary-200"
+            className={`w-full border-slate-200 border rounded-lg p-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 ${!targetEntity ? 'text-slate-400' : 'text-slate-900'}`}
+            required
           >
-            <option value="Executivo">Destino: Executivo (Prefeitura)</option>
-            <option value="Legislativo">Destino: Legislativo (Câmara Municipal)</option>
-            <option value="Secretaria">Destino: Secretaria Municipal</option>
+            <option value="" disabled>Escolha o destino</option>
+            <option value="Poder Executivo (prefeitura)">Poder Executivo (prefeitura)</option>
+            <option value="Poder legislativo (Câmara dos vereadores)">Poder legislativo (Câmara dos vereadores)</option>
+            <option value="Secretaria">Secretaria</option>
           </select>
           <textarea
             value={description}
@@ -175,7 +177,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished }) =>
         </div>
         <button
           onClick={handlePublish}
-          disabled={!title.trim() || !description.trim() || isPublishing}
+          disabled={!title.trim() || !description.trim() || !targetEntity || isPublishing}
           className="bg-primary text-white font-semibold px-6 py-2 rounded-full hover:bg-primary-700 transition-colors disabled:bg-primary-300 disabled:cursor-not-allowed"
         >
           {isPublishing ? 'Enviando...' : 'Enviar Ideia'}
