@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import type { Comment as CommentType, User } from '@/types';
-import { supabase } from '@/integrations/supabase/client';
 import { ThumbsUpIcon, ThumbsDownIcon } from './Icons';
 import RoleBadge from './RoleBadge';
 
@@ -23,43 +22,20 @@ interface ContributionProps {
   comment: CommentType;
   currentUser: User;
   onPostReply: (content: string, parentId: string | null) => Promise<void>;
-  onVote: () => void;
+  onVote: (comment: CommentType, voteType: 'agree' | 'disagree') => void;
 }
 
 const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPostReply, onVote }) => {
   const [isReplying, setIsReplying] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [isPostingReply, setIsPostingReply] = useState(false);
+  const [isVoting, setIsVoting] = useState(false);
 
-  const handleVote = async (voteType: 'agree' | 'disagree') => {
-    const isRemovingVote = comment.user_vote === voteType;
-    const isFirstVote = !comment.user_vote;
-
-    if (isRemovingVote) {
-      const { error } = await supabase.from('comment_votes').delete().match({ comment_id: comment.id, user_id: currentUser.id });
-      if (error) console.error('Error removing vote:', error);
-      else onVote();
-      return;
-    }
-
-    const { error } = await supabase.from('comment_votes').upsert(
-      { comment_id: comment.id, user_id: currentUser.id, vote_type: voteType },
-      { onConflict: 'comment_id, user_id' }
-    );
-    if (error) {
-      console.error('Error voting:', error);
-    } else {
-      onVote();
-      if (isFirstVote && currentUser.id !== comment.author.id) {
-        await supabase.from('notifications').insert({
-            user_id: comment.author.id,
-            actor_id: currentUser.id,
-            type: voteType === 'agree' ? 'comment_agree' : 'comment_disagree',
-            entity_id: comment.post_id,
-            comment_id: comment.id
-        });
-      }
-    }
+  const handleVoteClick = async (voteType: 'agree' | 'disagree') => {
+    if (isVoting) return;
+    setIsVoting(true);
+    await onVote(comment, voteType);
+    setIsVoting(false);
   };
 
   const handleReplySubmit = async () => {
@@ -88,11 +64,19 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
           <p className="text-sm text-slate-800 mt-1">{comment.content}</p>
         </div>
         <div className="flex items-center space-x-4 mt-1 text-xs text-slate-500 font-medium">
-          <button onClick={() => handleVote('agree')} className={`flex items-center space-x-1 hover:text-green-600 ${comment.user_vote === 'agree' ? 'text-green-600' : ''}`}>
+          <button 
+            onClick={() => handleVoteClick('agree')} 
+            disabled={isVoting}
+            className={`flex items-center space-x-1 hover:text-green-600 ${comment.user_vote === 'agree' ? 'text-green-600' : ''} disabled:opacity-50`}
+          >
             <ThumbsUpIcon className="h-4 w-4" />
             <span>{comment.agree_count} Concordo</span>
           </button>
-          <button onClick={() => handleVote('disagree')} className={`flex items-center space-x-1 hover:text-red-600 ${comment.user_vote === 'disagree' ? 'text-red-600' : ''}`}>
+          <button 
+            onClick={() => handleVoteClick('disagree')} 
+            disabled={isVoting}
+            className={`flex items-center space-x-1 hover:text-red-600 ${comment.user_vote === 'disagree' ? 'text-red-600' : ''} disabled:opacity-50`}
+          >
             <ThumbsDownIcon className="h-4 w-4" />
             <span>{comment.disagree_count} Discordo</span>
           </button>

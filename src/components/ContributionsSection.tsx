@@ -112,6 +112,81 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
     setIsPosting(false);
   };
 
+  const updateCommentInState = (
+    commentList: CommentType[],
+    commentId: string,
+    voteType: 'agree' | 'disagree'
+  ): CommentType[] => {
+    return commentList.map(c => {
+      if (c.id === commentId) {
+        let { agree_count, disagree_count, user_vote } = c;
+        const isRemovingVote = user_vote === voteType;
+        const isSwitchingVote = user_vote && user_vote !== voteType;
+
+        if (isRemovingVote) {
+          user_vote = null;
+          if (voteType === 'agree') agree_count--;
+          else disagree_count--;
+        } else if (isSwitchingVote) {
+          user_vote = voteType;
+          if (voteType === 'agree') {
+            agree_count++;
+            disagree_count--;
+          } else {
+            agree_count--;
+            disagree_count++;
+          }
+        } else { // First vote
+          user_vote = voteType;
+          if (voteType === 'agree') agree_count++;
+          else disagree_count++;
+        }
+        return { ...c, user_vote, agree_count, disagree_count };
+      }
+      if (c.replies && c.replies.length > 0) {
+        return { ...c, replies: updateCommentInState(c.replies, commentId, voteType) };
+      }
+      return c;
+    });
+  };
+
+  const handleCommentVote = async (comment: CommentType, voteType: 'agree' | 'disagree') => {
+    const originalComments = JSON.parse(JSON.stringify(comments));
+    
+    const newOptimisticComments = updateCommentInState(comments, comment.id, voteType);
+    setComments(newOptimisticComments);
+
+    const isRemovingVote = comment.user_vote === voteType;
+    const isFirstVote = !comment.user_vote;
+
+    let error;
+    if (isRemovingVote) {
+      const { error: deleteError } = await supabase.from('comment_votes').delete().match({ comment_id: comment.id, user_id: currentUser.id });
+      error = deleteError;
+    } else {
+      const { error: upsertError } = await supabase.from('comment_votes').upsert(
+        { comment_id: comment.id, user_id: currentUser.id, vote_type: voteType },
+        { onConflict: 'comment_id, user_id' }
+      );
+      error = upsertError;
+    }
+
+    if (error) {
+      console.error('Error voting:', error);
+      setComments(originalComments);
+    } else {
+      if (!isRemovingVote && isFirstVote && currentUser.id !== comment.author.id) {
+        await supabase.from('notifications').insert({
+            user_id: comment.author.id,
+            actor_id: currentUser.id,
+            type: voteType === 'agree' ? 'comment_agree' : 'comment_disagree',
+            entity_id: comment.post_id,
+            comment_id: comment.id
+        });
+      }
+    }
+  };
+
   return (
     <div className="mt-4 pt-4 border-t border-slate-200">
       {loading ? (
@@ -119,7 +194,7 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
       ) : (
         <div className="space-y-4">
           {comments.map(comment => (
-            <Contribution key={comment.id} comment={comment} currentUser={currentUser} onPostReply={handlePostComment} onVote={fetchComments} />
+            <Contribution key={comment.id} comment={comment} currentUser={currentUser} onPostReply={handlePostComment} onVote={handleCommentVote} />
           ))}
           {comments.length === 0 && <p className="text-slate-500 text-sm text-center py-4">Nenhuma contribuição ainda. Seja o primeiro!</p>}
         </div>
