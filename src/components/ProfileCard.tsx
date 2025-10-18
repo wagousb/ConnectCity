@@ -59,7 +59,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, onViewChange, onUserUpd
         onSave={handleSaveCroppedImage}
       />
       <div className="bg-white p-6 rounded-xl border border-slate-200 text-center">
-        <div className="relative w-20 h-20 mx-auto -mt-16">
+        <div className="relative w-20 h-20 mx-auto">
             <button onClick={() => setIsProfilePicModalOpen(true)} className="relative group rounded-full">
                 <img
                 src={user.avatarUrl}

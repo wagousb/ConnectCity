@@ -52,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange }) => {
               className="flex items-center space-x-3 cursor-pointer p-1 rounded-md hover:bg-slate-100">
               <img src={user.avatarUrl} alt={user.name} className="h-9 w-9 rounded-full" />
               <div className="hidden lg:block text-sm text-left">
-                <p className="font-semibold text-slate-800">{user.name}</p>
+                <p className="font-semibold text-slate-800 whitespace-nowrap">{user.name}</p>
                 <p className="text-slate-500">@{user.handle}</p>
               </div>
             </button>
