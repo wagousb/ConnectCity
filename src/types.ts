@@ -7,6 +7,11 @@ export interface User {
   following?: number;
   bannerUrl?: string;
   bio?: string;
+  date_of_birth?: string;
+  is_public?: boolean;
+  notifications_on_likes?: boolean;
+  notifications_on_comments?: boolean;
+  notifications_on_new_followers?: boolean;
 }
 
 export interface Post {

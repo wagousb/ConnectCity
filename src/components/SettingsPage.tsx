@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { User } from '@/types';
-import { UserCircleIcon, ShieldCheckIcon, BellIcon, BookmarkIcon, SettingsIcon, ArrowLeftIcon } from '@/components/Icons';
+import { UserCircleIcon, ShieldCheckIcon, BellIcon, BookmarkIcon, SettingsIcon } from '@/components/Icons';
 import ProfileSettingsForm from './ProfileSettingsForm';
 import AccountSettings from './AccountSettings';
 import PrivacySettings from './PrivacySettings';
@@ -37,9 +37,9 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ user, onViewChange }) => {
       case 'Conta':
         return <AccountSettings onBack={() => setActiveSetting(null)} />;
       case 'Privacidade e Segurança':
-        return <PrivacySettings onBack={() => setActiveSetting(null)} />;
+        return <PrivacySettings user={user} onBack={() => setActiveSetting(null)} />;
       case 'Notificações':
-        return <NotificationsSettings onBack={() => setActiveSetting(null)} />;
+        return <NotificationsSettings user={user} onBack={() => setActiveSetting(null)} />;
       default:
         return (
           <>

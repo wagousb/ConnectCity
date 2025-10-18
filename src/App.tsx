@@ -55,6 +55,11 @@ const App: React.FC = () => {
             followers: data.followers || 0,
             following: data.following || 0,
             bio: data.bio || 'Bem-vindo ao ConnectCity!',
+            date_of_birth: data.date_of_birth,
+            is_public: data.is_public,
+            notifications_on_likes: data.notifications_on_likes,
+            notifications_on_comments: data.notifications_on_comments,
+            notifications_on_new_followers: data.notifications_on_new_followers,
           };
           setUser(profile);
         }

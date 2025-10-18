@@ -6,6 +6,7 @@ const SignUpForm: React.FC = () => {
   const [handle, setHandle] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -29,6 +30,7 @@ const SignUpForm: React.FC = () => {
         data: {
           name,
           handle,
+          date_of_birth: dateOfBirth,
         },
       },
     });
@@ -69,6 +71,19 @@ const SignUpForm: React.FC = () => {
           placeholder="ex: seunome"
           value={handle}
           onChange={(e) => setHandle(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-slate-700" htmlFor="dateOfBirth">
+          Data de Nascimento
+        </label>
+        <input
+          id="dateOfBirth"
+          className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+          type="date"
+          value={dateOfBirth}
+          onChange={(e) => setDateOfBirth(e.target.value)}
           required
         />
       </div>
