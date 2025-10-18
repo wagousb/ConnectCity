@@ -86,7 +86,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished }) =>
           <textarea
             value={postText}
             onChange={(e) => setPostText(e.target.value)}
-            className="w-full text-lg border-none focus:ring-0 resize-none p-0 placeholder-slate-400 bg-transparent"
+            className="w-full text-lg border-none bg-slate-50 rounded-lg p-2 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-200"
             rows={3}
             placeholder="O que está acontecendo?"
           ></textarea>
