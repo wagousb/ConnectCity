@@ -6,15 +6,15 @@ import NavLinks from '@/components/NavLinks';
 interface LeftSidebarProps {
   user: User;
   currentView: string;
-  onViewChange: (view: string) => void;
+  onViewChange: (view: { view: string; userId?: string }) => void;
   onUserUpdate: (newProfileData: Partial<User>) => void;
 }
 
 const LeftSidebar: React.FC<LeftSidebarProps> = ({ user, currentView, onViewChange, onUserUpdate }) => {
   return (
     <aside className="space-y-6 sticky top-24">
-      <ProfileCard user={user} onViewChange={onViewChange} onUserUpdate={onUserUpdate} />
-      <NavLinks activeLink={currentView} onLinkClick={onViewChange} />
+      <ProfileCard user={user} onViewChange={(viewName) => onViewChange({ view: viewName })} onUserUpdate={onUserUpdate} />
+      <NavLinks activeLink={currentView} onLinkClick={(viewName) => onViewChange({ view: viewName })} />
     </aside>
   );
 };

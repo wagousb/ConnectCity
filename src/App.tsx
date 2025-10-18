@@ -31,7 +31,11 @@ const App: React.FC = () => {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const [likedPostIds, setLikedPostIds] = useState<Set<string>>(new Set());
-  const [currentView, setCurrentView] = useState('Feed');
+  
+  const [currentView, setCurrentView] = useState<{ view: string; userId?: string }>({ view: 'Feed' });
+  const [viewedProfile, setViewedProfile] = useState<User | null>(null);
+  const [viewedProfilePosts, setViewedProfilePosts] = useState<Post[]>([]);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
 
   const fetchPosts = useCallback(async (currentUserId?: string) => {
     const { data: postsData, error: postsError } = await supabase
@@ -218,6 +222,82 @@ const App: React.FC = () => {
       setSuggestions([]);
     }
   }, [session, fetchPosts, fetchSuggestions]);
+
+  useEffect(() => {
+    const fetchViewData = async () => {
+      if (currentView.view !== 'Profile' || !currentView.userId || !user) {
+        setViewedProfile(null);
+        setViewedProfilePosts([]);
+        return;
+      }
+  
+      setIsProfileLoading(true);
+  
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentView.userId)
+        .single();
+  
+      if (profileError || !profileData) {
+        console.error('Error fetching viewed profile:', profileError);
+        setIsProfileLoading(false);
+        return;
+      }
+      
+      const formattedProfile: User = {
+          id: profileData.id,
+          name: profileData.name || 'Usuário',
+          handle: profileData.handle || 'usuário',
+          avatarUrl: profileData.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
+          bannerUrl: profileData.banner_url || 'https://picsum.photos/seed/banner1/1500/500',
+          followers: profileData.followers || 0,
+          following: profileData.following || 0,
+          bio: profileData.bio || '',
+      };
+      setViewedProfile(formattedProfile);
+  
+      const { data: postsData, error: postsError } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('user_id', currentView.userId)
+        .order('created_at', { ascending: false });
+  
+      if (postsError) {
+          console.error('Error fetching posts for profile:', postsError);
+          setViewedProfilePosts([]);
+      } else {
+          const postIds = postsData.map(p => p.id);
+          const { data: likesData } = await supabase.from('likes').select('post_id, user_id').in('post_id', postIds);
+          const likesMap = new Map<string, number>();
+          const currentUserLikedPosts = new Set<string>();
+          likesData?.forEach(like => {
+              likesMap.set(like.post_id, (likesMap.get(like.post_id) || 0) + 1);
+              if (like.user_id === user.id) {
+                  currentUserLikedPosts.add(like.post_id);
+              }
+          });
+  
+          const formattedPosts: Post[] = postsData.map(post => ({
+              id: post.id,
+              content: post.content,
+              imageUrl: post.image_url,
+              timestamp: timeAgo(post.created_at),
+              author: formattedProfile,
+              likes: likesMap.get(post.id) || 0,
+              comments: 0,
+              shares: 0,
+              saved: false,
+              isLiked: currentUserLikedPosts.has(post.id),
+          }));
+          setViewedProfilePosts(formattedPosts);
+      }
+  
+      setIsProfileLoading(false);
+    };
+  
+    fetchViewData();
+  }, [currentView, user]);
   
   const [trends] = useState<Trend[]>([
     { id: 't1', hashtag: '#ReactJS', postCount: '12.5k publicações' },
@@ -231,7 +311,14 @@ const App: React.FC = () => {
       { id: 'cr2', user: { id: 'u8', name: 'Igor Martins', handle: 'igormartins', avatarUrl: 'https://ui-avatars.com/api/?name=Igor+Martins&background=eef2ff&color=4f46e5' }, mutuals: 5 },
   ]);
 
-  const handleViewChange = (view: string) => {
+  const handleViewChange = (view: { view: string; userId?: string }) => {
+    if (view.view === 'Profile' && view.userId === currentView.userId && currentView.view === 'Profile') {
+      return;
+    }
+    if (view.view === 'Profile' && view.userId === user?.id) {
+      setCurrentView({ view: 'Meu Perfil' });
+      return;
+    }
     setCurrentView(view);
   };
 
@@ -266,7 +353,10 @@ const App: React.FC = () => {
   const handleToggleLike = async (postId: string, isLiked: boolean) => {
     if (!user) return;
 
-    setPosts(posts.map(p => p.id === postId ? { ...p, isLiked: !isLiked, likes: p.likes + (!isLiked ? 1 : -1) } : p));
+    const updatePosts = (postList: Post[]) => postList.map(p => p.id === postId ? { ...p, isLiked: !isLiked, likes: p.likes + (!isLiked ? 1 : -1) } : p);
+    setPosts(updatePosts);
+    setViewedProfilePosts(updatePosts);
+
     setLikedPostIds(prev => {
         const newSet = new Set(prev);
         if (isLiked) newSet.delete(postId);
@@ -295,12 +385,12 @@ const App: React.FC = () => {
       <main className="max-w-screen-xl mx-auto py-8 px-4 md:px-6 lg:px-8">
         <div className="grid grid-cols-12 gap-8">
           <div className="col-span-12 lg:col-span-3">
-            <LeftSidebar user={user} currentView={currentView} onViewChange={handleViewChange} onUserUpdate={handleUserUpdate} />
+            <LeftSidebar user={user} currentView={currentView.view} onViewChange={handleViewChange} onUserUpdate={handleUserUpdate} />
           </div>
           <div className="col-span-12 lg:col-span-6">
             <MainContent 
               posts={posts} 
-              currentView={currentView} 
+              currentView={currentView.view} 
               user={user} 
               suggestions={suggestions}
               connectionRequests={connectionRequests}
@@ -311,10 +401,13 @@ const App: React.FC = () => {
               onPostPublished={() => fetchPosts(user.id)}
               onFollowToggle={handleFollowToggle}
               followingIds={followingIds}
+              viewedProfile={viewedProfile}
+              viewedProfilePosts={viewedProfilePosts}
+              isProfileLoading={isProfileLoading}
             />
           </div>
           <div className="col-span-12 lg:col-span-3">
-             <RightSidebar suggestions={suggestions} trends={trends} onFollowToggle={handleFollowToggle} />
+             <RightSidebar suggestions={suggestions} trends={trends} onFollowToggle={handleFollowToggle} onViewChange={handleViewChange} />
           </div>
         </div>
       </main>

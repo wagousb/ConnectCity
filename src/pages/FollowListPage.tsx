@@ -10,9 +10,10 @@ interface FollowListPageProps {
   onFollowToggle: (targetUserId: string) => void;
   followingIds: Set<string>;
   onBack: () => void;
+  onViewChange: (view: { view: string; userId?: string }) => void;
 }
 
-const FollowListPage: React.FC<FollowListPageProps> = ({ type, currentUserId, profileUserId, onFollowToggle, followingIds, onBack }) => {
+const FollowListPage: React.FC<FollowListPageProps> = ({ type, currentUserId, profileUserId, onFollowToggle, followingIds, onBack, onViewChange }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const title = type === 'following' ? 'Seguindo' : 'Seguidores';
@@ -94,10 +95,13 @@ const FollowListPage: React.FC<FollowListPageProps> = ({ type, currentUserId, pr
             const isCurrentUser = user.id === currentUserId;
             return (
               <div key={user.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50">
-                <div className="flex items-center space-x-4">
+                <div 
+                  className="flex items-center space-x-4 cursor-pointer flex-1"
+                  onClick={() => onViewChange({ view: 'Profile', userId: user.id })}
+                >
                   <img src={user.avatarUrl} alt={user.name} className="h-12 w-12 rounded-full" />
                   <div className="flex-1">
-                    <p className="font-bold text-slate-800">{user.name}</p>
+                    <p className="font-bold text-slate-800 hover:underline">{user.name}</p>
                     <p className="text-sm text-slate-500">@{user.handle}</p>
                     {user.bio && <p className="text-sm text-slate-600 mt-1 max-w-xs truncate">{user.bio}</p>}
                   </div>

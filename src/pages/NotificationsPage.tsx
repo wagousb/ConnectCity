@@ -20,9 +20,10 @@ const timeAgo = (date: string | Date): string => {
 
 interface NotificationsPageProps {
   user: User;
+  onViewChange: (view: { view: string; userId?: string }) => void;
 }
 
-const NotificationsPage: React.FC<NotificationsPageProps> = ({ user }) => {
+const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChange }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -75,14 +76,16 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user }) => {
     const iconClasses = "h-6 w-6 text-white";
     let icon, text;
 
+    const actorName = <span className="font-bold hover:underline" onClick={() => onViewChange({ view: 'Profile', userId: actor.id })}>{actor.name}</span>;
+
     switch (type) {
       case 'like':
         icon = <div className="bg-red-500 p-2 rounded-full"><HeartIcon className={iconClasses} /></div>;
-        text = <p><span className="font-bold">{actor.name}</span> curtiu sua publicação.</p>;
+        text = <p>{actorName} curtiu sua publicação.</p>;
         break;
       case 'follow':
         icon = <div className="bg-primary p-2 rounded-full"><UsersIcon className={iconClasses} /></div>;
-        text = <p><span className="font-bold">{actor.name}</span> começou a seguir você.</p>;
+        text = <p>{actorName} começou a seguir você.</p>;
         break;
       default:
         return null;
@@ -90,7 +93,9 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user }) => {
 
     return (
       <div key={notification.id} className={`flex items-start space-x-4 p-4 rounded-lg ${!notification.is_read ? 'bg-primary-50' : ''}`}>
-        {icon}
+        <div className="cursor-pointer" onClick={() => onViewChange({ view: 'Profile', userId: actor.id })}>
+          {icon}
+        </div>
         <div className="flex-1">
           {text}
           <p className="text-sm text-slate-500">{time}</p>

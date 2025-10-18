@@ -6,15 +6,19 @@ interface PostCardProps {
   post: Post;
   onToggleSave: (postId: string) => void;
   onToggleLike: (postId: string, isLiked: boolean) => void;
+  onViewChange: (view: { view: string; userId?: string }) => void;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ post, onToggleSave, onToggleLike }) => {
+const PostCard: React.FC<PostCardProps> = ({ post, onToggleSave, onToggleLike, onViewChange }) => {
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200">
-      <div className="flex items-center space-x-4">
+      <div 
+        className="flex items-center space-x-4 cursor-pointer"
+        onClick={() => onViewChange({ view: 'Profile', userId: post.author.id })}
+      >
         <img src={post.author.avatarUrl} alt={post.author.name} className="h-12 w-12 rounded-full" />
         <div>
-          <p className="font-bold">{post.author.name}</p>
+          <p className="font-bold hover:underline">{post.author.name}</p>
           <p className="text-sm text-slate-500">@{post.author.handle} &middot; {post.timestamp}</p>
         </div>
       </div>

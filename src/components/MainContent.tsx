@@ -16,21 +16,52 @@ interface MainContentProps {
   connectionRequests: ConnectionRequest[];
   onToggleSave: (postId: string) => void;
   onToggleLike: (postId: string, isLiked: boolean) => void;
-  onViewChange: (view: string) => void;
+  onViewChange: (view: { view: string; userId?: string }) => void;
   onUserUpdate: (newProfileData: Partial<User>) => void;
   onPostPublished: () => void;
   followingIds: Set<string>;
   onFollowToggle: (targetUserId: string) => void;
+  viewedProfile: User | null;
+  viewedProfilePosts: Post[];
+  isProfileLoading: boolean;
 }
 
-const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, suggestions, connectionRequests, onToggleSave, onToggleLike, onViewChange, onUserUpdate, onPostPublished, followingIds, onFollowToggle }) => {
+const MainContent: React.FC<MainContentProps> = ({ 
+  posts, currentView, user, suggestions, connectionRequests, onToggleSave, onToggleLike, 
+  onViewChange, onUserUpdate, onPostPublished, followingIds, onFollowToggle,
+  viewedProfile, viewedProfilePosts, isProfileLoading
+}) => {
   const renderContent = () => {
     switch (currentView) {
       case 'Feed':
-        return <FeedPage user={user} posts={posts} onToggleSave={onToggleSave} onToggleLike={onToggleLike} onPostPublished={onPostPublished} />;
+        return <FeedPage user={user} posts={posts} onToggleSave={onToggleSave} onToggleLike={onToggleLike} onPostPublished={onPostPublished} onViewChange={onViewChange} />;
       case 'Meu Perfil':
         const userPosts = posts.filter(post => post.author.id === user.id);
-        return <ProfilePage user={user} posts={userPosts} onToggleSave={onToggleSave} onViewChange={onViewChange} onUserUpdate={onUserUpdate} />;
+        return <ProfilePage 
+                  profileUser={user} 
+                  currentUser={user}
+                  posts={userPosts} 
+                  onToggleSave={onToggleSave} 
+                  onViewChange={onViewChange} 
+                  onUserUpdate={onUserUpdate}
+                  onFollowToggle={onFollowToggle}
+                  isFollowing={false}
+                  onToggleLike={onToggleLike}
+                />;
+      case 'Profile':
+        if (isProfileLoading) return <div className="bg-white p-6 rounded-xl border border-slate-200 text-center"><p className="text-slate-500">Carregando perfil...</p></div>;
+        if (!viewedProfile) return <div className="bg-white p-6 rounded-xl border border-slate-200 text-center"><p className="text-slate-500">Perfil não encontrado.</p></div>;
+        return <ProfilePage 
+                  profileUser={viewedProfile} 
+                  currentUser={user}
+                  posts={viewedProfilePosts} 
+                  onToggleSave={onToggleSave} 
+                  onViewChange={onViewChange} 
+                  onUserUpdate={onUserUpdate}
+                  onFollowToggle={onFollowToggle}
+                  isFollowing={followingIds.has(viewedProfile.id)}
+                  onToggleLike={onToggleLike}
+                />;
       case 'Minha Rede':
         return <NetworkPage requests={connectionRequests} suggestions={suggestions} />;
       case 'Salvos':
@@ -43,7 +74,7 @@ const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, sug
             </div>
             {savedPosts.length > 0 ? (
               savedPosts.map((post) => (
-                <PostCard key={post.id} post={post} onToggleSave={onToggleSave} onToggleLike={onToggleLike} />
+                <PostCard key={post.id} post={post} onToggleSave={onToggleSave} onToggleLike={onToggleLike} onViewChange={onViewChange} />
               ))
             ) : (
               <div className="bg-white p-6 rounded-xl border border-slate-200 text-center text-slate-500">
@@ -53,7 +84,7 @@ const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, sug
           </div>
         );
       case 'Configurações':
-        return <SettingsPage user={user} onViewChange={onViewChange} />;
+        return <SettingsPage user={user} onViewChange={(viewName) => onViewChange({ view: viewName })} />;
       case 'Seguindo':
         return <FollowListPage 
                   type="following" 
@@ -61,7 +92,8 @@ const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, sug
                   profileUserId={user.id} 
                   onFollowToggle={onFollowToggle} 
                   followingIds={followingIds}
-                  onBack={() => onViewChange('Meu Perfil')}
+                  onBack={() => onViewChange({ view: 'Meu Perfil' })}
+                  onViewChange={onViewChange}
                 />;
       case 'Seguidores':
         return <FollowListPage 
@@ -70,10 +102,11 @@ const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, sug
                   profileUserId={user.id} 
                   onFollowToggle={onFollowToggle} 
                   followingIds={followingIds}
-                  onBack={() => onViewChange('Meu Perfil')}
+                  onBack={() => onViewChange({ view: 'Meu Perfil' })}
+                  onViewChange={onViewChange}
                 />;
       case 'Notificações':
-        return <NotificationsPage user={user} />;
+        return <NotificationsPage user={user} onViewChange={onViewChange} />;
       default:
         return (
             <div className="bg-white p-6 rounded-xl border border-slate-200">
