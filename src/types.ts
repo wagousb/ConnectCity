@@ -25,6 +25,7 @@ export interface Post {
   comments: number;
   shares: number;
   saved?: boolean;
+  isLiked?: boolean;
 }
 
 export interface Suggestion {
@@ -42,4 +43,13 @@ export interface ConnectionRequest {
   id: string;
   user: User;
   mutuals: number;
+}
+
+export interface Notification {
+  id: string;
+  type: 'like' | 'follow' | 'comment';
+  actor: User;
+  is_read: boolean;
+  created_at: string;
+  entity_id?: string; // e.g., post_id
 }

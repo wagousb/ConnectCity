@@ -30,12 +30,13 @@ const App: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
+  const [likedPostIds, setLikedPostIds] = useState<Set<string>>(new Set());
   const [currentView, setCurrentView] = useState('Feed');
 
-  const fetchPosts = useCallback(async () => {
+  const fetchPosts = useCallback(async (currentUserId?: string) => {
     const { data: postsData, error: postsError } = await supabase
       .from('posts')
-      .select('*')
+      .select('*, profiles(*)')
       .order('created_at', { ascending: false });
 
     if (postsError) {
@@ -43,53 +44,55 @@ const App: React.FC = () => {
       return;
     }
 
-    if (!postsData || postsData.length === 0) {
-      setPosts([]);
-      return;
+    const postIds = postsData.map(p => p.id);
+    
+    const { data: likesData, error: likesError } = await supabase
+      .from('likes')
+      .select('post_id, user_id')
+      .in('post_id', postIds);
+
+    if (likesError) {
+      console.error('Erro ao buscar curtidas:', likesError);
     }
 
-    const userIds = [...new Set(postsData.map(p => p.user_id))];
+    const likesMap = new Map<string, number>();
+    const currentUserLikedPosts = new Set<string>();
 
-    const { data: profilesData, error: profilesError } = await supabase
-      .from('profiles')
-      .select('*')
-      .in('id', userIds);
-
-    if (profilesError) {
-      console.error('Erro ao buscar perfis:', profilesError);
-      return;
+    likesData?.forEach(like => {
+      likesMap.set(like.post_id, (likesMap.get(like.post_id) || 0) + 1);
+      if (like.user_id === currentUserId) {
+        currentUserLikedPosts.add(like.post_id);
+      }
+    });
+    
+    if (currentUserId) {
+      setLikedPostIds(currentUserLikedPosts);
     }
 
-    const profilesMap = new Map(profilesData.map(p => [p.id, p]));
-
-    const formattedPosts: Post[] = postsData
-      .map(post => {
-        const profile = profilesMap.get(post.user_id);
-        if (!profile) {
-          return null;
-        }
-        return {
-          id: post.id,
-          content: post.content,
-          imageUrl: post.image_url,
-          timestamp: timeAgo(post.created_at),
-          author: {
-            id: profile.id,
-            name: profile.name,
-            handle: profile.handle,
-            avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
-            bannerUrl: profile.banner_url,
-            bio: profile.bio,
-            followers: profile.followers,
-            following: profile.following,
-          },
-          likes: 0,
-          comments: 0,
-          shares: 0,
-          saved: false,
-        };
-      })
-      .filter((p): p is Post => p !== null);
+    const formattedPosts: Post[] = postsData.map(post => {
+      const profile = post.profiles;
+      return {
+        id: post.id,
+        content: post.content,
+        imageUrl: post.image_url,
+        timestamp: timeAgo(post.created_at),
+        author: {
+          id: profile.id,
+          name: profile.name,
+          handle: profile.handle,
+          avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
+          bannerUrl: profile.banner_url,
+          bio: profile.bio,
+          followers: profile.followers,
+          following: profile.following,
+        },
+        likes: likesMap.get(post.id) || 0,
+        comments: 0,
+        shares: 0,
+        saved: false, // Lógica de salvos a ser implementada
+        isLiked: currentUserLikedPosts.has(post.id),
+      };
+    });
 
     setPosts(formattedPosts);
   }, []);
@@ -141,11 +144,12 @@ const App: React.FC = () => {
     if (session?.user) {
       const fetchInitialData = async () => {
         setLoading(true);
-        // Fetch profile
+        const userId = session.user.id;
+
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', session.user.id)
+          .eq('id', userId)
           .single();
 
         if (profileError) {
@@ -153,7 +157,7 @@ const App: React.FC = () => {
         } else if (profileData) {
           const nameForAvatar = profileData.name || session.user.email || 'U';
           const avatarUrl = profileData.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&background=eef2ff&color=4f46e5&font-size=0.5`;
-          const profile: User = {
+          setUser({
             id: profileData.id,
             name: profileData.name || session.user.email || 'Usuário',
             handle: profileData.handle || 'usuário',
@@ -167,15 +171,13 @@ const App: React.FC = () => {
             notifications_on_likes: profileData.notifications_on_likes,
             notifications_on_comments: profileData.notifications_on_comments,
             notifications_on_new_followers: profileData.notifications_on_new_followers,
-          };
-          setUser(profile);
+          });
         }
 
-        // Fetch following IDs
         const { data: followingData, error: followingError } = await supabase
           .from('followers')
           .select('following_id')
-          .eq('follower_id', session.user.id);
+          .eq('follower_id', userId);
         
         let currentFollowingIds = new Set<string>();
         if (followingError) {
@@ -185,8 +187,8 @@ const App: React.FC = () => {
           setFollowingIds(currentFollowingIds);
         }
 
-        await fetchPosts();
-        await fetchSuggestions(session.user.id, currentFollowingIds);
+        await fetchPosts(userId);
+        await fetchSuggestions(userId, currentFollowingIds);
         setLoading(false);
       };
       fetchInitialData();
@@ -227,47 +229,35 @@ const App: React.FC = () => {
 
   const handleFollowToggle = async (targetUserId: string) => {
     if (!user) return;
-
     const isCurrentlyFollowing = followingIds.has(targetUserId);
-    const originalSuggestions = [...suggestions];
-    const originalFollowingIds = new Set(followingIds);
-    const originalUser = user;
-
-    // Optimistic UI Update
-    const newSuggestions = suggestions.map(s =>
-        s.user.id === targetUserId
-            ? { ...s, user: { ...s.user, isFollowing: !isCurrentlyFollowing } }
-            : s
-    );
-    setSuggestions(newSuggestions);
-
-    const newFollowingIds = new Set(originalFollowingIds);
+    setFollowingIds(prev => {
+      const newSet = new Set(prev);
+      if (isCurrentlyFollowing) newSet.delete(targetUserId);
+      else newSet.add(targetUserId);
+      return newSet;
+    });
     if (isCurrentlyFollowing) {
-        newFollowingIds.delete(targetUserId);
+      await supabase.from('followers').delete().match({ follower_id: user.id, following_id: targetUserId });
     } else {
-        newFollowingIds.add(targetUserId);
+      await supabase.from('followers').insert({ follower_id: user.id, following_id: targetUserId });
     }
-    setFollowingIds(newFollowingIds);
-    
-    setUser(currentUser => currentUser ? { ...currentUser, following: (currentUser.following || 0) + (isCurrentlyFollowing ? -1 : 1) } : null);
+  };
 
-    // Database Operation
-    if (isCurrentlyFollowing) {
-        const { error } = await supabase.from('followers').delete().match({ follower_id: user.id, following_id: targetUserId });
-        if (error) {
-            console.error("Error unfollowing:", error);
-            setSuggestions(originalSuggestions);
-            setFollowingIds(originalFollowingIds);
-            setUser(originalUser);
-        }
+  const handleToggleLike = async (postId: string, isLiked: boolean) => {
+    if (!user) return;
+
+    setPosts(posts.map(p => p.id === postId ? { ...p, isLiked: !isLiked, likes: p.likes + (!isLiked ? 1 : -1) } : p));
+    setLikedPostIds(prev => {
+        const newSet = new Set(prev);
+        if (isLiked) newSet.delete(postId);
+        else newSet.add(postId);
+        return newSet;
+    });
+
+    if (isLiked) {
+      await supabase.from('likes').delete().match({ user_id: user.id, post_id: postId });
     } else {
-        const { error } = await supabase.from('followers').insert({ follower_id: user.id, following_id: targetUserId });
-        if (error) {
-            console.error("Error following:", error);
-            setSuggestions(originalSuggestions);
-            setFollowingIds(originalFollowingIds);
-            setUser(originalUser);
-        }
+      await supabase.from('likes').insert({ user_id: user.id, post_id: postId });
     }
   };
 
@@ -295,9 +285,10 @@ const App: React.FC = () => {
               suggestions={suggestions}
               connectionRequests={connectionRequests}
               onToggleSave={handleToggleSave}
+              onToggleLike={handleToggleLike}
               onViewChange={handleViewChange}
               onUserUpdate={handleUserUpdate}
-              onPostPublished={fetchPosts}
+              onPostPublished={() => fetchPosts(user.id)}
               onFollowToggle={handleFollowToggle}
               followingIds={followingIds}
             />

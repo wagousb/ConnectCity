@@ -6,6 +6,7 @@ import FeedPage from '@/components/FeedPage';
 import NetworkPage from '@/components/NetworkPage';
 import SettingsPage from '@/components/SettingsPage';
 import FollowListPage from '@/pages/FollowListPage';
+import NotificationsPage from '@/pages/NotificationsPage';
 
 interface MainContentProps {
   posts: Post[];
@@ -14,6 +15,7 @@ interface MainContentProps {
   suggestions: Suggestion[];
   connectionRequests: ConnectionRequest[];
   onToggleSave: (postId: string) => void;
+  onToggleLike: (postId: string, isLiked: boolean) => void;
   onViewChange: (view: string) => void;
   onUserUpdate: (newProfileData: Partial<User>) => void;
   onPostPublished: () => void;
@@ -21,11 +23,11 @@ interface MainContentProps {
   onFollowToggle: (targetUserId: string) => void;
 }
 
-const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, suggestions, connectionRequests, onToggleSave, onViewChange, onUserUpdate, onPostPublished, followingIds, onFollowToggle }) => {
+const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, suggestions, connectionRequests, onToggleSave, onToggleLike, onViewChange, onUserUpdate, onPostPublished, followingIds, onFollowToggle }) => {
   const renderContent = () => {
     switch (currentView) {
       case 'Feed':
-        return <FeedPage user={user} posts={posts} onToggleSave={onToggleSave} onPostPublished={onPostPublished} />;
+        return <FeedPage user={user} posts={posts} onToggleSave={onToggleSave} onToggleLike={onToggleLike} onPostPublished={onPostPublished} />;
       case 'Meu Perfil':
         const userPosts = posts.filter(post => post.author.id === user.id);
         return <ProfilePage user={user} posts={userPosts} onToggleSave={onToggleSave} onViewChange={onViewChange} onUserUpdate={onUserUpdate} />;
@@ -41,7 +43,7 @@ const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, sug
             </div>
             {savedPosts.length > 0 ? (
               savedPosts.map((post) => (
-                <PostCard key={post.id} post={post} onToggleSave={onToggleSave} />
+                <PostCard key={post.id} post={post} onToggleSave={onToggleSave} onToggleLike={onToggleLike} />
               ))
             ) : (
               <div className="bg-white p-6 rounded-xl border border-slate-200 text-center text-slate-500">
@@ -71,12 +73,7 @@ const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, sug
                   onBack={() => onViewChange('Meu Perfil')}
                 />;
       case 'Notificações':
-        return (
-          <div className="bg-white p-6 rounded-xl border border-slate-200">
-            <h1 className="text-2xl font-bold">{currentView}</h1>
-            <p className="text-slate-500 mt-1">O conteúdo para a página "{currentView}" aparecerá aqui.</p>
-          </div>
-        );
+        return <NotificationsPage user={user} />;
       default:
         return (
             <div className="bg-white p-6 rounded-xl border border-slate-200">

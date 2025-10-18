@@ -5,9 +5,10 @@ import { HeartIcon, MessageCircleIcon, ShareIcon, BookmarkIconSolid, BookmarkIco
 interface PostCardProps {
   post: Post;
   onToggleSave: (postId: string) => void;
+  onToggleLike: (postId: string, isLiked: boolean) => void;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ post, onToggleSave }) => {
+const PostCard: React.FC<PostCardProps> = ({ post, onToggleSave, onToggleLike }) => {
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200">
       <div className="flex items-center space-x-4">
@@ -24,8 +25,11 @@ const PostCard: React.FC<PostCardProps> = ({ post, onToggleSave }) => {
         </div>
       )}
       <div className="flex items-center justify-between text-slate-500 pt-4 border-t border-slate-200">
-        <button className="flex items-center space-x-2 hover:text-red-500">
-          <HeartIcon className="h-5 w-5" />
+        <button 
+          className={`flex items-center space-x-2 hover:text-red-500 ${post.isLiked ? 'text-red-500' : ''}`}
+          onClick={() => onToggleLike(post.id, post.isLiked || false)}
+        >
+          <HeartIcon className={`h-5 w-5 ${post.isLiked ? 'fill-current' : ''}`} />
           <span className="text-sm font-medium">{post.likes} Curtidas</span>
         </button>
         <button className="flex items-center space-x-2 hover:text-blue-500">
