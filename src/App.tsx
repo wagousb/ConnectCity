@@ -172,7 +172,7 @@ const App: React.FC = () => {
           <div className="col-span-12 lg:col-span-3">
             <LeftSidebar user={user} currentView={currentView} onViewChange={handleViewChange} onUserUpdate={handleUserUpdate} />
           </div>
-          <div className="col-span-12 lg:col-span-6">
+          <div className="col-span-12 lg:col-span-6 relative z-10">
             <MainContent 
               posts={userPosts} 
               currentView={currentView} 
