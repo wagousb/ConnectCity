@@ -61,7 +61,7 @@ const MembersPage: React.FC<MembersPageProps> = ({ currentUser, onViewChange }) 
                 </div>
               </div>
               <div>
-                <p className="font-bold text-slate-800 hover:underline">{member.name}</p>
+                <p className="font-bold text-slate-800 hover:underline">{member.name.split(' ')[0]}</p>
                 <p className="text-sm text-slate-500">@{member.handle}</p>
               </div>
             </div>

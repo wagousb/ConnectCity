@@ -81,7 +81,7 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
       <div className="flex-1">
         <div className="bg-slate-50 rounded-lg p-3">
           <div className="flex items-center space-x-2">
-            <span className="font-bold text-sm">{comment.author.name}</span>
+            <span className="font-bold text-sm">{comment.author.name.split(' ')[0]}</span>
             <span className="text-xs text-slate-500">@{comment.author.handle}</span>
             <span className="text-xs text-slate-400">&middot; {timeAgo(comment.created_at)}</span>
           </div>
@@ -112,7 +112,7 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
                   <textarea
                     value={replyContent}
                     onChange={(e) => setReplyContent(e.target.value)}
-                    placeholder={`Respondendo a ${comment.author.name}...`}
+                    placeholder={`Respondendo a ${comment.author.name.split(' ')[0]}...`}
                     className="w-full text-sm border-slate-200 border rounded-lg p-2 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-200"
                     rows={2}
                   />

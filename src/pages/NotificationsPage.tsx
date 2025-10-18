@@ -110,7 +110,7 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
     const iconClasses = "h-6 w-6 text-white";
     let icon, text;
 
-    const actorName = <span className="font-bold hover:underline" onClick={(e) => { e.stopPropagation(); onViewChange({ view: 'Profile', userId: actor.id })}}>{actor.name}</span>;
+    const actorName = <span className="font-bold hover:underline" onClick={(e) => { e.stopPropagation(); onViewChange({ view: 'Profile', userId: actor.id })}}>{actor.name.split(' ')[0]}</span>;
     const ideaName = <span className="font-bold text-slate-700">"{postTitle || 'uma ideia'}"</span>;
     const commentText = commentContent ? <span className="text-slate-500 italic">"{commentContent}"</span> : null;
 

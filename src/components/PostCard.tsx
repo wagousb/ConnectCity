@@ -69,7 +69,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
             className="cursor-pointer pt-2"
             onClick={() => onViewChange({ view: 'Profile', userId: post.author.id })}
           >
-            <p className="font-bold hover:underline">{post.author.name}</p>
+            <p className="font-bold hover:underline">{post.author.name.split(' ')[0]}</p>
             <p className="text-sm text-slate-500">@{post.author.handle} &middot; {post.timestamp}</p>
           </div>
         </div>

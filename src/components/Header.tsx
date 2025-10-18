@@ -15,12 +15,12 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotificati
       <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
-            <div className="flex items-center space-x-2">
+            <button onClick={() => onViewChange({ view: 'Feed' })} className="flex items-center space-x-2 cursor-pointer">
               <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl">
                 C
               </span>
               <span className="font-bold text-xl text-slate-800">ConnectCity</span>
-            </div>
+            </button>
             <div className="relative hidden md:block">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <SearchIcon className="h-5 w-5 text-slate-400" />
@@ -35,7 +35,7 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotificati
           <div className="flex items-center space-x-6">
             <button 
               onClick={() => onViewChange({ view: 'Feed' })}
-              className="text-slate-500 hover:text-primary p-2 rounded-full hover:bg-primary-50">
+              className="text-slate-500 hover:text-primary p-2 rounded-full hover:bg-primary-50 hidden md:flex">
               <HomeIcon className="h-6 w-6" />
             </button>
             <button 
