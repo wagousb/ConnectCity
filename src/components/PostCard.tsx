@@ -28,6 +28,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
   const handleVote = async (rating: number) => {
     if (!currentUser) return;
 
+    const isFirstVote = !post.user_rating || post.user_rating === 0;
+
     const { error } = await supabase.from('ratings').upsert(
         { post_id: post.id, user_id: currentUser.id, rating },
         { onConflict: 'post_id, user_id' }
@@ -38,7 +40,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
     } else {
         onVote(post.id, rating);
         setIsVoting(false);
-        if (currentUser.id !== post.author.id) {
+        if (isFirstVote && currentUser.id !== post.author.id) {
             await supabase.from('notifications').insert({
                 user_id: post.author.id,
                 actor_id: currentUser.id,

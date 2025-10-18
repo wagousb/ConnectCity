@@ -32,6 +32,7 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
 
   const handleVote = async (voteType: 'agree' | 'disagree') => {
     const isRemovingVote = comment.user_vote === voteType;
+    const isFirstVote = !comment.user_vote;
 
     if (isRemovingVote) {
       const { error } = await supabase.from('comment_votes').delete().match({ comment_id: comment.id, user_id: currentUser.id });
@@ -48,12 +49,13 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
       console.error('Error voting:', error);
     } else {
       onVote();
-      if (currentUser.id !== comment.author.id) {
+      if (isFirstVote && currentUser.id !== comment.author.id) {
         await supabase.from('notifications').insert({
             user_id: comment.author.id,
             actor_id: currentUser.id,
             type: voteType === 'agree' ? 'comment_agree' : 'comment_disagree',
-            entity_id: comment.post_id
+            entity_id: comment.post_id,
+            comment_id: comment.id
         });
       }
     }
