@@ -13,9 +13,10 @@ interface MainContentProps {
   suggestions: Suggestion[];
   connectionRequests: ConnectionRequest[];
   onToggleSave: (postId: string) => void;
+  onViewChange: (view: string) => void;
 }
 
-const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, suggestions, connectionRequests, onToggleSave }) => {
+const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, suggestions, connectionRequests, onToggleSave, onViewChange }) => {
   const renderContent = () => {
     switch (currentView) {
       case 'Feed':
@@ -45,7 +46,7 @@ const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, sug
           </div>
         );
       case 'Configurações':
-        return <SettingsPage user={user} />;
+        return <SettingsPage user={user} onViewChange={onViewChange} />;
       case 'Notificações':
         return (
           <div className="bg-white p-6 rounded-xl border border-slate-200">

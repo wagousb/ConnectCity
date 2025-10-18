@@ -166,6 +166,7 @@ const App: React.FC = () => {
               suggestions={suggestions}
               connectionRequests={connectionRequests}
               onToggleSave={handleToggleSave}
+              onViewChange={handleViewChange}
             />
           </div>
           <div className="col-span-12 lg:col-span-3">
