@@ -49,13 +49,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, onViewChange, onUserUpd
                     <PencilIcon className="h-6 w-6 text-white" />
                 </div>
             </button>
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-max">
+                <RoleBadge role={user.role} />
+            </div>
         </div>
-        <div className="mt-4">
+        <div className="mt-8">
             <h2 className="text-xl font-bold hover:underline" onClick={() => onViewChange('Meu Perfil')}>{user.name}</h2>
             <p className="text-sm text-slate-500 hover:underline" onClick={() => onViewChange('Meu Perfil')}>@{user.handle}</p>
-        </div>
-        <div className="mt-2">
-            <RoleBadge role={user.role} />
         </div>
       </div>
     </>
