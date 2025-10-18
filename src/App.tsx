@@ -28,10 +28,10 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [currentView, setCurrentView] = useState('Feed');
 
   const fetchPosts = useCallback(async () => {
-    // Etapa 1: Buscar todas as publicações.
     const { data: postsData, error: postsError } = await supabase
       .from('posts')
       .select('*')
@@ -47,10 +47,8 @@ const App: React.FC = () => {
       return;
     }
 
-    // Etapa 2: Coletar IDs de usuário únicos das publicações.
     const userIds = [...new Set(postsData.map(p => p.user_id))];
 
-    // Etapa 3: Buscar os perfis correspondentes a esses IDs.
     const { data: profilesData, error: profilesError } = await supabase
       .from('profiles')
       .select('*')
@@ -61,15 +59,13 @@ const App: React.FC = () => {
       return;
     }
 
-    // Etapa 4: Criar um mapa de perfis para facilitar a consulta.
     const profilesMap = new Map(profilesData.map(p => [p.id, p]));
 
-    // Etapa 5: Combinar publicações e perfis.
     const formattedPosts: Post[] = postsData
       .map(post => {
         const profile = profilesMap.get(post.user_id);
         if (!profile) {
-          return null; // Ignorar posts sem um perfil de autor correspondente.
+          return null;
         }
         return {
           id: post.id,
@@ -95,6 +91,30 @@ const App: React.FC = () => {
       .filter((p): p is Post => p !== null);
 
     setPosts(formattedPosts);
+  }, []);
+
+  const fetchSuggestions = useCallback(async (userId: string) => {
+    const { data: profilesData, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .not('id', 'eq', userId)
+      .limit(3);
+
+    if (error) {
+      console.error('Erro ao buscar sugestões:', error);
+      return;
+    }
+
+    const formattedSuggestions: Suggestion[] = profilesData.map(profile => ({
+      id: profile.id,
+      user: {
+        id: profile.id,
+        name: profile.name || 'Usuário',
+        handle: profile.handle || 'usuário',
+        avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
+      }
+    }));
+    setSuggestions(formattedSuggestions);
   }, []);
 
   useEffect(() => {
@@ -123,7 +143,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (session?.user) {
-      const fetchProfile = async () => {
+      const fetchProfileAndSuggestions = async () => {
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
@@ -153,19 +173,14 @@ const App: React.FC = () => {
           };
           setUser(profile);
         }
+        await fetchSuggestions(session.user.id);
       };
-      fetchProfile();
+      fetchProfileAndSuggestions();
     } else {
       setUser(null);
     }
-  }, [session]);
+  }, [session, fetchSuggestions]);
   
-  const [suggestions] = useState<Suggestion[]>([
-    { id: 's1', user: { id: 'u4', name: 'Daniel Almeida', handle: 'danielalmeida', avatarUrl: 'https://ui-avatars.com/api/?name=Daniel+Almeida&background=eef2ff&color=4f46e5' } },
-    { id: 's2', user: { id: 'u5', name: 'Fernanda Lima', handle: 'fernandalima', avatarUrl: 'https://ui-avatars.com/api/?name=Fernanda+Lima&background=eef2ff&color=4f46e5' } },
-    { id: 's3', user: { id: 'u6', name: 'Gustavo Pereira', handle: 'gustavopereira', avatarUrl: 'https://ui-avatars.com/api/?name=Gustavo+Pereira&background=eef2ff&color=4f46e5' } },
-  ]);
-
   const [trends] = useState<Trend[]>([
     { id: 't1', hashtag: '#ReactJS', postCount: '12.5k publicações' },
     { id: 't2', hashtag: '#VagasDev', postCount: '8.9k publicações' },
