@@ -43,11 +43,14 @@ const App: React.FC = () => {
         if (error) {
           console.error('Erro ao buscar perfil:', error);
         } else if (data) {
+          const nameForAvatar = data.name || session.user.email || 'U';
+          const avatarUrl = data.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&background=eef2ff&color=4f46e5&font-size=0.5`;
+
           const profile: User = {
             id: data.id,
             name: data.name || session.user.email || 'Usuário',
             handle: data.handle || 'usuário',
-            avatarUrl: data.avatar_url || `https://i.pravatar.cc/150?u=${data.id}`,
+            avatarUrl: avatarUrl,
             bannerUrl: data.banner_url || 'https://picsum.photos/seed/banner1/1500/500',
             followers: data.followers || 0,
             following: data.following || 0,
@@ -66,7 +69,7 @@ const App: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([
     {
       id: 'p1',
-      author: { id: 'u2', name: 'Carlos Silva', handle: 'carlossilva', avatarUrl: 'https://i.pravatar.cc/150?u=u2' },
+      author: { id: 'u2', name: 'Carlos Silva', handle: 'carlossilva', avatarUrl: 'https://ui-avatars.com/api/?name=Carlos+Silva&background=eef2ff&color=4f46e5' },
       content: 'Acabei de lançar um novo projeto de código aberto no GitHub! É uma biblioteca de componentes de UI para React. Confiram e me digam o que acham. #react #opensource #development\n\nhttps://github.com/example/repo',
       timestamp: '2h',
       likes: 128,
@@ -76,7 +79,7 @@ const App: React.FC = () => {
     },
     {
       id: 'p2',
-      author: { id: 'u1', name: 'alex johnson', handle: 'alexj', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
+      author: { id: 'u1', name: 'alex johnson', handle: 'alexj', avatarUrl: 'https://ui-avatars.com/api/?name=Alex+Johnson&background=eef2ff&color=4f46e5' },
       content: 'Explorando as novas funcionalidades do CSS Grid e Flexbox. Incrível como a web evoluiu! Qual é a sua propriedade CSS favorita?',
       imageUrl: 'https://picsum.photos/seed/post2/600/400',
       timestamp: '5h',
@@ -87,7 +90,7 @@ const App: React.FC = () => {
     },
     {
       id: 'p3',
-      author: { id: 'u3', name: 'Beatriz Costa', handle: 'beacosta', avatarUrl: 'https://i.pravatar.cc/150?u=u3' },
+      author: { id: 'u3', name: 'Beatriz Costa', handle: 'beacosta', avatarUrl: 'https://ui-avatars.com/api/?name=Beatriz+Costa&background=eef2ff&color=4f46e5' },
       content: 'Participando de um webinar sobre IA generativa. O futuro é agora! 🤯',
       timestamp: '1d',
       likes: 98,
@@ -97,7 +100,7 @@ const App: React.FC = () => {
     },
     {
       id: 'p4',
-      author: { id: 'u1', name: 'alex johnson', handle: 'alexj', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
+      author: { id: 'u1', name: 'alex johnson', handle: 'alexj', avatarUrl: 'https://ui-avatars.com/api/?name=Alex+Johnson&background=eef2ff&color=4f46e5' },
       content: 'Dica do dia: Use `Promise.allSettled` quando precisar que todas as promessas sejam concluídas, independentemente de sucesso ou falha. Muito útil para lidar com múltiplas chamadas de API de forma robusta. #javascript #protip',
       timestamp: '2d',
       likes: 412,
@@ -108,9 +111,9 @@ const App: React.FC = () => {
   ]);
   
   const [suggestions] = useState<Suggestion[]>([
-    { id: 's1', user: { id: 'u4', name: 'Daniel Almeida', handle: 'danielalmeida', avatarUrl: 'https://i.pravatar.cc/150?u=u4' } },
-    { id: 's2', user: { id: 'u5', name: 'Fernanda Lima', handle: 'fernandalima', avatarUrl: 'https://i.pravatar.cc/150?u=u5' } },
-    { id: 's3', user: { id: 'u6', name: 'Gustavo Pereira', handle: 'gustavopereira', avatarUrl: 'https://i.pravatar.cc/150?u=u6' } },
+    { id: 's1', user: { id: 'u4', name: 'Daniel Almeida', handle: 'danielalmeida', avatarUrl: 'https://ui-avatars.com/api/?name=Daniel+Almeida&background=eef2ff&color=4f46e5' } },
+    { id: 's2', user: { id: 'u5', name: 'Fernanda Lima', handle: 'fernandalima', avatarUrl: 'https://ui-avatars.com/api/?name=Fernanda+Lima&background=eef2ff&color=4f46e5' } },
+    { id: 's3', user: { id: 'u6', name: 'Gustavo Pereira', handle: 'gustavopereira', avatarUrl: 'https://ui-avatars.com/api/?name=Gustavo+Pereira&background=eef2ff&color=4f46e5' } },
   ]);
 
   const [trends] = useState<Trend[]>([
@@ -121,8 +124,8 @@ const App: React.FC = () => {
   ]);
   
   const [connectionRequests] = useState<ConnectionRequest[]>([
-      { id: 'cr1', user: { id: 'u7', name: 'Helena Santos', handle: 'helenasantos', avatarUrl: 'https://i.pravatar.cc/150?u=u7' }, mutuals: 12 },
-      { id: 'cr2', user: { id: 'u8', name: 'Igor Martins', handle: 'igormartins', avatarUrl: 'https://i.pravatar.cc/150?u=u8' }, mutuals: 5 },
+      { id: 'cr1', user: { id: 'u7', name: 'Helena Santos', handle: 'helenasantos', avatarUrl: 'https://ui-avatars.com/api/?name=Helena+Santos&background=eef2ff&color=4f46e5' }, mutuals: 12 },
+      { id: 'cr2', user: { id: 'u8', name: 'Igor Martins', handle: 'igormartins', avatarUrl: 'https://ui-avatars.com/api/?name=Igor+Martins&background=eef2ff&color=4f46e5' }, mutuals: 5 },
   ]);
 
   const handleViewChange = (view: string) => {
