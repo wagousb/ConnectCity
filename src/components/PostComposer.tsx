@@ -1,14 +1,15 @@
 import React, { useState, useRef } from 'react';
 import type { User } from '@/types';
-import { ImageIcon, PaperclipIcon, XIcon } from '@/components/Icons';
+import { ImageIcon, PaperclipIcon, XIcon, LightbulbIcon } from '@/components/Icons';
 import { supabase } from '@/integrations/supabase/client';
 
 interface PostComposerProps {
   user: User;
   onPostPublished: () => void;
+  isFirstPost: boolean;
 }
 
-const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished }) => {
+const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFirstPost }) => {
   const [title, setTitle] = useState('');
   const [targetEntity, setTargetEntity] = useState('');
   const [description, setDescription] = useState('');
@@ -21,6 +22,11 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished }) =>
   const [isPublishing, setIsPublishing] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
+
+  const titleText = isFirstPost ? "Publique sua primeira ideia!" : "Tem uma nova ideia?";
+  const subtitleText = isFirstPost 
+    ? "Compartilhe sua visão para a cidade e comece a fazer a diferença." 
+    : "Continue contribuindo com projetos para melhorar nossa comunidade.";
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -116,7 +122,15 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished }) =>
 
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200">
-      <div className="flex space-x-4">
+      <div className="text-center mb-4">
+        <div className="w-12 h-12 bg-primary-50 rounded-full flex items-center justify-center mx-auto shadow-sm">
+          <LightbulbIcon className="h-6 w-6 text-primary" />
+        </div>
+        <h3 className="mt-4 text-lg font-bold text-slate-800">{titleText}</h3>
+        <p className="mt-1 text-sm text-slate-600">{subtitleText}</p>
+      </div>
+
+      <div className="flex space-x-4 pt-6 border-t border-slate-200">
         <img src={user.avatarUrl} alt={user.name} className="h-12 w-12 rounded-full" />
         <div className="flex-1 space-y-4">
           <input

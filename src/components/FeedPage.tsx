@@ -2,7 +2,6 @@ import React from 'react';
 import type { Post, User } from '@/types';
 import PostComposer from '@/components/PostComposer';
 import PostCard from '@/components/PostCard';
-import IdeaPrompt from '@/components/IdeaPrompt';
 
 interface FeedPageProps {
     user: User;
@@ -17,8 +16,7 @@ const FeedPage: React.FC<FeedPageProps> = ({ user, posts, onVote, onPostPublishe
 
     return (
         <div className="space-y-6">
-            <PostComposer user={user} onPostPublished={onPostPublished} />
-            <IdeaPrompt isFirstPost={isFirstPost} />
+            <PostComposer user={user} onPostPublished={onPostPublished} isFirstPost={isFirstPost} />
             {posts.map(post => (
                 <PostCard key={post.id} post={post} currentUser={user} onVote={onVote} onViewChange={onViewChange} />
             ))}
