@@ -221,12 +221,33 @@ const App: React.FC = () => {
         setIsProfileLoading(false);
       } else if (currentView.view === 'PostDetail' && currentView.postId && user) {
         setIsPostLoading(true);
-        const { data: postData, error: postError } = await supabase.from('posts').select('*, comments(count), author:user_id(*)').eq('id', currentView.postId).single();
+        
+        const { data: postData, error: postError } = await supabase
+          .from('posts')
+          .select('*, comments(count)')
+          .eq('id', currentView.postId)
+          .single();
+
         if (postError || !postData) {
           console.error('Error fetching post:', postError);
+          setViewedPost(null);
           setIsPostLoading(false);
           return;
         }
+
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', postData.user_id)
+          .single();
+
+        if (profileError || !profileData) {
+            console.error('Error fetching author profile for post:', profileError);
+            setViewedPost(null);
+            setIsPostLoading(false);
+            return;
+        }
+
         const { data: ratingsData } = await supabase.from('ratings').select('post_id, user_id, rating').eq('post_id', postData.id);
         const ratingsMap = new Map<string, { total: number; sum: number; userRating?: number }>();
         ratingsData?.forEach(rating => {
@@ -236,16 +257,28 @@ const App: React.FC = () => {
             if (rating.user_id === user.id) postRating.userRating = rating.rating;
         });
         const postRating = ratingsMap.get(postData.id);
+        
         const formattedPost: Post = {
-          id: postData.id, title: postData.title, target_entity: postData.target_entity, content: postData.content, imageUrl: postData.image_url, document_url: postData.document_url,
+          id: postData.id,
+          title: postData.title,
+          target_entity: postData.target_entity,
+          content: postData.content,
+          imageUrl: postData.image_url,
+          document_url: postData.document_url,
           timestamp: timeAgo(postData.created_at),
           author: {
-            id: postData.author.id, name: postData.author.name, handle: postData.author.handle,
-            avatarUrl: postData.author.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(postData.author.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
-            bannerUrl: postData.author.banner_url, bio: postData.author.bio,
+            id: profileData.id,
+            name: profileData.name,
+            handle: profileData.handle,
+            avatarUrl: profileData.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
+            bannerUrl: profileData.banner_url,
+            bio: profileData.bio,
           },
-          comments: (postData.comments as any)[0]?.count || 0, shares: 0,
-          average_rating: postRating ? postRating.sum / postRating.total : 0, user_rating: postRating?.userRating || 0, total_votes: postRating?.total || 0,
+          comments: (postData.comments as any)[0]?.count || 0,
+          shares: 0,
+          average_rating: postRating ? postRating.sum / postRating.total : 0,
+          user_rating: postRating?.userRating || 0,
+          total_votes: postRating?.total || 0,
         };
         setViewedPost(formattedPost);
         setIsPostLoading(false);
