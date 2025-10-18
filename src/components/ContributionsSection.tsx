@@ -35,6 +35,7 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
           name: c.author_name,
           handle: c.author_handle,
           avatarUrl: c.author_avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.author_name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
+          role: c.author_role || 'cidadão',
         },
         agree_count: c.agree_count,
         disagree_count: c.disagree_count,

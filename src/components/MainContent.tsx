@@ -6,6 +6,7 @@ import MembersPage from '@/pages/MembersPage';
 import SettingsPage from '@/components/SettingsPage';
 import NotificationsPage from '@/pages/NotificationsPage';
 import PostDetailPage from '@/pages/PostDetailPage';
+import ModerationPage from '@/pages/ModerationPage';
 
 interface MainContentProps {
   posts: Post[];
@@ -21,13 +22,14 @@ interface MainContentProps {
   isFeedLoading: boolean;
   viewedPost: Post | null;
   isPostLoading: boolean;
+  isModerator: boolean;
 }
 
 const MainContent: React.FC<MainContentProps> = ({ 
   posts, currentView, user, onVote,
   onViewChange, onUserUpdate, onPostPublished,
   viewedProfile, viewedProfilePosts, isProfileLoading,
-  isFeedLoading, viewedPost, isPostLoading
+  isFeedLoading, viewedPost, isPostLoading, isModerator
 }) => {
   const renderContent = () => {
     switch (currentView) {
@@ -71,6 +73,16 @@ const MainContent: React.FC<MainContentProps> = ({
         return <SettingsPage user={user} onViewChange={(viewName) => onViewChange({ view: viewName })} />;
       case 'Notificações':
         return <NotificationsPage user={user} onViewChange={onViewChange} />;
+      case 'Moderação':
+        if (!isModerator) {
+            return (
+                <div className="bg-white p-6 rounded-xl border border-slate-200 text-center">
+                    <h1 className="text-2xl font-bold text-red-600">Acesso Negado</h1>
+                    <p className="text-slate-500 mt-2">Você não tem permissão para acessar esta página.</p>
+                </div>
+            );
+        }
+        return <ModerationPage />;
       default:
         return (
             <div className="bg-white p-6 rounded-xl border border-slate-200">

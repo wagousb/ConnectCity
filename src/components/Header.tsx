@@ -1,6 +1,7 @@
 import React from 'react';
 import type { User } from '@/types';
 import { HomeIcon, SearchIcon, UsersIcon, BellIcon } from '@/components/Icons';
+import RoleBadge from './RoleBadge';
 
 interface HeaderProps {
   user: User;
@@ -55,7 +56,10 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotificati
               className="flex items-center space-x-3 cursor-pointer p-1 rounded-md hover:bg-slate-100">
               <img src={user.avatarUrl} alt={user.name} className="h-9 w-9 rounded-full" />
               <div className="hidden lg:block text-sm text-left">
-                <p className="font-semibold text-slate-800 whitespace-nowrap">{user.name}</p>
+                <div className="flex items-center gap-2">
+                    <p className="font-semibold text-slate-800 whitespace-nowrap">{user.name}</p>
+                    <RoleBadge role={user.role} />
+                </div>
                 <p className="text-slate-500">@{user.handle}</p>
               </div>
             </button>

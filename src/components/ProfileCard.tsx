@@ -4,6 +4,7 @@ import { PencilIcon } from './Icons';
 import ImageCropModal from './ImageCropModal';
 import ProfilePictureModal from './ProfilePictureModal';
 import { useProfilePictureManager } from '@/hooks/useProfilePictureManager';
+import RoleBadge from './RoleBadge';
 
 interface ProfileCardProps {
   user: User;
@@ -52,6 +53,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, onViewChange, onUserUpd
         <div onClick={() => onViewChange('Meu Perfil')} className="cursor-pointer mt-4">
             <h2 className="text-xl font-bold hover:underline">{user.name}</h2>
             <p className="text-sm text-slate-500 hover:underline">@{user.handle}</p>
+        </div>
+        <div className="mt-2">
+            <RoleBadge role={user.role} />
         </div>
       </div>
     </>

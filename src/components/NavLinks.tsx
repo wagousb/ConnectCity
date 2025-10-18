@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { HomeIcon, UsersIcon, BellIcon, SettingsIcon, LogoutIcon } from '@/components/Icons';
+import { HomeIcon, UsersIcon, BellIcon, SettingsIcon, LogoutIcon, ShieldCheckIcon } from '@/components/Icons';
 import { supabase } from '@/integrations/supabase/client';
 
 interface NavLinksProps {
   activeLink: string;
   onLinkClick: (linkName: string) => void;
+  isModerator: boolean;
 }
 
-const NavLinks: React.FC<NavLinksProps> = ({ activeLink, onLinkClick }) => {
+const NavLinks: React.FC<NavLinksProps> = ({ activeLink, onLinkClick, isModerator }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const links = [
@@ -16,6 +17,10 @@ const NavLinks: React.FC<NavLinksProps> = ({ activeLink, onLinkClick }) => {
     { name: 'Notificações', icon: <BellIcon className="h-6 w-6" /> },
     { name: 'Configurações', icon: <SettingsIcon className="h-6 w-6" /> },
   ];
+
+  if (isModerator) {
+    links.push({ name: 'Moderação', icon: <ShieldCheckIcon className="h-6 w-6" /> });
+  }
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -44,7 +49,7 @@ const NavLinks: React.FC<NavLinksProps> = ({ activeLink, onLinkClick }) => {
           className={`w-5 h-5 text-slate-500 transform transition-transform duration-200 ${isMobileMenuOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
-          viewBox="0 0 24 24"
+          viewBox="0 0 24"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>

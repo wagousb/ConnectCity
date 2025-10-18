@@ -10,6 +10,7 @@ export interface User {
   notifications_on_likes?: boolean;
   notifications_on_comments?: boolean;
   notifications_on_new_followers?: boolean;
+  role: string;
 }
 
 export interface Post {

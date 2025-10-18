@@ -3,6 +3,7 @@ import type { Post, User } from '@/types';
 import { MessageCircleIcon, StarIcon, PaperclipIcon } from '@/components/Icons';
 import { supabase } from '@/integrations/supabase/client';
 import ContributionsSection from './ContributionsSection';
+import RoleBadge from './RoleBadge';
 
 interface PostCardProps {
   post: Post;
@@ -60,7 +61,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
         >
           <img src={post.author.avatarUrl} alt={post.author.name} className="h-12 w-12 rounded-full" />
           <div>
-            <p className="font-bold hover:underline">{post.author.name}</p>
+            <div className="flex items-center space-x-2">
+                <p className="font-bold hover:underline">{post.author.name}</p>
+                <RoleBadge role={post.author.role} />
+            </div>
             <p className="text-sm text-slate-500">@{post.author.handle} &middot; {post.timestamp}</p>
           </div>
         </div>

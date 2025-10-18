@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import type { Comment as CommentType, User } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
-import { ThumbsUpIcon, ThumbsDownIcon } from './Icons'; // We'll need to add these icons
+import { ThumbsUpIcon, ThumbsDownIcon } from './Icons';
+import RoleBadge from './RoleBadge';
 
 const timeAgo = (date: string | Date): string => {
     const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
@@ -76,6 +77,7 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
         <div className="bg-slate-50 rounded-lg p-3">
           <div className="flex items-center space-x-2">
             <span className="font-bold text-sm">{comment.author.name}</span>
+            <RoleBadge role={comment.author.role} />
             <span className="text-xs text-slate-500">@{comment.author.handle}</span>
             <span className="text-xs text-slate-400">&middot; {timeAgo(comment.created_at)}</span>
           </div>

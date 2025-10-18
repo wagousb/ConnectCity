@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@/types';
+import RoleBadge from '@/components/RoleBadge';
 
 interface MembersPageProps {
   currentUser: User;
@@ -28,6 +29,7 @@ const MembersPage: React.FC<MembersPageProps> = ({ currentUser, onViewChange }) 
           handle: profile.handle || 'usuário',
           avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
           bio: profile.bio || '',
+          role: profile.role || 'cidadão',
         }));
         setMembers(formattedMembers);
       }
@@ -54,7 +56,10 @@ const MembersPage: React.FC<MembersPageProps> = ({ currentUser, onViewChange }) 
             >
               <img src={member.avatarUrl} alt={member.name} className="h-12 w-12 rounded-full" />
               <div>
-                <p className="font-bold text-slate-800 hover:underline">{member.name}</p>
+                <div className="flex items-center space-x-2">
+                    <p className="font-bold text-slate-800 hover:underline">{member.name}</p>
+                    <RoleBadge role={member.role} />
+                </div>
                 <p className="text-sm text-slate-500">@{member.handle}</p>
               </div>
             </div>

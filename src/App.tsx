@@ -38,6 +38,8 @@ const App: React.FC = () => {
   const [isFeedLoading, setIsFeedLoading] = useState(false);
   const [isPostLoading, setIsPostLoading] = useState(false);
 
+  const isModerator = session?.user?.email === 'produwagner@gmail.com';
+
   const fetchPosts = useCallback(async (currentUserId?: string) => {
     const { data: postsData, error: postsError } = await supabase
       .from('posts')
@@ -105,6 +107,7 @@ const App: React.FC = () => {
             avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
             bannerUrl: profile.banner_url,
             bio: profile.bio,
+            role: profile.role || 'cidadão',
           },
           comments: (post.comments as any)[0]?.count || 0,
           shares: 0,
@@ -167,6 +170,7 @@ const App: React.FC = () => {
             notifications_on_likes: profileData.notifications_on_likes,
             notifications_on_comments: profileData.notifications_on_comments,
             notifications_on_new_followers: profileData.notifications_on_new_followers,
+            role: profileData.role || 'cidadão',
           });
         }
         
@@ -223,6 +227,7 @@ const App: React.FC = () => {
             id: profileData.id, name: profileData.name || 'Usuário', handle: profileData.handle || 'usuário',
             avatarUrl: profileData.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
             bannerUrl: profileData.banner_url || 'https://picsum.photos/seed/banner1/1500/500', bio: profileData.bio || '',
+            role: profileData.role || 'cidadão',
         };
         setViewedProfile(formattedProfile);
         const { data: postsData, error: postsError } = await supabase.from('posts').select('*, comments(count)').eq('user_id', currentView.userId).order('created_at', { ascending: false });
@@ -304,6 +309,7 @@ const App: React.FC = () => {
             avatarUrl: profileData.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
             bannerUrl: profileData.banner_url,
             bio: profileData.bio,
+            role: profileData.role || 'cidadão',
           },
           comments: (postData.comments as any)[0]?.count || 0,
           shares: 0,
@@ -408,7 +414,7 @@ const App: React.FC = () => {
       <main className="max-w-screen-xl mx-auto py-8 px-4 md:px-6 lg:px-8">
         <div className="grid grid-cols-12 gap-8">
           <div className="col-span-12 lg:col-span-3">
-            <LeftSidebar user={user} currentView={currentView.view} onViewChange={handleViewChange} onUserUpdate={handleUserUpdate} />
+            <LeftSidebar user={user} currentView={currentView.view} onViewChange={handleViewChange} onUserUpdate={handleUserUpdate} isModerator={isModerator} />
           </div>
           <div className="col-span-12 lg:col-span-6">
             <MainContent 
@@ -425,6 +431,7 @@ const App: React.FC = () => {
               isFeedLoading={isFeedLoading}
               viewedPost={viewedPost}
               isPostLoading={isPostLoading}
+              isModerator={isModerator}
             />
           </div>
           <div className="col-span-12 lg:col-span-3">
