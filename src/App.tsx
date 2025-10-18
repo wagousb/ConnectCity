@@ -337,6 +337,19 @@ const App: React.FC = () => {
     if (view.view === 'Feed') {
       setIsFeedLoading(true);
       await fetchPosts(user?.id);
+      if (user) {
+        const { count, error } = await supabase
+          .from('notifications')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('is_read', false);
+
+        if (error) {
+          console.error('Error checking notifications:', error);
+        } else {
+          setHasUnreadNotifications(!!count && count > 0);
+        }
+      }
       setIsFeedLoading(false);
     }
 
