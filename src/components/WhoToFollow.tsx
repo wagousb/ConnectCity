@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { Suggestion } from '../types';
 
 interface WhoToFollowProps {
@@ -8,6 +8,8 @@ interface WhoToFollowProps {
 }
 
 const WhoToFollow: React.FC<WhoToFollowProps> = ({ suggestions, onFollowToggle, onViewChange }) => {
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200">
       <h3 className="font-bold text-lg mb-4">Quem seguir</h3>
@@ -28,13 +30,15 @@ const WhoToFollow: React.FC<WhoToFollowProps> = ({ suggestions, onFollowToggle, 
               </div>
               <button 
                 onClick={() => onFollowToggle(user.id)}
-                className={`font-semibold px-4 py-1.5 rounded-full text-sm transition-colors ${
+                onMouseEnter={() => setHoveredId(user.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                className={`font-semibold px-4 py-1.5 rounded-full text-sm transition-colors w-32 text-center ${
                   isFollowing 
-                    ? 'bg-slate-200 text-slate-800 hover:bg-slate-300' 
+                    ? (hoveredId === user.id ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-200 text-slate-800')
                     : 'bg-primary text-white hover:bg-primary-700'
                 }`}
               >
-                {isFollowing ? 'Seguindo' : 'Seguir'}
+                {isFollowing ? (hoveredId === user.id ? 'Deixar de seguir' : 'Seguindo') : 'Seguir'}
               </button>
             </div>
           );

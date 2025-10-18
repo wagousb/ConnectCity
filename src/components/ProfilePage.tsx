@@ -29,6 +29,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
   profileUser, currentUser, posts, onToggleSave, onToggleLike, onViewChange, onUserUpdate, onFollowToggle, isFollowing 
 }) => {
   const [activeTab, setActiveTab] = useState('Publicações');
+  const [isHoveringFollow, setIsHoveringFollow] = useState(false);
   const tabs = ['Publicações', 'Respostas', 'Mídia', 'Curtidas'];
   const isOwnProfile = profileUser.id === currentUser.id;
 
@@ -113,13 +114,15 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
             ) : (
               <button 
                 onClick={() => onFollowToggle(profileUser.id)}
+                onMouseEnter={() => setIsHoveringFollow(true)}
+                onMouseLeave={() => setIsHoveringFollow(false)}
                 className={`font-semibold px-6 py-2 rounded-full text-sm transition-colors ${
                   isFollowing 
-                    ? 'bg-slate-200 text-slate-800 hover:bg-slate-300' 
+                    ? (isHoveringFollow ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-200 text-slate-800')
                     : 'bg-primary text-white hover:bg-primary-700'
                 }`}
               >
-                {isFollowing ? 'Seguindo' : 'Seguir'}
+                {isFollowing ? (isHoveringFollow ? 'Deixar de seguir' : 'Seguindo') : 'Seguir'}
               </button>
             )}
           </div>

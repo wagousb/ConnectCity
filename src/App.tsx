@@ -337,12 +337,32 @@ const App: React.FC = () => {
   const handleFollowToggle = async (targetUserId: string) => {
     if (!user) return;
     const isCurrentlyFollowing = followingIds.has(targetUserId);
+
+    setUser(prevUser => {
+        if (!prevUser) return null;
+        const newFollowingCount = isCurrentlyFollowing 
+            ? (prevUser.following || 1) - 1 
+            : (prevUser.following || 0) + 1;
+        return { ...prevUser, following: newFollowingCount };
+    });
+
+    if (viewedProfile && viewedProfile.id === targetUserId) {
+        setViewedProfile(prevProfile => {
+            if (!prevProfile) return null;
+            const newFollowersCount = isCurrentlyFollowing
+                ? (prevProfile.followers || 1) - 1
+                : (prevProfile.followers || 0) + 1;
+            return { ...prevProfile, followers: newFollowersCount };
+        });
+    }
+
     setFollowingIds(prev => {
       const newSet = new Set(prev);
       if (isCurrentlyFollowing) newSet.delete(targetUserId);
       else newSet.add(targetUserId);
       return newSet;
     });
+
     if (isCurrentlyFollowing) {
       await supabase.from('followers').delete().match({ follower_id: user.id, following_id: targetUserId });
     } else {
