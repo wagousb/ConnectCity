@@ -14,8 +14,6 @@ const RoleBadge: React.FC<RoleBadgeProps> = ({ role, size = 'sm' }) => {
         return 'bg-green-100 text-green-800 border-green-200';
       case 'secretário':
         return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'moderador':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
       case 'cidadão':
       default:
         return 'bg-slate-100 text-slate-800 border-slate-200';

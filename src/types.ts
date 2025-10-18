@@ -11,6 +11,7 @@ export interface User {
   notifications_on_comments?: boolean;
   notifications_on_new_followers?: boolean;
   role: string;
+  is_moderator?: boolean;
 }
 
 export interface Post {

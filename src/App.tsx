@@ -38,7 +38,7 @@ const App: React.FC = () => {
   const [isFeedLoading, setIsFeedLoading] = useState(false);
   const [isPostLoading, setIsPostLoading] = useState(false);
 
-  const isModerator = user?.role === 'moderador' || session?.user?.email === 'produwagner@gmail.com';
+  const isModerator = user?.is_moderator || session?.user?.email === 'produwagner@gmail.com';
 
   const fetchPosts = useCallback(async (currentUserId?: string) => {
     const { data: postsData, error: postsError } = await supabase
@@ -108,6 +108,7 @@ const App: React.FC = () => {
             bannerUrl: profile.banner_url,
             bio: profile.bio,
             role: profile.role || 'cidadão',
+            is_moderator: profile.is_moderator,
           },
           comments: (post.comments as any)[0]?.count || 0,
           shares: 0,
@@ -171,6 +172,7 @@ const App: React.FC = () => {
             notifications_on_comments: profileData.notifications_on_comments,
             notifications_on_new_followers: profileData.notifications_on_new_followers,
             role: profileData.role || 'cidadão',
+            is_moderator: profileData.is_moderator,
           });
         }
         
@@ -228,6 +230,7 @@ const App: React.FC = () => {
             avatarUrl: profileData.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
             bannerUrl: profileData.banner_url || 'https://picsum.photos/seed/banner1/1500/500', bio: profileData.bio || '',
             role: profileData.role || 'cidadão',
+            is_moderator: profileData.is_moderator,
         };
         setViewedProfile(formattedProfile);
         const { data: postsData, error: postsError } = await supabase.from('posts').select('*, comments(count)').eq('user_id', currentView.userId).order('created_at', { ascending: false });
@@ -310,6 +313,7 @@ const App: React.FC = () => {
             bannerUrl: profileData.banner_url,
             bio: profileData.bio,
             role: profileData.role || 'cidadão',
+            is_moderator: profileData.is_moderator,
           },
           comments: (postData.comments as any)[0]?.count || 0,
           shares: 0,
@@ -332,6 +336,8 @@ const App: React.FC = () => {
   ]);
   
   const handleViewChange = async (view: { view: string; userId?: string; postId?: string }) => {
+    setCurrentView(view);
+
     if (view.view === 'Profile' && view.userId === currentView.userId && currentView.view === 'Profile') return;
     if (view.view === 'PostDetail' && view.postId === currentView.postId && currentView.view === 'PostDetail') return;
     
@@ -362,8 +368,6 @@ const App: React.FC = () => {
     if (view.view === 'Notificações') {
       setHasUnreadNotifications(false);
     }
-
-    setCurrentView(view);
   };
 
   const handleUserUpdate = (newProfileData: Partial<User>) => {
