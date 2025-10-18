@@ -108,13 +108,13 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
           className="flex items-center space-x-2 hover:text-amber-500"
           onClick={() => setIsVoting(!isVoting)}
         >
-          <StarIcon className={`h-5 w-5 ${post.average_rating && post.average_rating > 0 ? 'text-amber-400' : ''}`} />
+          <StarIcon className={`h-5 w-5 transition-colors ${post.user_rating && post.user_rating > 0 ? 'text-amber-400 fill-amber-400' : (post.average_rating && post.average_rating > 0 ? 'text-amber-400' : '')}`} />
           {post.total_votes && post.total_votes > 0 ? (
             <span className="text-sm font-medium">
               {post.average_rating?.toFixed(1)} ({post.total_votes} {post.total_votes === 1 ? 'voto' : 'votos'})
             </span>
           ) : (
-            <span className="text-sm font-medium">Votar</span>
+            <span className="text-sm font-medium">{post.user_rating && post.user_rating > 0 ? 'Avaliado' : 'Votar'}</span>
           )}
         </button>
       </div>
