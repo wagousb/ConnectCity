@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import type { User, Post } from '@/types';
 import PostCard from '@/components/PostCard';
 import { PencilIcon } from '@/components/Icons';
-import ImageCropModal from '@/components/ImageCropModal';
-import ProfilePictureModal from '@/components/ProfilePictureModal';
+import ImageCropModal from './ImageCropModal';
+import ProfilePictureModal from './ProfilePictureModal';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ProfilePageProps {
