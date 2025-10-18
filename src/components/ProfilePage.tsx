@@ -129,22 +129,27 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
             className="w-full h-48 md:h-64 object-cover"
           />
           <div className="absolute top-full left-6 -translate-y-1/2">
-            <button 
-              onClick={isOwnProfile ? openProfilePicModal : undefined}
-              className={`relative group rounded-full ${isOwnProfile ? '' : 'cursor-default'}`}
-              disabled={!isOwnProfile}
-            >
-              <img
-                src={profileUser.avatarUrl}
-                alt={profileUser.name}
-                className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white group-hover:opacity-75 transition-opacity"
-              />
-              {isOwnProfile && (
-                <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                  <PencilIcon className="h-8 w-8 text-white" />
-                </div>
-              )}
-            </button>
+            <div className="relative">
+              <button 
+                onClick={isOwnProfile ? openProfilePicModal : undefined}
+                className={`relative group rounded-full ${isOwnProfile ? '' : 'cursor-default'}`}
+                disabled={!isOwnProfile}
+              >
+                <img
+                  src={profileUser.avatarUrl}
+                  alt={profileUser.name}
+                  className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white group-hover:opacity-75 transition-opacity"
+                />
+                {isOwnProfile && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                    <PencilIcon className="h-8 w-8 text-white" />
+                  </div>
+                )}
+              </button>
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
+                  <RoleBadge role={profileUser.role} />
+              </div>
+            </div>
           </div>
           {isOwnProfile && (
             <div className="absolute top-4 right-4">
@@ -158,12 +163,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
           )}
         </div>
 
-        <div className="pt-16 md:pt-20 px-6 pb-6">
+        <div className="pt-18 md:pt-22 px-6 pb-6">
           <h1 className="text-2xl md:text-3xl font-bold">{profileUser.name}</h1>
           <p className="text-slate-500">@{profileUser.handle}</p>
-          <div className="mt-2">
-            <RoleBadge role={profileUser.role} />
-          </div>
           <p className="mt-4 text-slate-700">{profileUser.bio}</p>
 
           <div className="flex items-center space-x-6 mt-4 text-sm text-slate-500">
