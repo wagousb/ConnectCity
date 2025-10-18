@@ -26,6 +26,9 @@ export interface Post {
   shares: number;
   saved?: boolean;
   isLiked?: boolean;
+  average_rating?: number;
+  user_rating?: number;
+  total_votes?: number;
 }
 
 export interface Suggestion {

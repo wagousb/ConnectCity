@@ -13,6 +13,7 @@ interface MainContentProps {
   user: User;
   onToggleSave: (postId: string) => void;
   onToggleLike: (postId: string, isLiked: boolean) => void;
+  onVote: (postId: string, rating: number) => void;
   onViewChange: (view: { view: string; userId?: string }) => void;
   onUserUpdate: (newProfileData: Partial<User>) => void;
   onPostPublished: () => void;
@@ -22,14 +23,14 @@ interface MainContentProps {
 }
 
 const MainContent: React.FC<MainContentProps> = ({ 
-  posts, currentView, user, onToggleSave, onToggleLike, 
+  posts, currentView, user, onToggleSave, onToggleLike, onVote,
   onViewChange, onUserUpdate, onPostPublished,
   viewedProfile, viewedProfilePosts, isProfileLoading
 }) => {
   const renderContent = () => {
     switch (currentView) {
       case 'Feed':
-        return <FeedPage user={user} posts={posts} onToggleSave={onToggleSave} onToggleLike={onToggleLike} onPostPublished={onPostPublished} onViewChange={onViewChange} />;
+        return <FeedPage user={user} posts={posts} onToggleSave={onToggleSave} onToggleLike={onToggleLike} onVote={onVote} onPostPublished={onPostPublished} onViewChange={onViewChange} />;
       case 'Meu Perfil':
         const userPosts = posts.filter(post => post.author.id === user.id);
         return <ProfilePage 
@@ -40,6 +41,7 @@ const MainContent: React.FC<MainContentProps> = ({
                   onViewChange={onViewChange} 
                   onUserUpdate={onUserUpdate}
                   onToggleLike={onToggleLike}
+                  onVote={onVote}
                 />;
       case 'Profile':
         if (isProfileLoading) return <div className="bg-white p-6 rounded-xl border border-slate-200 text-center"><p className="text-slate-500">Carregando perfil...</p></div>;
@@ -52,6 +54,7 @@ const MainContent: React.FC<MainContentProps> = ({
                   onViewChange={onViewChange} 
                   onUserUpdate={onUserUpdate}
                   onToggleLike={onToggleLike}
+                  onVote={onVote}
                 />;
       case 'Membros':
         return <MembersPage currentUser={user} onViewChange={onViewChange} />;
@@ -65,7 +68,7 @@ const MainContent: React.FC<MainContentProps> = ({
             </div>
             {savedPosts.length > 0 ? (
               savedPosts.map((post) => (
-                <PostCard key={post.id} post={post} onToggleSave={onToggleSave} onToggleLike={onToggleLike} onViewChange={onViewChange} />
+                <PostCard key={post.id} post={post} currentUser={user} onToggleSave={onToggleSave} onToggleLike={onToggleLike} onVote={onVote} onViewChange={onViewChange} />
               ))
             ) : (
               <div className="bg-white p-6 rounded-xl border border-slate-200 text-center text-slate-500">

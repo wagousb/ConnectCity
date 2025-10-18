@@ -8,16 +8,17 @@ interface FeedPageProps {
     posts: Post[];
     onToggleSave: (postId: string) => void;
     onToggleLike: (postId: string, isLiked: boolean) => void;
+    onVote: (postId: string, rating: number) => void;
     onPostPublished: () => void;
     onViewChange: (view: { view: string; userId?: string }) => void;
 }
 
-const FeedPage: React.FC<FeedPageProps> = ({ user, posts, onToggleSave, onToggleLike, onPostPublished, onViewChange }) => {
+const FeedPage: React.FC<FeedPageProps> = ({ user, posts, onToggleSave, onToggleLike, onVote, onPostPublished, onViewChange }) => {
     return (
         <div className="space-y-6">
             <PostComposer user={user} onPostPublished={onPostPublished} />
             {posts.map(post => (
-                <PostCard key={post.id} post={post} onToggleSave={onToggleSave} onToggleLike={onToggleLike} onViewChange={onViewChange} />
+                <PostCard key={post.id} post={post} currentUser={user} onToggleSave={onToggleSave} onToggleLike={onToggleLike} onVote={onVote} onViewChange={onViewChange} />
             ))}
         </div>
     );

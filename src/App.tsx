@@ -28,7 +28,6 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [likedPostIds, setLikedPostIds] = useState<Set<string>>(new Set());
   
   const [currentView, setCurrentView] = useState<{ view: string; userId?: string }>({ view: 'Feed' });
   const [viewedProfile, setViewedProfile] = useState<User | null>(null);
@@ -63,35 +62,42 @@ const App: React.FC = () => {
     const profilesMap = new Map(profilesData.map((profile) => [profile.id, profile]));
 
     const postIds = postsData.map(p => p.id);
-    const { data: likesData, error: likesError } = await supabase
-      .from('likes')
-      .select('post_id, user_id')
-      .in('post_id', postIds);
+    
+    const { data: likesData, error: likesError } = await supabase.from('likes').select('post_id, user_id').in('post_id', postIds);
+    if (likesError) console.error('Erro ao buscar curtidas:', likesError);
 
-    if (likesError) {
-      console.error('Erro ao buscar curtidas:', likesError);
-    }
+    const { data: ratingsData, error: ratingsError } = await supabase.from('ratings').select('post_id, user_id, rating').in('post_id', postIds);
+    if (ratingsError) console.error('Erro ao buscar avaliações:', ratingsError);
 
     const likesMap = new Map<string, number>();
     const currentUserLikedPosts = new Set<string>();
-
     likesData?.forEach(like => {
       likesMap.set(like.post_id, (likesMap.get(like.post_id) || 0) + 1);
       if (like.user_id === currentUserId) {
         currentUserLikedPosts.add(like.post_id);
       }
     });
-    
-    if (currentUserId) {
-      setLikedPostIds(currentUserLikedPosts);
-    }
+
+    const ratingsMap = new Map<string, { total: number; sum: number; userRating?: number }>();
+    ratingsData?.forEach(rating => {
+        if (!ratingsMap.has(rating.post_id)) {
+            ratingsMap.set(rating.post_id, { total: 0, sum: 0 });
+        }
+        const postRating = ratingsMap.get(rating.post_id)!;
+        postRating.total += 1;
+        postRating.sum += rating.rating;
+        if (rating.user_id === currentUserId) {
+            postRating.userRating = rating.rating;
+        }
+    });
 
     const formattedPosts: Post[] = postsData
       .map(post => {
         const profile = profilesMap.get(post.user_id);
-        if (!profile) {
-          return null;
-        }
+        if (!profile) return null;
+        
+        const postRating = ratingsMap.get(post.id);
+
         return {
           id: post.id,
           title: post.title,
@@ -113,6 +119,9 @@ const App: React.FC = () => {
           shares: 0,
           saved: false,
           isLiked: currentUserLikedPosts.has(post.id),
+          average_rating: postRating ? postRating.sum / postRating.total : 0,
+          user_rating: postRating?.userRating || 0,
+          total_votes: postRating?.total || 0,
         };
       })
       .filter((p): p is Post => p !== null);
@@ -141,10 +150,6 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // This effect runs when the session changes.
-    // We only want to fetch the user's profile and posts on the initial load.
-    // The `!user` check prevents this from running every time the tab is focused,
-    // which can cause a session refresh.
     if (session?.user && !user) {
       const fetchInitialData = async () => {
         setLoading(true);
@@ -181,7 +186,6 @@ const App: React.FC = () => {
       };
       fetchInitialData();
     } else if (!session?.user) {
-      // Handle logout
       setUser(null);
     }
   }, [session, user, fetchPosts]);
@@ -230,6 +234,8 @@ const App: React.FC = () => {
       } else {
           const postIds = postsData.map(p => p.id);
           const { data: likesData } = await supabase.from('likes').select('post_id, user_id').in('post_id', postIds);
+          const { data: ratingsData } = await supabase.from('ratings').select('post_id, user_id, rating').in('post_id', postIds);
+
           const likesMap = new Map<string, number>();
           const currentUserLikedPosts = new Set<string>();
           likesData?.forEach(like => {
@@ -238,8 +244,19 @@ const App: React.FC = () => {
                   currentUserLikedPosts.add(like.post_id);
               }
           });
+
+          const ratingsMap = new Map<string, { total: number; sum: number; userRating?: number }>();
+          ratingsData?.forEach(rating => {
+              if (!ratingsMap.has(rating.post_id)) ratingsMap.set(rating.post_id, { total: 0, sum: 0 });
+              const postRating = ratingsMap.get(rating.post_id)!;
+              postRating.total += 1;
+              postRating.sum += rating.rating;
+              if (rating.user_id === user.id) postRating.userRating = rating.rating;
+          });
   
-          const formattedPosts: Post[] = postsData.map(post => ({
+          const formattedPosts: Post[] = postsData.map(post => {
+            const postRating = ratingsMap.get(post.id);
+            return {
               id: post.id,
               title: post.title,
               target_entity: post.target_entity,
@@ -253,7 +270,11 @@ const App: React.FC = () => {
               shares: 0,
               saved: false,
               isLiked: currentUserLikedPosts.has(post.id),
-          }));
+              average_rating: postRating ? postRating.sum / postRating.total : 0,
+              user_rating: postRating?.userRating || 0,
+              total_votes: postRating?.total || 0,
+            }
+          });
           setViewedProfilePosts(formattedPosts);
       }
   
@@ -300,18 +321,46 @@ const App: React.FC = () => {
     setPosts(updatePosts);
     setViewedProfilePosts(updatePosts);
 
-    setLikedPostIds(prev => {
-        const newSet = new Set(prev);
-        if (isLiked) newSet.delete(postId);
-        else newSet.add(postId);
-        return newSet;
-    });
-
     if (isLiked) {
       await supabase.from('likes').delete().match({ user_id: user.id, post_id: postId });
     } else {
       await supabase.from('likes').insert({ user_id: user.id, post_id: postId });
     }
+  };
+
+  const handleVote = (postId: string, rating: number) => {
+    if (!user) return;
+
+    const updatePostRating = (p: Post) => {
+        if (p.id !== postId) return p;
+
+        const oldRating = p.user_rating || 0;
+        const oldTotalVotes = p.total_votes || 0;
+        const oldSum = (p.average_rating || 0) * oldTotalVotes;
+
+        let newTotalVotes: number;
+        let newSum: number;
+
+        if (oldRating > 0) {
+            newTotalVotes = oldTotalVotes;
+            newSum = oldSum - oldRating + rating;
+        } else {
+            newTotalVotes = oldTotalVotes + 1;
+            newSum = oldSum + rating;
+        }
+
+        const newAverage = newTotalVotes > 0 ? newSum / newTotalVotes : 0;
+
+        return {
+            ...p,
+            user_rating: rating,
+            total_votes: newTotalVotes,
+            average_rating: newAverage,
+        };
+    };
+
+    setPosts(posts.map(updatePostRating));
+    setViewedProfilePosts(viewedProfilePosts.map(updatePostRating));
   };
 
   if (loading) {
@@ -337,6 +386,7 @@ const App: React.FC = () => {
               user={user} 
               onToggleSave={handleToggleSave}
               onToggleLike={handleToggleLike}
+              onVote={handleVote}
               onViewChange={handleViewChange}
               onUserUpdate={handleUserUpdate}
               onPostPublished={() => fetchPosts(user.id)}

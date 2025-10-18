@@ -13,12 +13,13 @@ interface ProfilePageProps {
   posts: Post[];
   onToggleSave: (postId: string) => void;
   onToggleLike: (postId: string, isLiked: boolean) => void;
+  onVote: (postId: string, rating: number) => void;
   onViewChange: (view: { view: string; userId?: string }) => void;
   onUserUpdate: (newProfileData: Partial<User>) => void;
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ 
-  profileUser, currentUser, posts, onToggleSave, onToggleLike, onViewChange, onUserUpdate
+  profileUser, currentUser, posts, onToggleSave, onToggleLike, onVote, onViewChange, onUserUpdate
 }) => {
   const [activeTab, setActiveTab] = useState('Publicações');
   const tabs = ['Publicações', 'Respostas', 'Mídia', 'Curtidas'];
@@ -138,7 +139,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
             <div className="space-y-6 p-6">
               {posts.length > 0 ? (
                 posts.map(post => (
-                  <PostCard key={post.id} post={post} onToggleSave={onToggleSave} onToggleLike={onToggleLike} onViewChange={onViewChange} />
+                  <PostCard key={post.id} post={post} currentUser={currentUser} onToggleSave={onToggleSave} onToggleLike={onToggleLike} onVote={onVote} onViewChange={onViewChange} />
                 ))
               ) : (
                 <p className="text-slate-500 text-center">Nenhuma publicação ainda.</p>
