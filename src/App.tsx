@@ -36,16 +36,31 @@ const App: React.FC = () => {
   const fetchPosts = useCallback(async (currentUserId?: string) => {
     const { data: postsData, error: postsError } = await supabase
       .from('posts')
-      .select('*, profiles(*)')
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (postsError) {
       console.error('Erro ao buscar posts:', postsError);
       return;
     }
+    if (!postsData) {
+        setPosts([]);
+        return;
+    }
+
+    const userIds = [...new Set(postsData.map((post) => post.user_id))];
+    const { data: profilesData, error: profilesError } = await supabase
+      .from('profiles')
+      .select('*')
+      .in('id', userIds);
+
+    if (profilesError) {
+      console.error('Erro ao buscar perfis:', profilesError);
+      return;
+    }
+    const profilesMap = new Map(profilesData.map((profile) => [profile.id, profile]));
 
     const postIds = postsData.map(p => p.id);
-    
     const { data: likesData, error: likesError } = await supabase
       .from('likes')
       .select('post_id, user_id')
@@ -69,30 +84,35 @@ const App: React.FC = () => {
       setLikedPostIds(currentUserLikedPosts);
     }
 
-    const formattedPosts: Post[] = postsData.map(post => {
-      const profile = post.profiles;
-      return {
-        id: post.id,
-        content: post.content,
-        imageUrl: post.image_url,
-        timestamp: timeAgo(post.created_at),
-        author: {
-          id: profile.id,
-          name: profile.name,
-          handle: profile.handle,
-          avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
-          bannerUrl: profile.banner_url,
-          bio: profile.bio,
-          followers: profile.followers,
-          following: profile.following,
-        },
-        likes: likesMap.get(post.id) || 0,
-        comments: 0,
-        shares: 0,
-        saved: false, // Lógica de salvos a ser implementada
-        isLiked: currentUserLikedPosts.has(post.id),
-      };
-    });
+    const formattedPosts: Post[] = postsData
+      .map(post => {
+        const profile = profilesMap.get(post.user_id);
+        if (!profile) {
+          return null;
+        }
+        return {
+          id: post.id,
+          content: post.content,
+          imageUrl: post.image_url,
+          timestamp: timeAgo(post.created_at),
+          author: {
+            id: profile.id,
+            name: profile.name,
+            handle: profile.handle,
+            avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
+            bannerUrl: profile.banner_url,
+            bio: profile.bio,
+            followers: profile.followers,
+            following: profile.following,
+          },
+          likes: likesMap.get(post.id) || 0,
+          comments: 0,
+          shares: 0,
+          saved: false,
+          isLiked: currentUserLikedPosts.has(post.id),
+        };
+      })
+      .filter((p): p is Post => p !== null);
 
     setPosts(formattedPosts);
   }, []);
