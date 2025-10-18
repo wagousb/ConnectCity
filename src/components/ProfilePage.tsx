@@ -42,7 +42,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, posts, onToggleSave, on
         onClose={closeCropModal}
         onSave={handleSaveCroppedImage}
       />
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div className="relative z-0 bg-white rounded-xl border border-slate-200 overflow-hidden">
         {/* Banner and Profile Header */}
         <div className="relative">
           <img
