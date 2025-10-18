@@ -28,7 +28,7 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchNotifications = async () => {
+    const fetchAndMarkNotifications = async () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('notifications')
@@ -38,69 +38,69 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
 
       if (error) {
         console.error('Error fetching notifications:', error);
-      } else {
-        const postIds = [...new Set(data.map(n => n.entity_id).filter(Boolean))];
-        let postTitlesMap = new Map<string, string>();
-
-        if (postIds.length > 0) {
-            const { data: postsData, error: postsError } = await supabase
-                .from('posts')
-                .select('id, title')
-                .in('id', postIds);
-            if (postsError) {
-                console.error('Error fetching post titles for notifications:', postsError);
-            } else {
-                postTitlesMap = new Map(postsData.map(p => [p.id, p.title]));
-            }
-        }
-
-        const commentIds = data.map(n => n.comment_id).filter(Boolean);
-        let commentsMap = new Map<string, string>();
-
-        if (commentIds.length > 0) {
-            const { data: commentsData, error: commentsError } = await supabase
-                .from('comments')
-                .select('id, content')
-                .in('id', commentIds);
-            if (commentsError) {
-                console.error('Error fetching comments for notifications:', commentsError);
-            } else {
-                commentsMap = new Map(commentsData.map(c => [c.id, c.content]));
-            }
-        }
-
-        const formattedNotifications: Notification[] = data
-          .map(n => ({
-            id: n.id,
-            type: n.type,
-            is_read: n.is_read,
-            created_at: n.created_at,
-            entity_id: n.entity_id,
-            postTitle: n.entity_id ? postTitlesMap.get(n.entity_id) : undefined,
-            comment_id: n.comment_id,
-            commentContent: n.comment_id ? commentsMap.get(n.comment_id) : undefined,
-            actor: {
-              id: n.actor.id,
-              name: n.actor.name,
-              handle: n.actor.handle,
-              avatarUrl: n.actor.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(n.actor.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
-            }
-        }));
-        setNotifications(formattedNotifications);
+        setLoading(false);
+        return;
       }
+
+      const postIds = [...new Set(data.map(n => n.entity_id).filter(Boolean))];
+      let postTitlesMap = new Map<string, string>();
+
+      if (postIds.length > 0) {
+          const { data: postsData, error: postsError } = await supabase
+              .from('posts')
+              .select('id, title')
+              .in('id', postIds);
+          if (postsError) {
+              console.error('Error fetching post titles for notifications:', postsError);
+          } else {
+              postTitlesMap = new Map(postsData.map(p => [p.id, p.title]));
+          }
+      }
+
+      const commentIds = data.map(n => n.comment_id).filter(Boolean);
+      let commentsMap = new Map<string, string>();
+
+      if (commentIds.length > 0) {
+          const { data: commentsData, error: commentsError } = await supabase
+              .from('comments')
+              .select('id, content')
+              .in('id', commentIds);
+          if (commentsError) {
+              console.error('Error fetching comments for notifications:', commentsError);
+          } else {
+              commentsMap = new Map(commentsData.map(c => [c.id, c.content]));
+          }
+      }
+
+      const formattedNotifications: Notification[] = data
+        .map(n => ({
+          id: n.id,
+          type: n.type,
+          is_read: n.is_read,
+          created_at: n.created_at,
+          entity_id: n.entity_id,
+          postTitle: n.entity_id ? postTitlesMap.get(n.entity_id) : undefined,
+          comment_id: n.comment_id,
+          commentContent: n.comment_id ? commentsMap.get(n.comment_id) : undefined,
+          actor: {
+            id: n.actor.id,
+            name: n.actor.name,
+            handle: n.actor.handle,
+            avatarUrl: n.actor.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(n.actor.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
+          }
+      }));
+      setNotifications(formattedNotifications);
       setLoading(false);
+
+      // After displaying, mark them as read in the database
+      await supabase
+          .from('notifications')
+          .update({ is_read: true })
+          .eq('user_id', user.id)
+          .eq('is_read', false);
     };
 
-    const markAsRead = async () => {
-        await supabase
-            .from('notifications')
-            .update({ is_read: true })
-            .eq('user_id', user.id)
-            .eq('is_read', false);
-    };
-
-    fetchNotifications();
-    markAsRead();
+    fetchAndMarkNotifications();
   }, [user.id]);
 
   const renderNotification = (notification: Notification) => {
