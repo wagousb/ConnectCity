@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { ImageIcon } from './Icons';
@@ -86,9 +87,9 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ isOpen, onClose, onSave
 
   if (!isOpen) return null;
 
-  return (
+  return ReactDOM.createPortal(
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl p-6 w-full max-w-lg">
+      <div className="bg-white rounded-xl p-6 w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
         <h2 className="text-xl font-bold mb-4">Alterar Foto de Perfil</h2>
         {!imgSrc ? (
           <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center">
@@ -125,7 +126,8 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ isOpen, onClose, onSave
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

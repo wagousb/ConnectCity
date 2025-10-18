@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { PencilIcon } from './Icons';
 
 interface ProfilePictureModalProps {
@@ -17,7 +18,7 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({ isOpen, onClo
     onClose();
   };
 
-  return (
+  return ReactDOM.createPortal(
     <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="relative max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
         <img src={imageUrl} alt={`${userName}'s profile picture`} className="rounded-lg w-full h-auto max-h-[80vh] object-contain" />
@@ -30,10 +31,11 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({ isOpen, onClo
           </button>
         </div>
          <button onClick={onClose} className="absolute top-4 left-4 bg-white/80 backdrop-blur-sm text-slate-800 rounded-full p-2 hover:bg-white transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
