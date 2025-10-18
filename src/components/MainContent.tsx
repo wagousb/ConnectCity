@@ -12,7 +12,6 @@ interface MainContentProps {
   currentView: string;
   user: User;
   onToggleSave: (postId: string) => void;
-  onToggleLike: (postId: string, isLiked: boolean) => void;
   onVote: (postId: string, rating: number) => void;
   onViewChange: (view: { view: string; userId?: string }) => void;
   onUserUpdate: (newProfileData: Partial<User>) => void;
@@ -23,14 +22,14 @@ interface MainContentProps {
 }
 
 const MainContent: React.FC<MainContentProps> = ({ 
-  posts, currentView, user, onToggleSave, onToggleLike, onVote,
+  posts, currentView, user, onToggleSave, onVote,
   onViewChange, onUserUpdate, onPostPublished,
   viewedProfile, viewedProfilePosts, isProfileLoading
 }) => {
   const renderContent = () => {
     switch (currentView) {
       case 'Feed':
-        return <FeedPage user={user} posts={posts} onToggleSave={onToggleSave} onToggleLike={onToggleLike} onVote={onVote} onPostPublished={onPostPublished} onViewChange={onViewChange} />;
+        return <FeedPage user={user} posts={posts} onToggleSave={onToggleSave} onVote={onVote} onPostPublished={onPostPublished} onViewChange={onViewChange} />;
       case 'Meu Perfil':
         const userPosts = posts.filter(post => post.author.id === user.id);
         return <ProfilePage 
@@ -40,7 +39,6 @@ const MainContent: React.FC<MainContentProps> = ({
                   onToggleSave={onToggleSave} 
                   onViewChange={onViewChange} 
                   onUserUpdate={onUserUpdate}
-                  onToggleLike={onToggleLike}
                   onVote={onVote}
                 />;
       case 'Profile':
@@ -53,7 +51,6 @@ const MainContent: React.FC<MainContentProps> = ({
                   onToggleSave={onToggleSave} 
                   onViewChange={onViewChange} 
                   onUserUpdate={onUserUpdate}
-                  onToggleLike={onToggleLike}
                   onVote={onVote}
                 />;
       case 'Membros':
@@ -68,7 +65,7 @@ const MainContent: React.FC<MainContentProps> = ({
             </div>
             {savedPosts.length > 0 ? (
               savedPosts.map((post) => (
-                <PostCard key={post.id} post={post} currentUser={user} onToggleSave={onToggleSave} onToggleLike={onToggleLike} onVote={onVote} onViewChange={onViewChange} />
+                <PostCard key={post.id} post={post} currentUser={user} onToggleSave={onToggleSave} onVote={onVote} onViewChange={onViewChange} />
               ))
             ) : (
               <div className="bg-white p-6 rounded-xl border border-slate-200 text-center text-slate-500">

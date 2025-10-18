@@ -21,14 +21,25 @@ export interface Post {
   imageUrl?: string;
   document_url?: string;
   timestamp: string;
-  likes: number;
   comments: number;
   shares: number;
   saved?: boolean;
-  isLiked?: boolean;
   average_rating?: number;
   user_rating?: number;
   total_votes?: number;
+}
+
+export interface Comment {
+  id: string;
+  content: string;
+  author: User;
+  created_at: string;
+  replies: Comment[];
+  agree_count: number;
+  disagree_count: number;
+  user_vote?: 'agree' | 'disagree' | null;
+  post_id: string;
+  parent_comment_id?: string | null;
 }
 
 export interface Suggestion {

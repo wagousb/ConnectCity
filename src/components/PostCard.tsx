@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 import type { Post, User } from '@/types';
-import { HeartIcon, MessageCircleIcon, StarIcon, BookmarkIconSolid, BookmarkIcon, PaperclipIcon } from '@/components/Icons';
+import { MessageCircleIcon, StarIcon, BookmarkIconSolid, BookmarkIcon, PaperclipIcon } from '@/components/Icons';
 import { supabase } from '@/integrations/supabase/client';
+import ContributionsSection from './ContributionsSection';
 
 interface PostCardProps {
   post: Post;
   currentUser: User;
   onToggleSave: (postId: string) => void;
-  onToggleLike: (postId: string, isLiked: boolean) => void;
   onVote: (postId: string, rating: number) => void;
   onViewChange: (view: { view: string; userId?: string }) => void;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onToggleSave, onToggleLike, onVote, onViewChange }) => {
+const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onToggleSave, onVote, onViewChange }) => {
   const [isVoting, setIsVoting] = useState(false);
   const [hoverRating, setHoverRating] = useState(0);
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
 
   const getEntityBadgeColor = (entity: string) => {
     switch (entity) {
@@ -85,16 +86,9 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onToggleSave, on
       )}
 
       <div className="flex items-center justify-between text-slate-500 pt-4 border-t border-slate-200">
-        <button 
-          className={`flex items-center space-x-2 hover:text-red-500 ${post.isLiked ? 'text-red-500' : ''}`}
-          onClick={() => onToggleLike(post.id, post.isLiked || false)}
-        >
-          <HeartIcon className={`h-5 w-5 ${post.isLiked ? 'fill-current' : ''}`} />
-          <span className="text-sm font-medium">{post.likes} Curtidas</span>
-        </button>
-        <button className="flex items-center space-x-2 hover:text-blue-500">
+        <button onClick={() => setIsCommentsOpen(!isCommentsOpen)} className="flex items-center space-x-2 hover:text-blue-500">
           <MessageCircleIcon className="h-5 w-5" />
-          <span className="text-sm font-medium">{post.comments} Considerações</span>
+          <span className="text-sm font-medium">{post.comments} Contribuições</span>
         </button>
         <button 
           className="flex items-center space-x-2 hover:text-amber-500"
@@ -129,6 +123,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onToggleSave, on
             ))}
         </div>
       )}
+
+      {isCommentsOpen && <ContributionsSection postId={post.id} currentUser={currentUser} />}
     </div>
   );
 };

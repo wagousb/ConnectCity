@@ -37,7 +37,7 @@ const App: React.FC = () => {
   const fetchPosts = useCallback(async (currentUserId?: string) => {
     const { data: postsData, error: postsError } = await supabase
       .from('posts')
-      .select('*')
+      .select('*, comments(count)')
       .order('created_at', { ascending: false });
 
     if (postsError) {
@@ -63,20 +63,8 @@ const App: React.FC = () => {
 
     const postIds = postsData.map(p => p.id);
     
-    const { data: likesData, error: likesError } = await supabase.from('likes').select('post_id, user_id').in('post_id', postIds);
-    if (likesError) console.error('Erro ao buscar curtidas:', likesError);
-
     const { data: ratingsData, error: ratingsError } = await supabase.from('ratings').select('post_id, user_id, rating').in('post_id', postIds);
     if (ratingsError) console.error('Erro ao buscar avaliações:', ratingsError);
-
-    const likesMap = new Map<string, number>();
-    const currentUserLikedPosts = new Set<string>();
-    likesData?.forEach(like => {
-      likesMap.set(like.post_id, (likesMap.get(like.post_id) || 0) + 1);
-      if (like.user_id === currentUserId) {
-        currentUserLikedPosts.add(like.post_id);
-      }
-    });
 
     const ratingsMap = new Map<string, { total: number; sum: number; userRating?: number }>();
     ratingsData?.forEach(rating => {
@@ -114,11 +102,9 @@ const App: React.FC = () => {
             bannerUrl: profile.banner_url,
             bio: profile.bio,
           },
-          likes: likesMap.get(post.id) || 0,
-          comments: 0,
+          comments: (post.comments as any)[0]?.count || 0,
           shares: 0,
           saved: false,
-          isLiked: currentUserLikedPosts.has(post.id),
           average_rating: postRating ? postRating.sum / postRating.total : 0,
           user_rating: postRating?.userRating || 0,
           total_votes: postRating?.total || 0,
@@ -224,7 +210,7 @@ const App: React.FC = () => {
   
       const { data: postsData, error: postsError } = await supabase
         .from('posts')
-        .select('*')
+        .select('*, comments(count)')
         .eq('user_id', currentView.userId)
         .order('created_at', { ascending: false });
   
@@ -233,17 +219,7 @@ const App: React.FC = () => {
           setViewedProfilePosts([]);
       } else {
           const postIds = postsData.map(p => p.id);
-          const { data: likesData } = await supabase.from('likes').select('post_id, user_id').in('post_id', postIds);
           const { data: ratingsData } = await supabase.from('ratings').select('post_id, user_id, rating').in('post_id', postIds);
-
-          const likesMap = new Map<string, number>();
-          const currentUserLikedPosts = new Set<string>();
-          likesData?.forEach(like => {
-              likesMap.set(like.post_id, (likesMap.get(like.post_id) || 0) + 1);
-              if (like.user_id === user.id) {
-                  currentUserLikedPosts.add(like.post_id);
-              }
-          });
 
           const ratingsMap = new Map<string, { total: number; sum: number; userRating?: number }>();
           ratingsData?.forEach(rating => {
@@ -265,11 +241,9 @@ const App: React.FC = () => {
               document_url: post.document_url,
               timestamp: timeAgo(post.created_at),
               author: formattedProfile,
-              likes: likesMap.get(post.id) || 0,
-              comments: 0,
+              comments: (post.comments as any)[0]?.count || 0,
               shares: 0,
               saved: false,
-              isLiked: currentUserLikedPosts.has(post.id),
               average_rating: postRating ? postRating.sum / postRating.total : 0,
               user_rating: postRating?.userRating || 0,
               total_votes: postRating?.total || 0,
@@ -311,20 +285,6 @@ const App: React.FC = () => {
   const handleUserUpdate = (newProfileData: Partial<User>) => {
     if (user) {
       setUser({ ...user, ...newProfileData });
-    }
-  };
-
-  const handleToggleLike = async (postId: string, isLiked: boolean) => {
-    if (!user) return;
-
-    const updatePosts = (postList: Post[]) => postList.map(p => p.id === postId ? { ...p, isLiked: !isLiked, likes: p.likes + (!isLiked ? 1 : -1) } : p);
-    setPosts(updatePosts);
-    setViewedProfilePosts(updatePosts);
-
-    if (isLiked) {
-      await supabase.from('likes').delete().match({ user_id: user.id, post_id: postId });
-    } else {
-      await supabase.from('likes').insert({ user_id: user.id, post_id: postId });
     }
   };
 
@@ -385,7 +345,6 @@ const App: React.FC = () => {
               currentView={currentView.view} 
               user={user} 
               onToggleSave={handleToggleSave}
-              onToggleLike={handleToggleLike}
               onVote={handleVote}
               onViewChange={handleViewChange}
               onUserUpdate={handleUserUpdate}
