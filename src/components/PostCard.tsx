@@ -97,7 +97,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
         </div>
       )}
 
-      <div className="flex items-center space-x-8 text-slate-500 pt-4 border-t border-slate-200">
+      <div className="flex items-center justify-between text-slate-500 pt-4 border-t border-slate-200">
         <button onClick={() => setIsCommentsOpen(!isCommentsOpen)} className="flex items-center space-x-2 hover:text-blue-500">
           <MessageCircleIcon className="h-5 w-5" />
           <span className="text-sm font-medium">{post.comments} Contribuições</span>
@@ -106,8 +106,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
           className="flex items-center space-x-2 hover:text-amber-500"
           onClick={() => setIsVoting(!isVoting)}
         >
-          <StarIcon className="h-5 w-5" />
-          <span className="text-sm font-medium">Votar</span>
+          <StarIcon className={`h-5 w-5 ${post.average_rating && post.average_rating > 0 ? 'text-amber-400' : ''}`} />
+          {post.total_votes && post.total_votes > 0 ? (
+            <span className="text-sm font-medium">
+              {post.average_rating?.toFixed(1)} ({post.total_votes} {post.total_votes === 1 ? 'voto' : 'votos'})
+            </span>
+          ) : (
+            <span className="text-sm font-medium">Votar</span>
+          )}
         </button>
       </div>
 
