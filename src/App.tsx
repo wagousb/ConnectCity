@@ -31,35 +31,46 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState('Feed');
 
   const fetchPosts = useCallback(async () => {
-    const { data, error } = await supabase
+    // Etapa 1: Buscar todas as publicações.
+    const { data: postsData, error: postsError } = await supabase
       .from('posts')
-      .select(`
-        id,
-        content,
-        image_url,
-        created_at,
-        profiles!inner (
-          id,
-          name,
-          handle,
-          avatar_url,
-          banner_url,
-          bio,
-          followers,
-          following
-        )
-      `)
+      .select('*')
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Erro ao buscar posts:', error);
+    if (postsError) {
+      console.error('Erro ao buscar posts:', postsError);
       return;
     }
 
-    const formattedPosts: Post[] = data
-      .filter(post => post.profiles)
+    if (!postsData || postsData.length === 0) {
+      setPosts([]);
+      return;
+    }
+
+    // Etapa 2: Coletar IDs de usuário únicos das publicações.
+    const userIds = [...new Set(postsData.map(p => p.user_id))];
+
+    // Etapa 3: Buscar os perfis correspondentes a esses IDs.
+    const { data: profilesData, error: profilesError } = await supabase
+      .from('profiles')
+      .select('*')
+      .in('id', userIds);
+
+    if (profilesError) {
+      console.error('Erro ao buscar perfis:', profilesError);
+      return;
+    }
+
+    // Etapa 4: Criar um mapa de perfis para facilitar a consulta.
+    const profilesMap = new Map(profilesData.map(p => [p.id, p]));
+
+    // Etapa 5: Combinar publicações e perfis.
+    const formattedPosts: Post[] = postsData
       .map(post => {
-        const profile = post.profiles as any;
+        const profile = profilesMap.get(post.user_id);
+        if (!profile) {
+          return null; // Ignorar posts sem um perfil de autor correspondente.
+        }
         return {
           id: post.id,
           content: post.content,
@@ -80,7 +91,9 @@ const App: React.FC = () => {
           shares: 0,
           saved: false,
         };
-    });
+      })
+      .filter((p): p is Post => p !== null);
+
     setPosts(formattedPosts);
   }, []);
 
