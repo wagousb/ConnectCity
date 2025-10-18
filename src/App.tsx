@@ -31,11 +31,12 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState('Feed');
 
   const fetchPosts = useCallback(async () => {
+    // Usando a consulta mais simples e robusta para buscar posts e seus autores.
     const { data, error } = await supabase
       .from('posts')
       .select(`
         *,
-        author:profiles (
+        profiles (
           id,
           name,
           handle,
@@ -53,27 +54,28 @@ const App: React.FC = () => {
       return;
     }
 
+    // Mapeando os dados recebidos para o formato esperado pelo aplicativo.
     const formattedPosts: Post[] = data
-      .filter(post => post.author) // Garante que o post tem um autor
+      .filter(post => post.profiles) // Garante que o post tem um autor (o perfil não é nulo)
       .map(post => ({
         id: post.id,
         content: post.content,
         imageUrl: post.image_url,
         timestamp: timeAgo(post.created_at),
         author: {
-          id: (post.author as any).id,
-          name: (post.author as any).name,
-          handle: (post.author as any).handle,
-          avatarUrl: (post.author as any).avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent((post.author as any).name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
-          bannerUrl: (post.author as any).banner_url,
-          bio: (post.author as any).bio,
-          followers: (post.author as any).followers,
-          following: (post.author as any).following,
+          id: (post.profiles as any).id,
+          name: (post.profiles as any).name,
+          handle: (post.profiles as any).handle,
+          avatarUrl: (post.profiles as any).avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent((post.profiles as any).name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
+          bannerUrl: (post.profiles as any).banner_url,
+          bio: (post.profiles as any).bio,
+          followers: (post.profiles as any).followers,
+          following: (post.profiles as any).following,
         },
         likes: 0,
         comments: 0,
         shares: 0,
-        saved: false, // Lógica de "salvos" precisaria ser implementada separadamente
+        saved: false,
     }));
     setPosts(formattedPosts);
   }, []);
@@ -92,6 +94,9 @@ const App: React.FC = () => {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (_event === 'SIGNED_IN') {
+        fetchPosts();
+      }
     });
 
     return () => {
