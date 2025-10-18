@@ -52,14 +52,14 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, onViewChange, onUserUpd
         <h2 className="text-xl font-bold mt-4">{user.name}</h2>
         <p className="text-sm text-slate-500">@{user.handle}</p>
         <div className="flex justify-around my-6 text-sm">
-          <div>
-            <p className="font-bold text-lg">{user.following ? (user.following / 1000).toFixed(1) + 'k' : '0'}</p>
+          <button onClick={() => onViewChange('Seguindo')} className="text-left p-2 rounded-md hover:bg-slate-50 transition-colors">
+            <p className="font-bold text-lg text-center">{user.following ? (user.following / 1000).toFixed(1) + 'k' : '0'}</p>
             <p className="text-slate-500">Seguindo</p>
-          </div>
-          <div>
-            <p className="font-bold text-lg">{user.followers ? (user.followers / 1000).toFixed(1) + 'k' : '0'}</p>
+          </button>
+          <button onClick={() => onViewChange('Seguidores')} className="text-left p-2 rounded-md hover:bg-slate-50 transition-colors">
+            <p className="font-bold text-lg text-center">{user.followers ? (user.followers / 1000).toFixed(1) + 'k' : '0'}</p>
             <p className="text-slate-500">Seguidores</p>
-          </div>
+          </button>
         </div>
         <button 
           className="w-full bg-primary text-white font-semibold py-3 rounded-lg hover:bg-primary-700 transition-colors duration-300"

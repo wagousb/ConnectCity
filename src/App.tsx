@@ -298,6 +298,8 @@ const App: React.FC = () => {
               onViewChange={handleViewChange}
               onUserUpdate={handleUserUpdate}
               onPostPublished={fetchPosts}
+              onFollowToggle={handleFollowToggle}
+              followingIds={followingIds}
             />
           </div>
           <div className="col-span-12 lg:col-span-3">

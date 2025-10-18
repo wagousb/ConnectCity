@@ -5,6 +5,7 @@ import ProfilePage from '@/components/ProfilePage';
 import FeedPage from '@/components/FeedPage';
 import NetworkPage from '@/components/NetworkPage';
 import SettingsPage from '@/components/SettingsPage';
+import FollowListPage from '@/pages/FollowListPage';
 
 interface MainContentProps {
   posts: Post[];
@@ -16,9 +17,11 @@ interface MainContentProps {
   onViewChange: (view: string) => void;
   onUserUpdate: (newProfileData: Partial<User>) => void;
   onPostPublished: () => void;
+  followingIds: Set<string>;
+  onFollowToggle: (targetUserId: string) => void;
 }
 
-const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, suggestions, connectionRequests, onToggleSave, onViewChange, onUserUpdate, onPostPublished }) => {
+const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, suggestions, connectionRequests, onToggleSave, onViewChange, onUserUpdate, onPostPublished, followingIds, onFollowToggle }) => {
   const renderContent = () => {
     switch (currentView) {
       case 'Feed':
@@ -49,6 +52,24 @@ const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, sug
         );
       case 'Configurações':
         return <SettingsPage user={user} onViewChange={onViewChange} />;
+      case 'Seguindo':
+        return <FollowListPage 
+                  type="following" 
+                  currentUserId={user.id}
+                  profileUserId={user.id} 
+                  onFollowToggle={onFollowToggle} 
+                  followingIds={followingIds}
+                  onBack={() => onViewChange('Meu Perfil')}
+                />;
+      case 'Seguidores':
+        return <FollowListPage 
+                  type="followers" 
+                  currentUserId={user.id}
+                  profileUserId={user.id} 
+                  onFollowToggle={onFollowToggle} 
+                  followingIds={followingIds}
+                  onBack={() => onViewChange('Meu Perfil')}
+                />;
       case 'Notificações':
         return (
           <div className="bg-white p-6 rounded-xl border border-slate-200">
