@@ -19,8 +19,8 @@ interface ProfilePageProps {
 const ProfilePage: React.FC<ProfilePageProps> = ({ 
   profileUser, currentUser, posts, onVote, onViewChange, onUserUpdate
 }) => {
-  const [activeTab, setActiveTab] = useState('Publicações');
-  const tabs = ['Publicações', 'Respostas', 'Mídia', 'Curtidas'];
+  const [activeTab, setActiveTab] = useState('Ideias enviadas');
+  const tabs = ['Ideias enviadas', 'Contribuições'];
   const isOwnProfile = profileUser.id === currentUser.id;
 
   const {
@@ -111,7 +111,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
           <p className="mt-4 text-slate-700">{profileUser.bio}</p>
 
           <div className="flex items-center space-x-6 mt-4 text-sm text-slate-500">
-            <span><span className="font-bold text-slate-800">{posts.length}</span> Publicações</span>
+            <span><span className="font-bold text-slate-800">{posts.length}</span> Ideias enviadas</span>
           </div>
         </div>
 
@@ -133,18 +133,18 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
         </div>
 
         <div>
-          {activeTab === 'Publicações' && (
+          {activeTab === 'Ideias enviadas' && (
             <div className="space-y-6 p-6">
               {posts.length > 0 ? (
                 posts.map(post => (
                   <PostCard key={post.id} post={post} currentUser={currentUser} onVote={onVote} onViewChange={onViewChange} />
                 ))
               ) : (
-                <p className="text-slate-500 text-center">Nenhuma publicação ainda.</p>
+                <p className="text-slate-500 text-center">Nenhuma ideia enviada ainda.</p>
               )}
             </div>
           )}
-          {activeTab !== 'Publicações' && (
+          {activeTab === 'Contribuições' && (
             <p className="p-6 text-slate-500 text-center">O conteúdo para "{activeTab}" aparecerá aqui.</p>
           )}
         </div>
