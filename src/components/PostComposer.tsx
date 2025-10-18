@@ -23,10 +23,10 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFi
   const imageInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
 
-  const titleText = isFirstPost ? "Publique sua primeira ideia!" : "Tem uma nova ideia?";
+  const titleText = isFirstPost ? "Sua primeira ideia começa aqui!" : "Mente borbulhando com ideias?";
   const subtitleText = isFirstPost 
-    ? "Compartilhe sua visão para a cidade e comece a fazer a diferença." 
-    : "Continue contribuindo com projetos para melhorar nossa comunidade.";
+    ? "Toda grande mudança começa com um pensamento. Compartilhe o seu com a cidade." 
+    : "Não guarde para você! Publique seu novo projeto e continue fazendo a diferença.";
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -122,15 +122,17 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFi
 
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200">
-      <div className="text-center mb-4">
-        <div className="w-12 h-12 bg-primary-50 rounded-full flex items-center justify-center mx-auto shadow-sm">
-          <LightbulbIcon className="h-6 w-6 text-primary" />
+      <div className="bg-gradient-to-br from-primary-50 to-indigo-100 p-6 rounded-lg mb-6 flex items-center space-x-4">
+        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md shrink-0">
+            <LightbulbIcon className="h-8 w-8 text-primary" />
         </div>
-        <h3 className="mt-4 text-lg font-bold text-slate-800">{titleText}</h3>
-        <p className="mt-1 text-sm text-slate-600">{subtitleText}</p>
+        <div>
+            <h3 className="text-xl font-bold text-slate-800">{titleText}</h3>
+            <p className="mt-1 text-slate-600">{subtitleText}</p>
+        </div>
       </div>
 
-      <div className="flex space-x-4 pt-6 border-t border-slate-200">
+      <div className="flex space-x-4">
         <img src={user.avatarUrl} alt={user.name} className="h-12 w-12 rounded-full" />
         <div className="flex-1 space-y-4">
           <input
