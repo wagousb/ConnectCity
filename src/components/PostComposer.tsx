@@ -12,6 +12,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished }) =>
   const [title, setTitle] = useState('');
   const [targetEntity, setTargetEntity] = useState('');
   const [description, setDescription] = useState('');
+  const [isDescriptionFocused, setIsDescriptionFocused] = useState(false);
   
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -136,13 +137,23 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished }) =>
             <option value="Câmara de vereadores (Legislativo)">Câmara de vereadores (Legislativo)</option>
             <option value="Secretários">Secretários</option>
           </select>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full text-base border-slate-200 border rounded-lg p-2 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-200"
-            rows={4}
-            placeholder="Descreva sua ideia de projeto aqui..."
-          ></textarea>
+          <div className="relative">
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              onFocus={() => setIsDescriptionFocused(true)}
+              onBlur={() => setIsDescriptionFocused(false)}
+              className="w-full text-base border-slate-200 border rounded-lg p-2 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-200"
+              rows={4}
+              placeholder="Descreva sua ideia de projeto aqui..."
+            ></textarea>
+            {isDescriptionFocused && (
+              <div className="absolute bottom-full mb-2 w-full bg-slate-800 text-white text-sm rounded-lg py-3 px-4 z-10 shadow-lg">
+                <p>Lembre-se de adicionar o máximo de detalhes possíveis, como <strong>Localização</strong>, <strong>importância</strong> e <strong>contribuições</strong> do projeto.</p>
+                <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-slate-800"></div>
+              </div>
+            )}
+          </div>
           
           {imagePreview && (
             <div className="relative">
