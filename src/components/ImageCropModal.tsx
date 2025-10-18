@@ -8,6 +8,9 @@ interface ImageCropModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (croppedImageFile: File) => Promise<void>;
+  aspectRatio?: number;
+  title?: string;
+  circularCrop?: boolean;
 }
 
 function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: number) {
@@ -18,13 +21,20 @@ function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: numbe
   );
 }
 
-const ImageCropModal: React.FC<ImageCropModalProps> = ({ isOpen, onClose, onSave }) => {
+const ImageCropModal: React.FC<ImageCropModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  onSave, 
+  aspectRatio = 1, 
+  title = "Editar Imagem",
+  circularCrop = false
+}) => {
   const [imgSrc, setImgSrc] = useState('');
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<Crop>();
   const [isSaving, setIsSaving] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
-  const [originalFileName, setOriginalFileName] = useState('new-avatar.jpeg');
+  const [originalFileName, setOriginalFileName] = useState('new-image.jpeg');
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -38,7 +48,7 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ isOpen, onClose, onSave
 
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    setCrop(centerAspectCrop(width, height, 1));
+    setCrop(centerAspectCrop(width, height, aspectRatio));
   };
 
   const handleSaveCrop = async () => {
@@ -84,13 +94,18 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ isOpen, onClose, onSave
       setIsSaving(false);
     }, 'image/jpeg');
   };
+  
+  const handleClose = () => {
+    setImgSrc('');
+    onClose();
+  }
 
   if (!isOpen) return null;
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl p-6 w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-xl font-bold mb-4">Alterar Foto de Perfil</h2>
+        <h2 className="text-xl font-bold mb-4">{title}</h2>
         {!imgSrc ? (
           <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center">
             <ImageIcon className="h-12 w-12 mx-auto text-slate-400" />
@@ -106,15 +121,15 @@ const ImageCropModal: React.FC<ImageCropModalProps> = ({ isOpen, onClose, onSave
               crop={crop}
               onChange={(_, percentCrop) => setCrop(percentCrop)}
               onComplete={(c) => setCompletedCrop(c)}
-              aspect={1}
-              circularCrop
+              aspect={aspectRatio}
+              circularCrop={circularCrop}
             >
               <img ref={imgRef} src={imgSrc} onLoad={onImageLoad} alt="Crop me" style={{ maxHeight: '70vh' }} />
             </ReactCrop>
           </div>
         )}
         <div className="flex justify-end space-x-4 mt-6">
-          <button onClick={onClose} className="bg-slate-200 text-slate-800 font-semibold px-4 py-2 rounded-md hover:bg-slate-300 transition-colors">
+          <button onClick={handleClose} className="bg-slate-200 text-slate-800 font-semibold px-4 py-2 rounded-md hover:bg-slate-300 transition-colors">
             Cancelar
           </button>
           <button 

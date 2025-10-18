@@ -5,6 +5,7 @@ import { PencilIcon } from '@/components/Icons';
 import ImageCropModal from './ImageCropModal';
 import ProfilePictureModal from './ProfilePictureModal';
 import { useProfilePictureManager } from '@/hooks/useProfilePictureManager';
+import { useBannerImageManager } from '@/hooks/useBannerImageManager';
 
 interface ProfilePageProps {
   user: User;
@@ -19,28 +20,45 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, posts, onToggleSave, on
   const tabs = ['Publicações', 'Respostas', 'Mídia', 'Curtidas'];
 
   const {
-    isCropModalOpen,
+    isCropModalOpen: isAvatarCropModalOpen,
     isProfilePicModalOpen,
     openProfilePicModal,
     closeProfilePicModal,
-    openCropModal,
-    closeCropModal,
-    handleSaveCroppedImage,
+    openCropModal: openAvatarCropModal,
+    closeCropModal: closeAvatarCropModal,
+    handleSaveCroppedImage: handleSaveAvatar,
   } = useProfilePictureManager(user, onUserUpdate);
+
+  const {
+    isCropModalOpen: isBannerCropModalOpen,
+    openCropModal: openBannerCropModal,
+    closeCropModal: closeBannerCropModal,
+    handleSaveCroppedImage: handleSaveBanner,
+  } = useBannerImageManager(user, onUserUpdate);
 
   return (
     <>
       <ProfilePictureModal
         isOpen={isProfilePicModalOpen}
         onClose={closeProfilePicModal}
-        onChange={openCropModal}
+        onChange={openAvatarCropModal}
         imageUrl={user.avatarUrl}
         userName={user.name}
       />
       <ImageCropModal
-        isOpen={isCropModalOpen}
-        onClose={closeCropModal}
-        onSave={handleSaveCroppedImage}
+        isOpen={isAvatarCropModalOpen}
+        onClose={closeAvatarCropModal}
+        onSave={handleSaveAvatar}
+        title="Alterar Foto de Perfil"
+        aspectRatio={1}
+        circularCrop={true}
+      />
+      <ImageCropModal
+        isOpen={isBannerCropModalOpen}
+        onClose={closeBannerCropModal}
+        onSave={handleSaveBanner}
+        title="Alterar Foto de Capa"
+        aspectRatio={3 / 1}
       />
       <div className="relative z-0 bg-white rounded-xl border border-slate-200 overflow-hidden">
         {/* Banner and Profile Header */}
@@ -64,7 +82,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, posts, onToggleSave, on
           </div>
           <div className="absolute top-4 right-4">
             <button
-              onClick={() => onViewChange('Configurações')}
+              onClick={openBannerCropModal}
               className="bg-white/80 backdrop-blur-sm text-slate-800 font-semibold px-4 py-2 rounded-full text-sm hover:bg-white transition-colors flex items-center space-x-2">
               <PencilIcon className="h-4 w-4" />
               <span>Editar Capa</span>
