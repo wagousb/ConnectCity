@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { Post, User } from '@/types';
-import { MessageCircleIcon, StarIcon, PaperclipIcon, MoreHorizontalIcon, PencilIcon, FileTextIcon, XIcon } from '@/components/Icons';
+import { MessageCircleIcon, StarIcon, PaperclipIcon, MoreHorizontalIcon, PencilIcon, FileTextIcon } from '@/components/Icons';
 import { supabase } from '@/integrations/supabase/client';
 import ContributionsSection from './ContributionsSection';
 import RoleBadge from './RoleBadge';
