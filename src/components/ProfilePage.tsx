@@ -4,7 +4,7 @@ import PostCard from '@/components/PostCard';
 import { PencilIcon } from '@/components/Icons';
 import ImageCropModal from './ImageCropModal';
 import ProfilePictureModal from './ProfilePictureModal';
-import { supabase } from '@/integrations/supabase/client';
+import { useProfilePictureManager } from '@/hooks/useProfilePictureManager';
 
 interface ProfilePageProps {
   user: User;
@@ -16,51 +16,30 @@ interface ProfilePageProps {
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ user, posts, onToggleSave, onViewChange, onUserUpdate }) => {
   const [activeTab, setActiveTab] = useState('Publicações');
-  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
-  const [isProfilePicModalOpen, setIsProfilePicModalOpen] = useState(false);
   const tabs = ['Publicações', 'Respostas', 'Mídia', 'Curtidas'];
 
-  const handleSaveCroppedImage = async (imageFile: File) => {
-    const fileExt = imageFile.name.split('.').pop();
-    const filePath = `${user.id}/${Math.random()}.${fileExt}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, imageFile, { upsert: true });
-
-    if (uploadError) {
-      console.error('Error uploading avatar:', uploadError);
-      return;
-    }
-
-    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
-    const newAvatarUrl = urlData.publicUrl;
-
-    const { error: dbError } = await supabase
-      .from('profiles')
-      .update({ avatar_url: newAvatarUrl })
-      .eq('id', user.id);
-
-    if (dbError) {
-      console.error('Error updating profile:', dbError);
-    } else {
-      onUserUpdate({ avatarUrl: newAvatarUrl });
-      setIsCropModalOpen(false);
-    }
-  };
+  const {
+    isCropModalOpen,
+    isProfilePicModalOpen,
+    openProfilePicModal,
+    closeProfilePicModal,
+    openCropModal,
+    closeCropModal,
+    handleSaveCroppedImage,
+  } = useProfilePictureManager(user, onUserUpdate);
 
   return (
     <>
       <ProfilePictureModal
         isOpen={isProfilePicModalOpen}
-        onClose={() => setIsProfilePicModalOpen(false)}
-        onChange={() => setIsCropModalOpen(true)}
+        onClose={closeProfilePicModal}
+        onChange={openCropModal}
         imageUrl={user.avatarUrl}
         userName={user.name}
       />
       <ImageCropModal
         isOpen={isCropModalOpen}
-        onClose={() => setIsCropModalOpen(false)}
+        onClose={closeCropModal}
         onSave={handleSaveCroppedImage}
       />
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
@@ -72,7 +51,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, posts, onToggleSave, on
             className="w-full h-48 md:h-64 object-cover"
           />
           <div className="absolute top-full left-6 -translate-y-1/2">
-            <button onClick={() => setIsProfilePicModalOpen(true)} className="relative group rounded-full">
+            <button onClick={openProfilePicModal} className="relative group rounded-full">
               <img
                 src={user.avatarUrl}
                 alt={user.name}
