@@ -43,8 +43,8 @@ const NotificationsSettings: React.FC<NotificationsSettingsProps> = ({ user, onB
   };
 
   const notificationOptions = [
-    { key: 'likes' as keyof typeof settings, label: 'Curtidas', description: 'Receber notificações sobre curtidas em suas publicações.' },
-    { key: 'comments' as keyof typeof settings, label: 'Comentários', description: 'Receber notificações quando alguém comentar em suas publicações.' },
+    { key: 'likes' as keyof typeof settings, label: 'Votos', description: 'Receber notificações sobre votos em suas publicações.' },
+    { key: 'comments' as keyof typeof settings, label: 'Contribuições', description: 'Receber notificações quando alguém fizer uma contribuição em suas publicações.' },
   ];
 
   return (

@@ -81,7 +81,6 @@ const ModerationPage: React.FC = () => {
               <div>
                 <div className="flex items-center space-x-2">
                   <p className="font-bold text-slate-800">{user.name}</p>
-                  <RoleBadge role={user.role} size="xs" />
                   {user.is_moderator && <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200">Moderador</span>}
                 </div>
                 <p className="text-sm text-slate-500">@{user.handle}</p>
