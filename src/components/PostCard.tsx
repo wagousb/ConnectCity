@@ -60,15 +60,13 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
             className="flex flex-col items-center cursor-pointer"
             onClick={() => onViewChange({ view: 'Profile', userId: post.author.id })}
           >
-            <div className="relative">
-                <img src={post.author.avatarUrl} alt={post.author.name} className="h-12 w-12 rounded-full" />
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
-                    <RoleBadge role={post.author.role} />
-                </div>
+            <img src={post.author.avatarUrl} alt={post.author.name} className="h-12 w-12 rounded-full" />
+            <div className="mt-1">
+              <RoleBadge role={post.author.role} />
             </div>
           </div>
           <div 
-            className="cursor-pointer pt-2"
+            className="cursor-pointer"
             onClick={() => onViewChange({ view: 'Profile', userId: post.author.id })}
           >
             <p className="font-bold hover:underline">{post.author.name}</p>

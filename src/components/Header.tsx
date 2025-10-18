@@ -54,14 +54,12 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotificati
             <button 
               onClick={() => onViewChange({ view: 'Meu Perfil' })}
               className="flex items-center space-x-3 cursor-pointer p-1 rounded-md hover:bg-slate-100">
-              <div className="relative">
-                <img src={user.avatarUrl} alt={user.name} className="h-9 w-9 rounded-full" />
-                <div className="absolute -bottom-1 -right-1">
+              <img src={user.avatarUrl} alt={user.name} className="h-9 w-9 rounded-full" />
+              <div className="hidden lg:block text-sm text-left">
+                <div className="flex items-center gap-2">
+                    <p className="font-semibold text-slate-800 whitespace-nowrap">{user.name}</p>
                     <RoleBadge role={user.role} />
                 </div>
-              </div>
-              <div className="hidden lg:block text-sm text-left">
-                <p className="font-semibold text-slate-800 whitespace-nowrap">{user.name}</p>
                 <p className="text-slate-500">@{user.handle}</p>
               </div>
             </button>

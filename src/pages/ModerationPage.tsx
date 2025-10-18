@@ -54,13 +54,13 @@ const ModerationPage: React.FC = () => {
         {users.map(user => (
           <div key={user.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-200">
             <div className="flex items-start space-x-4">
-              <div className="relative flex-shrink-0">
+              <div className="flex flex-col items-center">
                 <img src={user.avatarUrl} alt={user.name} className="h-12 w-12 rounded-full" />
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
-                    <RoleBadge role={user.role} />
+                <div className="mt-1">
+                  <RoleBadge role={user.role} />
                 </div>
               </div>
-              <div className="pt-2">
+              <div>
                 <p className="font-bold text-slate-800">{user.name}</p>
                 <p className="text-sm text-slate-500">@{user.handle}</p>
               </div>
