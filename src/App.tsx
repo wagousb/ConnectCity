@@ -29,11 +29,13 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
   
-  const [currentView, setCurrentView] = useState<{ view: string; userId?: string }>({ view: 'Feed' });
+  const [currentView, setCurrentView] = useState<{ view: string; userId?: string; postId?: string }>({ view: 'Feed' });
   const [viewedProfile, setViewedProfile] = useState<User | null>(null);
   const [viewedProfilePosts, setViewedProfilePosts] = useState<Post[]>([]);
+  const [viewedPost, setViewedPost] = useState<Post | null>(null);
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isFeedLoading, setIsFeedLoading] = useState(false);
+  const [isPostLoading, setIsPostLoading] = useState(false);
 
   const fetchPosts = useCallback(async (currentUserId?: string) => {
     const { data: postsData, error: postsError } = await supabase
@@ -178,82 +180,77 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const fetchViewData = async () => {
-      if (currentView.view !== 'Profile' || !currentView.userId || !user) {
-        setViewedProfile(null);
-        setViewedProfilePosts([]);
-        return;
-      }
-  
-      setIsProfileLoading(true);
-  
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', currentView.userId)
-        .single();
-  
-      if (profileError || !profileData) {
-        console.error('Error fetching viewed profile:', profileError);
+      if (currentView.view === 'Profile' && currentView.userId && user) {
+        setIsProfileLoading(true);
+        const { data: profileData, error: profileError } = await supabase.from('profiles').select('*').eq('id', currentView.userId).single();
+        if (profileError || !profileData) {
+          console.error('Error fetching viewed profile:', profileError);
+          setIsProfileLoading(false);
+          return;
+        }
+        const formattedProfile: User = {
+            id: profileData.id, name: profileData.name || 'Usuário', handle: profileData.handle || 'usuário',
+            avatarUrl: profileData.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
+            bannerUrl: profileData.banner_url || 'https://picsum.photos/seed/banner1/1500/500', bio: profileData.bio || '',
+        };
+        setViewedProfile(formattedProfile);
+        const { data: postsData, error: postsError } = await supabase.from('posts').select('*, comments(count)').eq('user_id', currentView.userId).order('created_at', { ascending: false });
+        if (postsError) {
+            console.error('Error fetching posts for profile:', postsError);
+            setViewedProfilePosts([]);
+        } else {
+            const postIds = postsData.map(p => p.id);
+            const { data: ratingsData } = await supabase.from('ratings').select('post_id, user_id, rating').in('post_id', postIds);
+            const ratingsMap = new Map<string, { total: number; sum: number; userRating?: number }>();
+            ratingsData?.forEach(rating => {
+                if (!ratingsMap.has(rating.post_id)) ratingsMap.set(rating.post_id, { total: 0, sum: 0 });
+                const postRating = ratingsMap.get(rating.post_id)!;
+                postRating.total += 1; postRating.sum += rating.rating;
+                if (rating.user_id === user.id) postRating.userRating = rating.rating;
+            });
+            const formattedPosts: Post[] = postsData.map(post => {
+              const postRating = ratingsMap.get(post.id);
+              return {
+                id: post.id, title: post.title, target_entity: post.target_entity, content: post.content, imageUrl: post.image_url, document_url: post.document_url,
+                timestamp: timeAgo(post.created_at), author: formattedProfile, comments: (post.comments as any)[0]?.count || 0, shares: 0,
+                average_rating: postRating ? postRating.sum / postRating.total : 0, user_rating: postRating?.userRating || 0, total_votes: postRating?.total || 0,
+              }
+            });
+            setViewedProfilePosts(formattedPosts);
+        }
         setIsProfileLoading(false);
-        return;
+      } else if (currentView.view === 'PostDetail' && currentView.postId && user) {
+        setIsPostLoading(true);
+        const { data: postData, error: postError } = await supabase.from('posts').select('*, comments(count), author:user_id(*)').eq('id', currentView.postId).single();
+        if (postError || !postData) {
+          console.error('Error fetching post:', postError);
+          setIsPostLoading(false);
+          return;
+        }
+        const { data: ratingsData } = await supabase.from('ratings').select('post_id, user_id, rating').eq('post_id', postData.id);
+        const ratingsMap = new Map<string, { total: number; sum: number; userRating?: number }>();
+        ratingsData?.forEach(rating => {
+            if (!ratingsMap.has(rating.post_id)) ratingsMap.set(rating.post_id, { total: 0, sum: 0 });
+            const postRating = ratingsMap.get(rating.post_id)!;
+            postRating.total += 1; postRating.sum += rating.rating;
+            if (rating.user_id === user.id) postRating.userRating = rating.rating;
+        });
+        const postRating = ratingsMap.get(postData.id);
+        const formattedPost: Post = {
+          id: postData.id, title: postData.title, target_entity: postData.target_entity, content: postData.content, imageUrl: postData.image_url, document_url: postData.document_url,
+          timestamp: timeAgo(postData.created_at),
+          author: {
+            id: postData.author.id, name: postData.author.name, handle: postData.author.handle,
+            avatarUrl: postData.author.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(postData.author.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
+            bannerUrl: postData.author.banner_url, bio: postData.author.bio,
+          },
+          comments: (postData.comments as any)[0]?.count || 0, shares: 0,
+          average_rating: postRating ? postRating.sum / postRating.total : 0, user_rating: postRating?.userRating || 0, total_votes: postRating?.total || 0,
+        };
+        setViewedPost(formattedPost);
+        setIsPostLoading(false);
       }
-      
-      const formattedProfile: User = {
-          id: profileData.id,
-          name: profileData.name || 'Usuário',
-          handle: profileData.handle || 'usuário',
-          avatarUrl: profileData.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
-          bannerUrl: profileData.banner_url || 'https://picsum.photos/seed/banner1/1500/500',
-          bio: profileData.bio || '',
-      };
-      setViewedProfile(formattedProfile);
-  
-      const { data: postsData, error: postsError } = await supabase
-        .from('posts')
-        .select('*, comments(count)')
-        .eq('user_id', currentView.userId)
-        .order('created_at', { ascending: false });
-  
-      if (postsError) {
-          console.error('Error fetching posts for profile:', postsError);
-          setViewedProfilePosts([]);
-      } else {
-          const postIds = postsData.map(p => p.id);
-          const { data: ratingsData } = await supabase.from('ratings').select('post_id, user_id, rating').in('post_id', postIds);
-
-          const ratingsMap = new Map<string, { total: number; sum: number; userRating?: number }>();
-          ratingsData?.forEach(rating => {
-              if (!ratingsMap.has(rating.post_id)) ratingsMap.set(rating.post_id, { total: 0, sum: 0 });
-              const postRating = ratingsMap.get(rating.post_id)!;
-              postRating.total += 1;
-              postRating.sum += rating.rating;
-              if (rating.user_id === user.id) postRating.userRating = rating.rating;
-          });
-  
-          const formattedPosts: Post[] = postsData.map(post => {
-            const postRating = ratingsMap.get(post.id);
-            return {
-              id: post.id,
-              title: post.title,
-              target_entity: post.target_entity,
-              content: post.content,
-              imageUrl: post.image_url,
-              document_url: post.document_url,
-              timestamp: timeAgo(post.created_at),
-              author: formattedProfile,
-              comments: (post.comments as any)[0]?.count || 0,
-              shares: 0,
-              average_rating: postRating ? postRating.sum / postRating.total : 0,
-              user_rating: postRating?.userRating || 0,
-              total_votes: postRating?.total || 0,
-            }
-          });
-          setViewedProfilePosts(formattedPosts);
-      }
-  
-      setIsProfileLoading(false);
     };
-  
     fetchViewData();
   }, [currentView, user]);
   
@@ -264,10 +261,10 @@ const App: React.FC = () => {
     { id: 't4', hashtag: '#UXDesign', postCount: '3.7k publicações' },
   ]);
   
-  const handleViewChange = async (view: { view: string; userId?: string }) => {
-    if (view.view === 'Profile' && view.userId === currentView.userId && currentView.view === 'Profile') {
-      return;
-    }
+  const handleViewChange = async (view: { view: string; userId?: string; postId?: string }) => {
+    if (view.view === 'Profile' && view.userId === currentView.userId && currentView.view === 'Profile') return;
+    if (view.view === 'PostDetail' && view.postId === currentView.postId && currentView.view === 'PostDetail') return;
+    
     if (view.view === 'Profile' && view.userId === user?.id) {
       setCurrentView({ view: 'Meu Perfil' });
       return;
@@ -293,14 +290,11 @@ const App: React.FC = () => {
 
     const updatePostRating = (p: Post) => {
         if (p.id !== postId) return p;
-
         const oldRating = p.user_rating || 0;
         const oldTotalVotes = p.total_votes || 0;
         const oldSum = (p.average_rating || 0) * oldTotalVotes;
-
         let newTotalVotes: number;
         let newSum: number;
-
         if (oldRating > 0) {
             newTotalVotes = oldTotalVotes;
             newSum = oldSum - oldRating + rating;
@@ -308,19 +302,15 @@ const App: React.FC = () => {
             newTotalVotes = oldTotalVotes + 1;
             newSum = oldSum + rating;
         }
-
         const newAverage = newTotalVotes > 0 ? newSum / newTotalVotes : 0;
-
-        return {
-            ...p,
-            user_rating: rating,
-            total_votes: newTotalVotes,
-            average_rating: newAverage,
-        };
+        return { ...p, user_rating: rating, total_votes: newTotalVotes, average_rating: newAverage };
     };
 
     setPosts(posts.map(updatePostRating));
     setViewedProfilePosts(viewedProfilePosts.map(updatePostRating));
+    if (viewedPost && viewedPost.id === postId) {
+      setViewedPost(updatePostRating(viewedPost));
+    }
   };
 
   if (loading) {
@@ -352,6 +342,8 @@ const App: React.FC = () => {
               viewedProfilePosts={viewedProfilePosts}
               isProfileLoading={isProfileLoading}
               isFeedLoading={isFeedLoading}
+              viewedPost={viewedPost}
+              isPostLoading={isPostLoading}
             />
           </div>
           <div className="col-span-12 lg:col-span-3">

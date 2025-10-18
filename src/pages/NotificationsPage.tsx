@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Notification, User } from '@/types';
-import { HeartIcon, UsersIcon } from '@/components/Icons';
+import { HeartIcon, UsersIcon, MessageCircleIcon, StarIcon } from '@/components/Icons';
 
 const timeAgo = (date: string | Date): string => {
     const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
@@ -20,7 +20,7 @@ const timeAgo = (date: string | Date): string => {
 
 interface NotificationsPageProps {
   user: User;
-  onViewChange: (view: { view: string; userId?: string }) => void;
+  onViewChange: (view: { view: string; userId?: string; postId?: string }) => void;
 }
 
 const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChange }) => {
@@ -72,27 +72,38 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
   }, [user.id]);
 
   const renderNotification = (notification: Notification) => {
-    const { actor, type, created_at } = notification;
+    const { actor, type, created_at, entity_id } = notification;
     const time = timeAgo(created_at);
 
     const iconClasses = "h-6 w-6 text-white";
     let icon, text;
 
-    const actorName = <span className="font-bold hover:underline" onClick={() => onViewChange({ view: 'Profile', userId: actor.id })}>{actor.name}</span>;
+    const actorName = <span className="font-bold hover:underline" onClick={(e) => { e.stopPropagation(); onViewChange({ view: 'Profile', userId: actor.id })}}>{actor.name}</span>;
 
     switch (type) {
       case 'like':
         icon = <div className="bg-red-500 p-2 rounded-full"><HeartIcon className={iconClasses} /></div>;
         text = <p>{actorName} curtiu sua publicação.</p>;
         break;
-      // 'follow' case removed
+      case 'comment':
+        icon = <div className="bg-blue-500 p-2 rounded-full"><MessageCircleIcon className={iconClasses} /></div>;
+        text = <p>{actorName} deixou uma contribuição em sua ideia.</p>;
+        break;
+      case 'rating':
+        icon = <div className="bg-amber-500 p-2 rounded-full"><StarIcon className={iconClasses} /></div>;
+        text = <p>{actorName} avaliou sua ideia.</p>;
+        break;
       default:
         return null;
     }
 
     return (
-      <div key={notification.id} className={`flex items-start space-x-4 p-4 rounded-lg ${!notification.is_read ? 'bg-primary-50' : ''}`}>
-        <div className="cursor-pointer" onClick={() => onViewChange({ view: 'Profile', userId: actor.id })}>
+      <div 
+        key={notification.id} 
+        className={`flex items-start space-x-4 p-4 rounded-lg cursor-pointer hover:bg-slate-50 ${!notification.is_read ? 'bg-primary-50' : ''}`}
+        onClick={() => entity_id && onViewChange({ view: 'PostDetail', postId: entity_id })}
+      >
+        <div className="cursor-pointer" onClick={(e) => { e.stopPropagation(); onViewChange({ view: 'Profile', userId: actor.id })}}>
           {icon}
         </div>
         <div className="flex-1">

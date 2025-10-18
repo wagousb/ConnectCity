@@ -8,7 +8,7 @@ interface PostCardProps {
   post: Post;
   currentUser: User;
   onVote: (postId: string, rating: number) => void;
-  onViewChange: (view: { view: string; userId?: string }) => void;
+  onViewChange: (view: { view: string; userId?: string; postId?: string }) => void;
 }
 
 const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewChange }) => {
@@ -38,6 +38,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
     } else {
         onVote(post.id, rating);
         setIsVoting(false);
+        if (currentUser.id !== post.author.id) {
+            await supabase.from('notifications').insert({
+                user_id: post.author.id,
+                actor_id: currentUser.id,
+                type: 'rating',
+                entity_id: post.id
+            });
+        }
     }
   };
 
@@ -60,7 +68,12 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
       </div>
       
       <div className="mt-4">
-        <h3 className="text-xl font-bold text-slate-800">{post.title}</h3>
+        <h3 
+          className="text-xl font-bold text-slate-800 hover:underline cursor-pointer"
+          onClick={() => onViewChange({ view: 'PostDetail', postId: post.id })}
+        >
+          {post.title}
+        </h3>
         <p className="my-2 text-slate-700 whitespace-pre-wrap">{post.content}</p>
       </div>
 
@@ -116,7 +129,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
         </div>
       )}
 
-      {isCommentsOpen && <ContributionsSection postId={post.id} currentUser={currentUser} />}
+      {isCommentsOpen && <ContributionsSection postId={post.id} postAuthorId={post.author.id} currentUser={currentUser} />}
     </div>
   );
 };

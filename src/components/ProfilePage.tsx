@@ -1,25 +1,35 @@
-import React, { useState } from 'react';
-import type { User, Post } from '@/types';
+import React, { useState, useEffect } from 'react';
+import type { User, Post, Comment } from '@/types';
 import PostCard from '@/components/PostCard';
 import { PencilIcon } from '@/components/Icons';
 import ImageCropModal from './ImageCropModal';
 import ProfilePictureModal from './ProfilePictureModal';
 import { useProfilePictureManager } from '@/hooks/useProfilePictureManager';
 import { useBannerImageManager } from '@/hooks/useBannerImageManager';
+import { supabase } from '@/integrations/supabase/client';
+import Contribution from './Contribution';
 
 interface ProfilePageProps {
   profileUser: User;
   currentUser: User;
   posts: Post[];
   onVote: (postId: string, rating: number) => void;
-  onViewChange: (view: { view: string; userId?: string }) => void;
+  onViewChange: (view: { view: string; userId?: string; postId?: string }) => void;
   onUserUpdate: (newProfileData: Partial<User>) => void;
+}
+
+interface GroupedContribution {
+    postId: string;
+    postTitle: string;
+    comments: Comment[];
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ 
   profileUser, currentUser, posts, onVote, onViewChange, onUserUpdate
 }) => {
   const [activeTab, setActiveTab] = useState('Ideias enviadas');
+  const [contributions, setContributions] = useState<GroupedContribution[]>([]);
+  const [loadingContributions, setLoadingContributions] = useState(false);
   const tabs = ['Ideias enviadas', 'Contribuições'];
   const isOwnProfile = profileUser.id === currentUser.id;
 
@@ -39,6 +49,48 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
     closeCropModal: closeBannerCropModal,
     handleSaveCroppedImage: handleSaveBanner,
   } = useBannerImageManager(profileUser, onUserUpdate);
+
+  useEffect(() => {
+    const fetchContributions = async () => {
+        if (activeTab !== 'Contribuições') return;
+        setLoadingContributions(true);
+        const { data, error } = await supabase
+            .from('comments')
+            .select('*, post:posts(id, title)')
+            .eq('user_id', profileUser.id)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching contributions:', error);
+        } else {
+            const grouped: { [key: string]: GroupedContribution } = {};
+            data.forEach((comment: any) => {
+                if (!comment.post) return;
+                const postId = comment.post.id;
+                if (!grouped[postId]) {
+                    grouped[postId] = {
+                        postId: postId,
+                        postTitle: comment.post.title,
+                        comments: [],
+                    };
+                }
+                grouped[postId].comments.push({
+                    id: comment.id,
+                    content: comment.content,
+                    created_at: comment.created_at,
+                    author: profileUser,
+                    replies: [],
+                    agree_count: 0,
+                    disagree_count: 0,
+                    post_id: postId,
+                });
+            });
+            setContributions(Object.values(grouped));
+        }
+        setLoadingContributions(false);
+    };
+    fetchContributions();
+  }, [activeTab, profileUser]);
 
   return (
     <>
@@ -140,12 +192,36 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                   <PostCard key={post.id} post={post} currentUser={currentUser} onVote={onVote} onViewChange={onViewChange} />
                 ))
               ) : (
-                <p className="text-slate-500 text-center">Nenhuma ideia enviada ainda.</p>
+                <p className="text-slate-500 text-center py-8">Nenhuma ideia enviada ainda.</p>
               )}
             </div>
           )}
           {activeTab === 'Contribuições' && (
-            <p className="p-6 text-slate-500 text-center">O conteúdo para "{activeTab}" aparecerá aqui.</p>
+            <div className="p-6 space-y-6">
+                {loadingContributions ? (
+                    <p className="text-slate-500 text-center py-8">Carregando contribuições...</p>
+                ) : contributions.length > 0 ? (
+                    contributions.map(group => (
+                        <div key={group.postId} className="p-4 rounded-lg border border-slate-200">
+                            <p className="text-sm text-slate-500 mb-2">
+                                Em resposta a: <span onClick={() => onViewChange({ view: 'PostDetail', postId: group.postId })} className="font-semibold text-primary hover:underline cursor-pointer">{group.postTitle}</span>
+                            </p>
+                            <div className="space-y-4">
+                                {group.comments.map(comment => (
+                                    <div key={comment.id} className="flex space-x-3">
+                                        <img src={comment.author.avatarUrl} alt={comment.author.name} className="h-10 w-10 rounded-full" />
+                                        <div className="flex-1 bg-slate-50 rounded-lg p-3">
+                                            <p className="text-sm text-slate-800">{comment.content}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <p className="text-slate-500 text-center py-8">Nenhuma contribuição encontrada.</p>
+                )}
+            </div>
           )}
         </div>
       </div>

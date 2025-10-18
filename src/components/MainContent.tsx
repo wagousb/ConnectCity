@@ -1,31 +1,33 @@
 import React from 'react';
 import type { Post, User } from '@/types';
-import PostCard from '@/components/PostCard';
 import ProfilePage from '@/components/ProfilePage';
 import FeedPage from '@/components/FeedPage';
 import MembersPage from '@/pages/MembersPage';
 import SettingsPage from '@/components/SettingsPage';
 import NotificationsPage from '@/pages/NotificationsPage';
+import PostDetailPage from '@/pages/PostDetailPage';
 
 interface MainContentProps {
   posts: Post[];
   currentView: string;
   user: User;
   onVote: (postId: string, rating: number) => void;
-  onViewChange: (view: { view: string; userId?: string }) => void;
+  onViewChange: (view: { view: string; userId?: string; postId?: string }) => void;
   onUserUpdate: (newProfileData: Partial<User>) => void;
   onPostPublished: () => void;
   viewedProfile: User | null;
   viewedProfilePosts: Post[];
   isProfileLoading: boolean;
   isFeedLoading: boolean;
+  viewedPost: Post | null;
+  isPostLoading: boolean;
 }
 
 const MainContent: React.FC<MainContentProps> = ({ 
   posts, currentView, user, onVote,
   onViewChange, onUserUpdate, onPostPublished,
   viewedProfile, viewedProfilePosts, isProfileLoading,
-  isFeedLoading
+  isFeedLoading, viewedPost, isPostLoading
 }) => {
   const renderContent = () => {
     switch (currentView) {
@@ -59,6 +61,10 @@ const MainContent: React.FC<MainContentProps> = ({
                   onUserUpdate={onUserUpdate}
                   onVote={onVote}
                 />;
+      case 'PostDetail':
+        if (isPostLoading) return <div className="bg-white p-6 rounded-xl border border-slate-200 text-center"><p className="text-slate-500">Carregando ideia...</p></div>;
+        if (!viewedPost) return <div className="bg-white p-6 rounded-xl border border-slate-200 text-center"><p className="text-slate-500">Ideia não encontrada.</p></div>;
+        return <PostDetailPage post={viewedPost} currentUser={user} onVote={onVote} onViewChange={onViewChange} />;
       case 'Membros':
         return <MembersPage currentUser={user} onViewChange={onViewChange} />;
       case 'Configurações':

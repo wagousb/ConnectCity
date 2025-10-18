@@ -5,10 +5,11 @@ import Contribution from './Contribution';
 
 interface ContributionsSectionProps {
   postId: string;
+  postAuthorId: string;
   currentUser: User;
 }
 
-const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, currentUser }) => {
+const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, postAuthorId, currentUser }) => {
   const [comments, setComments] = useState<CommentType[]>([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
@@ -73,6 +74,14 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, cur
     } else {
       setNewComment('');
       await fetchComments();
+      if (currentUser.id !== postAuthorId) {
+        await supabase.from('notifications').insert({
+            user_id: postAuthorId,
+            actor_id: currentUser.id,
+            type: 'comment',
+            entity_id: postId
+        });
+      }
     }
     setIsPosting(false);
   };

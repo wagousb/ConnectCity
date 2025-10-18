@@ -60,7 +60,7 @@ export interface ConnectionRequest {
 
 export interface Notification {
   id: string;
-  type: 'like' | 'comment';
+  type: 'like' | 'comment' | 'rating';
   actor: User;
   is_read: boolean;
   created_at: string;
