@@ -79,38 +79,38 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
           <button onClick={() => setIsReplying(!isReplying)} className="hover:underline">Responder</button>
         </div>
 
-        {isReplying && (
-          <div className="flex space-x-3 mt-2">
-            <img src={currentUser.avatarUrl} alt={currentUser.name} className="h-8 w-8 rounded-full" />
-            <div className="flex-1">
-              <textarea
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                placeholder={`Respondendo a ${comment.author.name}...`}
-                className="w-full text-sm border-slate-200 border rounded-lg p-2 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-200"
-                rows={2}
-              />
-              <div className="flex justify-end space-x-2 mt-2">
-                <button onClick={() => setIsReplying(false)} className="text-slate-500 text-xs font-semibold px-3 py-1 rounded-full hover:bg-slate-100">Cancelar</button>
-                <button
-                  onClick={handleReplySubmit}
-                  disabled={isPostingReply || !replyContent.trim()}
-                  className="bg-primary text-white font-semibold px-3 py-1 rounded-full text-xs hover:bg-primary-700 transition-colors disabled:bg-primary-300"
-                >
-                  {isPostingReply ? 'Enviando...' : 'Responder'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {comment.replies && comment.replies.length > 0 && (
+        {(comment.replies && comment.replies.length > 0) || isReplying ? (
           <div className="mt-3 space-y-3 pl-6 border-l-2 border-slate-100">
-            {comment.replies.map(reply => (
+            {comment.replies && comment.replies.map(reply => (
               <Contribution key={reply.id} comment={reply} currentUser={currentUser} onPostReply={onPostReply} onVote={onVote} />
             ))}
+            
+            {isReplying && (
+              <div className="flex space-x-3 pt-3">
+                <img src={currentUser.avatarUrl} alt={currentUser.name} className="h-8 w-8 rounded-full" />
+                <div className="flex-1">
+                  <textarea
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    placeholder={`Respondendo a ${comment.author.name}...`}
+                    className="w-full text-sm border-slate-200 border rounded-lg p-2 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-200"
+                    rows={2}
+                  />
+                  <div className="flex justify-end space-x-2 mt-2">
+                    <button onClick={() => setIsReplying(false)} className="text-slate-500 text-xs font-semibold px-3 py-1 rounded-full hover:bg-slate-100">Cancelar</button>
+                    <button
+                      onClick={handleReplySubmit}
+                      disabled={isPostingReply || !replyContent.trim()}
+                      className="bg-primary text-white font-semibold px-3 py-1 rounded-full text-xs hover:bg-primary-700 transition-colors disabled:bg-primary-300"
+                    >
+                      {isPostingReply ? 'Enviando...' : 'Responder'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

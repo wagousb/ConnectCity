@@ -79,7 +79,18 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, cur
 
   return (
     <div className="mt-4 pt-4 border-t border-slate-200">
-      <div className="flex space-x-3 mb-4">
+      {loading ? (
+        <p className="text-slate-500 text-sm text-center">Carregando contribuições...</p>
+      ) : (
+        <div className="space-y-4">
+          {comments.map(comment => (
+            <Contribution key={comment.id} comment={comment} currentUser={currentUser} onPostReply={handlePostComment} onVote={fetchComments} />
+          ))}
+          {comments.length === 0 && <p className="text-slate-500 text-sm text-center py-4">Nenhuma contribuição ainda. Seja o primeiro!</p>}
+        </div>
+      )}
+
+      <div className="flex space-x-3 mt-4 pt-4 border-t border-slate-100">
         <img src={currentUser.avatarUrl} alt={currentUser.name} className="h-10 w-10 rounded-full" />
         <div className="flex-1">
           <textarea
@@ -100,17 +111,6 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, cur
           </div>
         </div>
       </div>
-      
-      {loading ? (
-        <p className="text-slate-500 text-sm text-center">Carregando contribuições...</p>
-      ) : (
-        <div className="space-y-4">
-          {comments.map(comment => (
-            <Contribution key={comment.id} comment={comment} currentUser={currentUser} onPostReply={handlePostComment} onVote={fetchComments} />
-          ))}
-          {comments.length === 0 && <p className="text-slate-500 text-sm text-center">Nenhuma contribuição ainda. Seja o primeiro!</p>}
-        </div>
-      )}
     </div>
   );
 };
