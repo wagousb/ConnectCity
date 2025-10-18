@@ -62,7 +62,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
           >
             <img src={post.author.avatarUrl} alt={post.author.name} className="h-12 w-12 rounded-full" />
             <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-max">
-              <RoleBadge role={post.author.role} />
+              <RoleBadge role={post.author.role} size="xs" />
             </div>
           </div>
           <div 

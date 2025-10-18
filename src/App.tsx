@@ -38,7 +38,7 @@ const App: React.FC = () => {
   const [isFeedLoading, setIsFeedLoading] = useState(false);
   const [isPostLoading, setIsPostLoading] = useState(false);
 
-  const isModerator = session?.user?.email === 'produwagner@gmail.com';
+  const isModerator = user?.role === 'moderador' || session?.user?.email === 'produwagner@gmail.com';
 
   const fetchPosts = useCallback(async (currentUserId?: string) => {
     const { data: postsData, error: postsError } = await supabase
@@ -241,7 +241,7 @@ const App: React.FC = () => {
             ratingsData?.forEach(rating => {
                 if (!ratingsMap.has(rating.post_id)) ratingsMap.set(rating.post_id, { total: 0, sum: 0 });
                 const postRating = ratingsMap.get(rating.post_id)!;
-                postRating.total += 1; postRating.sum += rating.rating;
+                postRating.total += 1; postRating.sum += rating.sum;
                 if (rating.user_id === user.id) postRating.userRating = rating.rating;
             });
             const formattedPosts: Post[] = postsData.map(post => {

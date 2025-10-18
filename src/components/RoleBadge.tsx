@@ -2,7 +2,7 @@ import React from 'react';
 
 interface RoleBadgeProps {
   role: string;
-  size?: 'sm' | 'md';
+  size?: 'xs' | 'sm' | 'md';
 }
 
 const RoleBadge: React.FC<RoleBadgeProps> = ({ role, size = 'sm' }) => {
@@ -14,6 +14,8 @@ const RoleBadge: React.FC<RoleBadgeProps> = ({ role, size = 'sm' }) => {
         return 'bg-green-100 text-green-800 border-green-200';
       case 'secretário':
         return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'moderador':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
       case 'cidadão':
       default:
         return 'bg-slate-100 text-slate-800 border-slate-200';
@@ -21,6 +23,7 @@ const RoleBadge: React.FC<RoleBadgeProps> = ({ role, size = 'sm' }) => {
   };
 
   const sizeStyles = {
+    xs: 'text-[10px] font-semibold px-1.5 py-0.5',
     sm: 'text-xs font-semibold px-2 py-0.5',
     md: 'text-sm font-semibold px-3 py-1',
   };

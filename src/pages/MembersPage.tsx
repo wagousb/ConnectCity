@@ -57,7 +57,7 @@ const MembersPage: React.FC<MembersPageProps> = ({ currentUser, onViewChange }) 
               <div className="flex flex-col items-center">
                 <img src={member.avatarUrl} alt={member.name} className="h-12 w-12 rounded-full" />
                 <div className="mt-1">
-                  <RoleBadge role={member.role} />
+                  <RoleBadge role={member.role} size="xs" />
                 </div>
               </div>
               <div>

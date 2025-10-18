@@ -75,7 +75,7 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
       <div className="flex flex-col items-center">
         <img src={comment.author.avatarUrl} alt={comment.author.name} className="h-10 w-10 rounded-full" />
         <div className="mt-1">
-          <RoleBadge role={comment.author.role} />
+          <RoleBadge role={comment.author.role} size="xs" />
         </div>
       </div>
       <div className="flex-1">

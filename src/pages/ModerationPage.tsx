@@ -6,6 +6,8 @@ import RoleBadge from '@/components/RoleBadge';
 const ModerationPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -30,17 +32,32 @@ const ModerationPage: React.FC = () => {
     fetchUsers();
   }, []);
 
-  const handleRoleChange = async (userId: string, newRole: string) => {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ role: newRole })
-      .eq('id', userId);
+  const handleRoleChange = (userId: string, newRole: string) => {
+    setUsers(users.map(user => user.id === userId ? { ...user, role: newRole } : user));
+  };
 
-    if (error) {
-      alert('Erro ao atualizar a patente.');
-      console.error('Error updating role:', error);
+  const handleSaveChanges = async () => {
+    setIsSaving(true);
+    setMessage(null);
+
+    const updatePromises = users.map(user =>
+      supabase
+        .from('profiles')
+        .update({ role: user.role })
+        .eq('id', user.id)
+    );
+
+    const results = await Promise.allSettled(updatePromises);
+    
+    setIsSaving(false);
+
+    const failedUpdates = results.filter(result => result.status === 'rejected');
+
+    if (failedUpdates.length > 0) {
+      setMessage({ type: 'error', text: 'Algumas patentes não puderam ser atualizadas. Tente novamente.' });
+      console.error('Failed updates:', failedUpdates);
     } else {
-      setUsers(users.map(user => user.id === userId ? { ...user, role: newRole } : user));
+      setMessage({ type: 'success', text: 'Todas as patentes foram atualizadas com sucesso!' });
     }
   };
 
@@ -49,7 +66,23 @@ const ModerationPage: React.FC = () => {
 
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200">
-      <h1 className="text-2xl font-bold mb-6">Painel de Moderação</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Painel de Moderação</h1>
+        <button
+          onClick={handleSaveChanges}
+          disabled={isSaving}
+          className="bg-primary text-white font-semibold px-6 py-2 rounded-md hover:bg-primary-700 transition-colors disabled:bg-primary-300 disabled:cursor-not-allowed"
+        >
+          {isSaving ? 'Salvando...' : 'Salvar Alterações'}
+        </button>
+      </div>
+
+      {message && (
+        <div className={`mb-4 p-3 rounded-md text-sm ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+          {message.text}
+        </div>
+      )}
+
       <div className="space-y-4">
         {users.map(user => (
           <div key={user.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-200">
@@ -57,7 +90,7 @@ const ModerationPage: React.FC = () => {
               <div className="flex flex-col items-center">
                 <img src={user.avatarUrl} alt={user.name} className="h-12 w-12 rounded-full" />
                 <div className="mt-1">
-                  <RoleBadge role={user.role} />
+                  <RoleBadge role={user.role} size="xs" />
                 </div>
               </div>
               <div>
@@ -75,6 +108,7 @@ const ModerationPage: React.FC = () => {
                     <option value="secretário">Secretário</option>
                     <option value="vereador">Vereador</option>
                     <option value="prefeito">Prefeito</option>
+                    <option value="moderador">Moderador</option>
                 </select>
             </div>
           </div>
