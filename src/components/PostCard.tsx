@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { Post, User } from '@/types';
-import { MessageCircleIcon, StarIcon, PaperclipIcon, MoreHorizontalIcon, PencilIcon, FileTextIcon } from '@/components/Icons';
+import { MessageCircleIcon, StarIcon, PaperclipIcon, MoreHorizontalIcon, PencilIcon, FileTextIcon, XIcon } from '@/components/Icons';
 import { supabase } from '@/integrations/supabase/client';
 import ContributionsSection from './ContributionsSection';
 import RoleBadge from './RoleBadge';
@@ -106,7 +106,15 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
     if (error) {
       alert('Erro ao atualizar a postagem: ' + error.message);
     } else {
-      onPostUpdated({ ...post, ...data });
+      const updatedPostWithAuthor = {
+        ...post,
+        ...data,
+        title: data.title,
+        content: data.content,
+        target_entity: data.target_entity,
+        edited_at: data.edited_at,
+      };
+      onPostUpdated(updatedPostWithAuthor);
     }
   };
 
