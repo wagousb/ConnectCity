@@ -31,8 +31,9 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
   const [isPostingReply, setIsPostingReply] = useState(false);
 
   const handleVote = async (voteType: 'agree' | 'disagree') => {
-    // If user clicks the same vote again, remove it
-    if (comment.user_vote === voteType) {
+    const isRemovingVote = comment.user_vote === voteType;
+
+    if (isRemovingVote) {
       const { error } = await supabase.from('comment_votes').delete().match({ comment_id: comment.id, user_id: currentUser.id });
       if (error) console.error('Error removing vote:', error);
       else onVote();
@@ -43,8 +44,19 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
       { comment_id: comment.id, user_id: currentUser.id, vote_type: voteType },
       { onConflict: 'comment_id, user_id' }
     );
-    if (error) console.error('Error voting:', error);
-    else onVote();
+    if (error) {
+      console.error('Error voting:', error);
+    } else {
+      onVote();
+      if (currentUser.id !== comment.author.id) {
+        await supabase.from('notifications').insert({
+            user_id: comment.author.id,
+            actor_id: currentUser.id,
+            type: voteType === 'agree' ? 'comment_agree' : 'comment_disagree',
+            entity_id: comment.post_id
+        });
+      }
+    }
   };
 
   const handleReplySubmit = async () => {

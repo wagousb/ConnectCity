@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Notification, User } from '@/types';
-import { HeartIcon, UsersIcon, MessageCircleIcon, StarIcon } from '@/components/Icons';
+import { MessageCircleIcon, StarIcon, ThumbsUpIcon, ThumbsDownIcon } from '@/components/Icons';
 
 const timeAgo = (date: string | Date): string => {
     const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
@@ -39,14 +39,29 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
       if (error) {
         console.error('Error fetching notifications:', error);
       } else {
+        const postIds = [...new Set(data.map(n => n.entity_id).filter(Boolean))];
+        let postTitlesMap = new Map<string, string>();
+
+        if (postIds.length > 0) {
+            const { data: postsData, error: postsError } = await supabase
+                .from('posts')
+                .select('id, title')
+                .in('id', postIds);
+            if (postsError) {
+                console.error('Error fetching post titles for notifications:', postsError);
+            } else {
+                postTitlesMap = new Map(postsData.map(p => [p.id, p.title]));
+            }
+        }
+
         const formattedNotifications: Notification[] = data
-          .filter(n => n.type !== 'follow')
           .map(n => ({
             id: n.id,
             type: n.type,
             is_read: n.is_read,
             created_at: n.created_at,
             entity_id: n.entity_id,
+            postTitle: n.entity_id ? postTitlesMap.get(n.entity_id) : undefined,
             actor: {
               id: n.actor.id,
               name: n.actor.name,
@@ -72,30 +87,41 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
   }, [user.id]);
 
   const renderNotification = (notification: Notification) => {
-    const { actor, type, created_at, entity_id } = notification;
+    const { actor, type, created_at, entity_id, postTitle } = notification;
     const time = timeAgo(created_at);
 
     const iconClasses = "h-6 w-6 text-white";
     let icon, text;
 
     const actorName = <span className="font-bold hover:underline" onClick={(e) => { e.stopPropagation(); onViewChange({ view: 'Profile', userId: actor.id })}}>{actor.name}</span>;
+    const ideaName = <span className="font-semibold text-slate-700">"{postTitle || 'uma ideia'}"</span>;
 
     switch (type) {
-      case 'like':
-        icon = <div className="bg-red-500 p-2 rounded-full"><HeartIcon className={iconClasses} /></div>;
-        text = <p>{actorName} curtiu sua publicação.</p>;
-        break;
       case 'comment':
         icon = <div className="bg-blue-500 p-2 rounded-full"><MessageCircleIcon className={iconClasses} /></div>;
-        text = <p>{actorName} deixou uma contribuição em sua ideia.</p>;
+        text = <p className="text-slate-600">{actorName} deixou uma contribuição na ideia {ideaName}.</p>;
         break;
       case 'rating':
         icon = <div className="bg-amber-500 p-2 rounded-full"><StarIcon className={iconClasses} /></div>;
-        text = <p>{actorName} avaliou sua ideia.</p>;
+        text = <p className="text-slate-600">Você recebeu um voto na ideia {ideaName}. <span className="text-slate-400">(Os votos são secretos)</span></p>;
+        break;
+      case 'reply':
+        icon = <div className="bg-purple-500 p-2 rounded-full"><MessageCircleIcon className={iconClasses} /></div>;
+        text = <p className="text-slate-600">{actorName} respondeu à sua contribuição na ideia {ideaName}.</p>;
+        break;
+      case 'comment_agree':
+        icon = <div className="bg-green-500 p-2 rounded-full"><ThumbsUpIcon className={iconClasses} /></div>;
+        text = <p className="text-slate-600">{actorName} concordou com a sua contribuição na ideia {ideaName}.</p>;
+        break;
+      case 'comment_disagree':
+        icon = <div className="bg-red-500 p-2 rounded-full"><ThumbsDownIcon className={iconClasses} /></div>;
+        text = <p className="text-slate-600">{actorName} discordou da sua contribuição na ideia {ideaName}.</p>;
         break;
       default:
         return null;
     }
+
+    const isAnonymous = type === 'rating';
 
     return (
       <div 
@@ -103,9 +129,13 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
         className={`flex items-start space-x-4 p-4 rounded-lg cursor-pointer hover:bg-slate-50 ${!notification.is_read ? 'bg-primary-50' : ''}`}
         onClick={() => entity_id && onViewChange({ view: 'PostDetail', postId: entity_id })}
       >
-        <div className="cursor-pointer" onClick={(e) => { e.stopPropagation(); onViewChange({ view: 'Profile', userId: actor.id })}}>
-          {icon}
-        </div>
+        {isAnonymous ? (
+            <div>{icon}</div>
+        ) : (
+            <div className="cursor-pointer" onClick={(e) => { e.stopPropagation(); onViewChange({ view: 'Profile', userId: actor.id })}}>
+                <img src={actor.avatarUrl} alt={actor.name} className="h-10 w-10 rounded-full" />
+            </div>
+        )}
         <div className="flex-1">
           {text}
           <p className="text-sm text-slate-500">{time}</p>

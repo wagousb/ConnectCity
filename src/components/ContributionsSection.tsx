@@ -74,13 +74,35 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
     } else {
       setNewComment('');
       await fetchComments();
-      if (currentUser.id !== postAuthorId) {
+      
+      // Notification for original post author (only for top-level comments)
+      if (!parentId && currentUser.id !== postAuthorId) {
         await supabase.from('notifications').insert({
             user_id: postAuthorId,
             actor_id: currentUser.id,
             type: 'comment',
             entity_id: postId
         });
+      }
+
+      // Notification for parent comment author (for replies)
+      if (parentId) {
+        const { data: parentComment, error: parentError } = await supabase
+            .from('comments')
+            .select('user_id')
+            .eq('id', parentId)
+            .single();
+        
+        if (parentError) {
+            console.error('Error fetching parent comment for notification:', parentError);
+        } else if (parentComment && parentComment.user_id !== currentUser.id) {
+            await supabase.from('notifications').insert({
+                user_id: parentComment.user_id,
+                actor_id: currentUser.id,
+                type: 'reply',
+                entity_id: postId
+            });
+        }
       }
     }
     setIsPosting(false);

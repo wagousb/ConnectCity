@@ -60,9 +60,10 @@ export interface ConnectionRequest {
 
 export interface Notification {
   id: string;
-  type: 'like' | 'comment' | 'rating';
+  type: 'comment' | 'rating' | 'reply' | 'comment_agree' | 'comment_disagree';
   actor: User;
   is_read: boolean;
   created_at: string;
   entity_id?: string; // e.g., post_id
+  postTitle?: string;
 }
