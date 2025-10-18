@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, a from 'react';
 import type { User, Post, Suggestion, Trend, ConnectionRequest } from '@/types';
 import Header from '@/components/Header';
 import LeftSidebar from '@/components/LeftSidebar';
@@ -31,12 +31,14 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState('Feed');
 
   const fetchPosts = useCallback(async () => {
-    // Usando a consulta mais simples e robusta para buscar posts e seus autores.
     const { data, error } = await supabase
       .from('posts')
       .select(`
-        *,
-        profiles (
+        id,
+        content,
+        image_url,
+        created_at,
+        profiles!inner (
           id,
           name,
           handle,
@@ -54,29 +56,31 @@ const App: React.FC = () => {
       return;
     }
 
-    // Mapeando os dados recebidos para o formato esperado pelo aplicativo.
     const formattedPosts: Post[] = data
-      .filter(post => post.profiles) // Garante que o post tem um autor (o perfil não é nulo)
-      .map(post => ({
-        id: post.id,
-        content: post.content,
-        imageUrl: post.image_url,
-        timestamp: timeAgo(post.created_at),
-        author: {
-          id: (post.profiles as any).id,
-          name: (post.profiles as any).name,
-          handle: (post.profiles as any).handle,
-          avatarUrl: (post.profiles as any).avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent((post.profiles as any).name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
-          bannerUrl: (post.profiles as any).banner_url,
-          bio: (post.profiles as any).bio,
-          followers: (post.profiles as any).followers,
-          following: (post.profiles as any).following,
-        },
-        likes: 0,
-        comments: 0,
-        shares: 0,
-        saved: false,
-    }));
+      .filter(post => post.profiles)
+      .map(post => {
+        const profile = post.profiles as any;
+        return {
+          id: post.id,
+          content: post.content,
+          imageUrl: post.image_url,
+          timestamp: timeAgo(post.created_at),
+          author: {
+            id: profile.id,
+            name: profile.name,
+            handle: profile.handle,
+            avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
+            bannerUrl: profile.banner_url,
+            bio: profile.bio,
+            followers: profile.followers,
+            following: profile.following,
+          },
+          likes: 0,
+          comments: 0,
+          shares: 0,
+          saved: false,
+        };
+    });
     setPosts(formattedPosts);
   }, []);
 
