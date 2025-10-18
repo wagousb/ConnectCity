@@ -49,14 +49,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, onViewChange, onUserUpd
                 </div>
             </button>
         </div>
-        <h2 className="text-xl font-bold mt-4">{user.name}</h2>
-        <p className="text-sm text-slate-500">@{user.handle}</p>
-        <button 
-          className="mt-6 w-full bg-primary text-white font-semibold py-3 rounded-lg hover:bg-primary-700 transition-colors duration-300"
-          onClick={() => onViewChange('Meu Perfil')}
-        >
-          Meu Perfil
-        </button>
+        <div onClick={() => onViewChange('Meu Perfil')} className="cursor-pointer mt-4">
+            <h2 className="text-xl font-bold hover:underline">{user.name}</h2>
+            <p className="text-sm text-slate-500 hover:underline">@{user.handle}</p>
+        </div>
       </div>
     </>
   );
