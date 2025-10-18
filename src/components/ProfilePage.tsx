@@ -15,6 +15,12 @@ interface ProfilePageProps {
   onUserUpdate: (newProfileData: Partial<User>) => void;
 }
 
+const formatCount = (count?: number) => {
+  if (!count) return '0';
+  if (count < 1000) return count.toString();
+  return `${(count / 1000).toFixed(1).replace(/\.0$/, '')}k`;
+};
+
 const ProfilePage: React.FC<ProfilePageProps> = ({ user, posts, onToggleSave, onViewChange, onUserUpdate }) => {
   const [activeTab, setActiveTab] = useState('Publicações');
   const tabs = ['Publicações', 'Respostas', 'Mídia', 'Curtidas'];
@@ -97,8 +103,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, posts, onToggleSave, on
           <p className="mt-4 text-slate-700">{user.bio}</p>
 
           <div className="flex items-center space-x-6 mt-4 text-sm text-slate-500">
-            <span><span className="font-bold text-slate-800">{user.following ? (user.following / 1000).toFixed(1) + 'k' : '0'}</span> Seguindo</span>
-            <span><span className="font-bold text-slate-800">{user.followers ? (user.followers / 1000).toFixed(1) + 'k' : '0'}</span> Seguidores</span>
+            <span><span className="font-bold text-slate-800">{formatCount(user.following)}</span> Seguindo</span>
+            <span><span className="font-bold text-slate-800">{formatCount(user.followers)}</span> Seguidores</span>
             <span><span className="font-bold text-slate-800">{posts.length}</span> Publicações</span>
           </div>
         </div>
