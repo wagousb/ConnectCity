@@ -33,6 +33,7 @@ const App: React.FC = () => {
   const [viewedProfile, setViewedProfile] = useState<User | null>(null);
   const [viewedProfilePosts, setViewedProfilePosts] = useState<Post[]>([]);
   const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [isFeedLoading, setIsFeedLoading] = useState(false);
 
   const fetchPosts = useCallback(async (currentUserId?: string) => {
     const { data: postsData, error: postsError } = await supabase
@@ -263,7 +264,7 @@ const App: React.FC = () => {
     { id: 't4', hashtag: '#UXDesign', postCount: '3.7k publicações' },
   ]);
   
-  const handleViewChange = (view: { view: string; userId?: string }) => {
+  const handleViewChange = async (view: { view: string; userId?: string }) => {
     if (view.view === 'Profile' && view.userId === currentView.userId && currentView.view === 'Profile') {
       return;
     }
@@ -271,6 +272,13 @@ const App: React.FC = () => {
       setCurrentView({ view: 'Meu Perfil' });
       return;
     }
+
+    if (view.view === 'Feed') {
+      setIsFeedLoading(true);
+      await fetchPosts(user?.id);
+      setIsFeedLoading(false);
+    }
+
     setCurrentView(view);
   };
 
@@ -343,6 +351,7 @@ const App: React.FC = () => {
               viewedProfile={viewedProfile}
               viewedProfilePosts={viewedProfilePosts}
               isProfileLoading={isProfileLoading}
+              isFeedLoading={isFeedLoading}
             />
           </div>
           <div className="col-span-12 lg:col-span-3">

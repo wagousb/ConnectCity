@@ -18,16 +18,25 @@ interface MainContentProps {
   viewedProfile: User | null;
   viewedProfilePosts: Post[];
   isProfileLoading: boolean;
+  isFeedLoading: boolean;
 }
 
 const MainContent: React.FC<MainContentProps> = ({ 
   posts, currentView, user, onVote,
   onViewChange, onUserUpdate, onPostPublished,
-  viewedProfile, viewedProfilePosts, isProfileLoading
+  viewedProfile, viewedProfilePosts, isProfileLoading,
+  isFeedLoading
 }) => {
   const renderContent = () => {
     switch (currentView) {
       case 'Feed':
+        if (isFeedLoading) {
+          return (
+            <div className="bg-white p-6 rounded-xl border border-slate-200 text-center">
+              <p className="text-slate-500 animate-pulse">Atualizando o feed...</p>
+            </div>
+          );
+        }
         return <FeedPage user={user} posts={posts} onVote={onVote} onPostPublished={onPostPublished} onViewChange={onViewChange} />;
       case 'Meu Perfil':
         const userPosts = posts.filter(post => post.author.id === user.id);
