@@ -1,4 +1,4 @@
-import React, a from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { User, Post, Suggestion, Trend, ConnectionRequest } from '@/types';
 import Header from '@/components/Header';
 import LeftSidebar from '@/components/LeftSidebar';
