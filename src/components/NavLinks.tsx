@@ -12,7 +12,6 @@ const NavLinks: React.FC<NavLinksProps> = ({ activeLink, onLinkClick }) => {
     { name: 'Feed', icon: <HomeIcon className="h-6 w-6" /> },
     { name: 'Membros', icon: <UsersIcon className="h-6 w-6" /> },
     { name: 'Notificações', icon: <BellIcon className="h-6 w-6" /> },
-    { name: 'Salvos', icon: <BookmarkIcon className="h-6 w-6" /> },
     { name: 'Configurações', icon: <SettingsIcon className="h-6 w-6" /> },
   ];
 

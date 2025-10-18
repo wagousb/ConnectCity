@@ -23,7 +23,6 @@ export interface Post {
   timestamp: string;
   comments: number;
   shares: number;
-  saved?: boolean;
   average_rating?: number;
   user_rating?: number;
   total_votes?: number;

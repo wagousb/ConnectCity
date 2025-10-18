@@ -19,15 +19,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ user, onViewChange }) => {
     { name: 'Conta', icon: <SettingsIcon className="h-6 w-6 text-primary" />, description: "Gerencie seu e-mail, senha e configurações de conta." },
     { name: 'Privacidade e Segurança', icon: <ShieldCheckIcon className="h-6 w-6 text-primary" />, description: "Controle quem vê suas informações e a segurança da sua conta." },
     { name: 'Notificações', icon: <BellIcon className="h-6 w-6 text-primary" />, description: "Escolha quais notificações você quer receber e como." },
-    { name: 'Conteúdo Salvo', icon: <BookmarkIcon className="h-6 w-6 text-primary" />, description: "Veja e gerencie as publicações que você salvou." },
   ];
 
   const handleItemClick = (name: string) => {
-    if (name === 'Conteúdo Salvo') {
-      onViewChange('Salvos');
-    } else {
-      setActiveSetting(name);
-    }
+    setActiveSetting(name);
   };
 
   const renderContent = () => {

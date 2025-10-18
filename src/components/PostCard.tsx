@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import type { Post, User } from '@/types';
-import { MessageCircleIcon, StarIcon, BookmarkIconSolid, BookmarkIcon, PaperclipIcon } from '@/components/Icons';
+import { MessageCircleIcon, StarIcon, PaperclipIcon } from '@/components/Icons';
 import { supabase } from '@/integrations/supabase/client';
 import ContributionsSection from './ContributionsSection';
 
 interface PostCardProps {
   post: Post;
   currentUser: User;
-  onToggleSave: (postId: string) => void;
   onVote: (postId: string, rating: number) => void;
   onViewChange: (view: { view: string; userId?: string }) => void;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onToggleSave, onVote, onViewChange }) => {
+const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewChange }) => {
   const [isVoting, setIsVoting] = useState(false);
   const [hoverRating, setHoverRating] = useState(0);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
@@ -85,7 +84,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onToggleSave, on
         </div>
       )}
 
-      <div className="flex items-center justify-between text-slate-500 pt-4 border-t border-slate-200">
+      <div className="flex items-center space-x-8 text-slate-500 pt-4 border-t border-slate-200">
         <button onClick={() => setIsCommentsOpen(!isCommentsOpen)} className="flex items-center space-x-2 hover:text-blue-500">
           <MessageCircleIcon className="h-5 w-5" />
           <span className="text-sm font-medium">{post.comments} Contribuições</span>
@@ -96,13 +95,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onToggleSave, on
         >
           <StarIcon className="h-5 w-5" />
           <span className="text-sm font-medium">Votar</span>
-        </button>
-        <button 
-          className={`flex items-center space-x-2 hover:text-primary ${post.saved ? 'text-primary' : ''}`}
-          onClick={() => onToggleSave(post.id)}
-        >
-          {post.saved ? <BookmarkIconSolid className="h-5 w-5" /> : <BookmarkIcon className="h-5 w-5" />}
-          <span className="text-sm font-medium">{post.saved ? 'Salvo' : 'Salvar'}</span>
         </button>
       </div>
 

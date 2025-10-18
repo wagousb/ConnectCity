@@ -104,7 +104,6 @@ const App: React.FC = () => {
           },
           comments: (post.comments as any)[0]?.count || 0,
           shares: 0,
-          saved: false,
           average_rating: postRating ? postRating.sum / postRating.total : 0,
           user_rating: postRating?.userRating || 0,
           total_votes: postRating?.total || 0,
@@ -243,7 +242,6 @@ const App: React.FC = () => {
               author: formattedProfile,
               comments: (post.comments as any)[0]?.count || 0,
               shares: 0,
-              saved: false,
               average_rating: postRating ? postRating.sum / postRating.total : 0,
               user_rating: postRating?.userRating || 0,
               total_votes: postRating?.total || 0,
@@ -274,12 +272,6 @@ const App: React.FC = () => {
       return;
     }
     setCurrentView(view);
-  };
-
-  const handleToggleSave = (postId: string) => {
-    setPosts(posts.map(post => 
-      post.id === postId ? { ...post, saved: !post.saved } : post
-    ));
   };
 
   const handleUserUpdate = (newProfileData: Partial<User>) => {
@@ -344,7 +336,6 @@ const App: React.FC = () => {
               posts={posts} 
               currentView={currentView.view} 
               user={user} 
-              onToggleSave={handleToggleSave}
               onVote={handleVote}
               onViewChange={handleViewChange}
               onUserUpdate={handleUserUpdate}
