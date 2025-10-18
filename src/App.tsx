@@ -28,6 +28,7 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   
   const [currentView, setCurrentView] = useState<{ view: string; userId?: string; postId?: string }>({ view: 'Feed' });
   const [viewedProfile, setViewedProfile] = useState<User | null>(null);
@@ -169,6 +170,18 @@ const App: React.FC = () => {
           });
         }
         
+        const { count, error: notificationError } = await supabase
+          .from('notifications')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .eq('is_read', false);
+
+        if (notificationError) {
+          console.error('Error checking notifications:', notificationError);
+        } else if (count && count > 0) {
+          setHasUnreadNotifications(true);
+        }
+
         await fetchPosts(userId);
         setLoading(false);
       };
@@ -177,6 +190,24 @@ const App: React.FC = () => {
       setUser(null);
     }
   }, [session, user, fetchPosts]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase.channel('public:notifications')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        () => {
+          setHasUnreadNotifications(true);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   useEffect(() => {
     const fetchViewData = async () => {
@@ -309,6 +340,10 @@ const App: React.FC = () => {
       setIsFeedLoading(false);
     }
 
+    if (view.view === 'Notificações') {
+      setHasUnreadNotifications(false);
+    }
+
     setCurrentView(view);
   };
 
@@ -356,7 +391,7 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen">
-      <Header user={user} onViewChange={handleViewChange} />
+      <Header user={user} onViewChange={handleViewChange} hasUnreadNotifications={hasUnreadNotifications} />
       <main className="max-w-screen-xl mx-auto py-8 px-4 md:px-6 lg:px-8">
         <div className="grid grid-cols-12 gap-8">
           <div className="col-span-12 lg:col-span-3">

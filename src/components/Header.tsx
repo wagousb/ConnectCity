@@ -5,9 +5,10 @@ import { HomeIcon, SearchIcon, UsersIcon, BellIcon } from '@/components/Icons';
 interface HeaderProps {
   user: User;
   onViewChange: (view: { view: string; userId?: string }) => void;
+  hasUnreadNotifications: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ user, onViewChange }) => {
+const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotifications }) => {
   return (
     <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
       <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8">
@@ -45,7 +46,9 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange }) => {
               onClick={() => onViewChange({ view: 'Notificações' })}
               className="relative text-slate-500 hover:text-primary p-2 rounded-full hover:bg-primary-50">
               <BellIcon className="h-6 w-6" />
-              <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+              {hasUnreadNotifications && (
+                <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+              )}
             </button>
             <button 
               onClick={() => onViewChange({ view: 'Meu Perfil' })}
