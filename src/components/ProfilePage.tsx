@@ -8,7 +8,7 @@ import { useProfilePictureManager } from '@/hooks/useProfilePictureManager';
 import { useBannerImageManager } from '@/hooks/useBannerImageManager';
 import { supabase } from '@/integrations/supabase/client';
 import Contribution from './Contribution';
-import RoleBadge from '@/components/RoleBadge';
+import RoleBadge from './RoleBadge';
 
 interface ProfilePageProps {
   profileUser: User;
@@ -147,7 +147,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                 )}
                 </button>
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-max">
-                    <RoleBadge role={profileUser.role} />
+                    <RoleBadge role={profileUser.role} size="md" />
                 </div>
             </div>
           </div>

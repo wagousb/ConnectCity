@@ -2,9 +2,10 @@ import React from 'react';
 
 interface RoleBadgeProps {
   role: string;
+  size?: 'sm' | 'md';
 }
 
-const RoleBadge: React.FC<RoleBadgeProps> = ({ role }) => {
+const RoleBadge: React.FC<RoleBadgeProps> = ({ role, size = 'sm' }) => {
   const getBadgeStyle = () => {
     switch (role) {
       case 'prefeito':
@@ -19,8 +20,13 @@ const RoleBadge: React.FC<RoleBadgeProps> = ({ role }) => {
     }
   };
 
+  const sizeStyles = {
+    sm: 'text-xs font-semibold px-2 py-0.5',
+    md: 'text-sm font-semibold px-3 py-1',
+  };
+
   return (
-    <span className={`capitalize text-xs font-semibold px-2 py-0.5 rounded-full border ${getBadgeStyle()}`}>
+    <span className={`capitalize rounded-full border ${getBadgeStyle()} ${sizeStyles[size]}`}>
       {role}
     </span>
   );
