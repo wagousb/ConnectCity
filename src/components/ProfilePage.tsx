@@ -159,11 +159,11 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
         </div>
 
         <div className="pt-16 md:pt-20 px-6 pb-6">
-          <div className="flex items-center space-x-3">
-            <h1 className="text-2xl md:text-3xl font-bold">{profileUser.name}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">{profileUser.name}</h1>
+          <p className="text-slate-500">@{profileUser.handle}</p>
+          <div className="mt-2">
             <RoleBadge role={profileUser.role} />
           </div>
-          <p className="text-slate-500">@{profileUser.handle}</p>
           <p className="mt-4 text-slate-700">{profileUser.bio}</p>
 
           <div className="flex items-center space-x-6 mt-4 text-sm text-slate-500">
