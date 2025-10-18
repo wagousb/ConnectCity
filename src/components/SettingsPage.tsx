@@ -1,6 +1,6 @@
 import React from 'react';
-import type { User } from '../types';
-import { UserCircleIcon, ShieldCheckIcon, BellIcon, BookmarkIcon, SettingsIcon } from './Icons';
+import type { User } from '@/types';
+import { UserCircleIcon, ShieldCheckIcon, BellIcon, BookmarkIcon, SettingsIcon } from '@/components/Icons';
 
 interface SettingsPageProps {
   user: User;

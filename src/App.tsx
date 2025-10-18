@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import type { User, Post, Suggestion, Trend, ConnectionRequest } from './types';
-import Header from './components/Header';
-import LeftSidebar from './components/LeftSidebar';
-import MainContent from './components/MainContent';
-import RightSidebar from './components/RightSidebar';
+import type { User, Post, Suggestion, Trend, ConnectionRequest } from '@/types';
+import Header from '@/components/Header';
+import LeftSidebar from '@/components/LeftSidebar';
+import MainContent from '@/components/MainContent';
+import RightSidebar from '@/components/RightSidebar';
 import { supabase } from '@/integrations/supabase/client';
 import type { Session } from '@supabase/supabase-js';
-import Login from './pages/Login';
+import Login from '@/pages/Login';
 
 const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);

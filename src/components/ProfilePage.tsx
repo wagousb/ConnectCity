@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import type { User, Post } from '../types';
-import PostCard from './PostCard';
-import { PencilIcon } from './Icons';
+import type { User, Post } from '@/types';
+import PostCard from '@/components/PostCard';
+import { PencilIcon } from '@/components/Icons';
 
 interface ProfilePageProps {
   user: User;

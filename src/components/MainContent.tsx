@@ -1,10 +1,10 @@
 import React from 'react';
-import type { Post, User, Suggestion, ConnectionRequest } from '../types';
-import PostCard from './PostCard';
-import ProfilePage from './ProfilePage';
-import FeedPage from './FeedPage';
-import NetworkPage from './NetworkPage';
-import SettingsPage from './SettingsPage';
+import type { Post, User, Suggestion, ConnectionRequest } from '@/types';
+import PostCard from '@/components/PostCard';
+import ProfilePage from '@/components/ProfilePage';
+import FeedPage from '@/components/FeedPage';
+import NetworkPage from '@/components/NetworkPage';
+import SettingsPage from '@/components/SettingsPage';
 
 interface MainContentProps {
   posts: Post[];

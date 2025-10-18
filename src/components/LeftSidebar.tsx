@@ -1,7 +1,7 @@
 import React from 'react';
-import type { User } from '../types';
-import ProfileCard from './ProfileCard';
-import NavLinks from './NavLinks';
+import type { User } from '@/types';
+import ProfileCard from '@/components/ProfileCard';
+import NavLinks from '@/components/NavLinks';
 
 interface LeftSidebarProps {
   user: User;

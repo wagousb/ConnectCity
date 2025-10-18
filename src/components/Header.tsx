@@ -1,6 +1,6 @@
 import React from 'react';
-import type { User } from '../types';
-import { HomeIcon, SearchIcon, UsersIcon, BellIcon } from './Icons';
+import type { User } from '@/types';
+import { HomeIcon, SearchIcon, UsersIcon, BellIcon } from '@/components/Icons';
 
 interface HeaderProps {
   user: User;

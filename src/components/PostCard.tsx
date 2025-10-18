@@ -1,6 +1,6 @@
 import React from 'react';
-import type { Post } from '../types';
-import { HeartIcon, MessageCircleIcon, ShareIcon, BookmarkIconSolid, BookmarkIcon } from './Icons';
+import type { Post } from '@/types';
+import { HeartIcon, MessageCircleIcon, ShareIcon, BookmarkIconSolid, BookmarkIcon } from '@/components/Icons';
 
 interface PostCardProps {
   post: Post;

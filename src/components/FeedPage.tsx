@@ -1,7 +1,7 @@
 import React from 'react';
-import type { Post, User } from '../types';
-import PostComposer from './PostComposer';
-import PostCard from './PostCard';
+import type { Post, User } from '@/types';
+import PostComposer from '@/components/PostComposer';
+import PostCard from '@/components/PostCard';
 
 interface FeedPageProps {
     user: User;

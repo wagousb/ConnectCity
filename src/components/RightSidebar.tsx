@@ -1,8 +1,7 @@
-
 import React from 'react';
-import type { Suggestion, Trend } from '../types';
-import WhoToFollow from './WhoToFollow';
-import TrendingTopics from './TrendingTopics';
+import type { Suggestion, Trend } from '@/types';
+import WhoToFollow from '@/components/WhoToFollow';
+import TrendingTopics from '@/components/TrendingTopics';
 
 interface RightSidebarProps {
   suggestions: Suggestion[];

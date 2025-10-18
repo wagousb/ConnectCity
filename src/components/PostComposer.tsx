@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import type { User } from '../types';
-import { ImageIcon, BarChartIcon, SmileIcon } from './Icons';
+import type { User } from '@/types';
+import { ImageIcon, BarChartIcon, SmileIcon } from '@/components/Icons';
 
 interface PostComposerProps {
   user: User;
