@@ -123,7 +123,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished }) =>
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Título da Ideia de Projeto"
+            placeholder="Título da ideia de projeto"
             className="w-full text-lg border-slate-200 border rounded-lg p-2 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-200"
           />
           <select
