@@ -15,8 +15,11 @@ export interface User {
 export interface Post {
   id: string;
   author: User;
+  title: string;
+  target_entity: string;
   content: string;
   imageUrl?: string;
+  document_url?: string;
   timestamp: string;
   likes: number;
   comments: number;

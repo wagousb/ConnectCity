@@ -94,8 +94,11 @@ const App: React.FC = () => {
         }
         return {
           id: post.id,
+          title: post.title,
+          target_entity: post.target_entity,
           content: post.content,
           imageUrl: post.image_url,
+          document_url: post.document_url,
           timestamp: timeAgo(post.created_at),
           author: {
             id: profile.id,
@@ -231,8 +234,11 @@ const App: React.FC = () => {
   
           const formattedPosts: Post[] = postsData.map(post => ({
               id: post.id,
+              title: post.title,
+              target_entity: post.target_entity,
               content: post.content,
               imageUrl: post.image_url,
+              document_url: post.document_url,
               timestamp: timeAgo(post.created_at),
               author: formattedProfile,
               likes: likesMap.get(post.id) || 0,

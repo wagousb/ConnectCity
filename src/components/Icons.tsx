@@ -106,20 +106,9 @@ export const ImageIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
-export const BarChartIcon = (props: React.SVGProps<SVGSVGElement>) => (
+export const PaperclipIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-        <line x1="12" y1="20" x2="12" y2="10" />
-        <line x1="18" y1="20" x2="18" y2="4" />
-        <line x1="6" y1="20" x2="6" y2="16" />
-    </svg>
-);
-
-export const SmileIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-        <circle cx="12" cy="12" r="10" />
-        <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-        <line x1="9" y1="9" x2="9.01" y2="9" />
-        <line x1="15" y1="9" x2="15.01" y2="9" />
+        <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
     </svg>
 );
 
@@ -131,7 +120,7 @@ export const ArrowLeftIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
         <line x1="18" y1="6" x2="6" y2="18" />
         <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
