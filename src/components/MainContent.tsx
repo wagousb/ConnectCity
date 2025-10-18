@@ -23,13 +23,15 @@ interface MainContentProps {
   viewedPost: Post | null;
   isPostLoading: boolean;
   isModerator: boolean;
+  showWelcomeMessage?: boolean;
 }
 
 const MainContent: React.FC<MainContentProps> = ({ 
   posts, currentView, user, onVote,
   onViewChange, onUserUpdate, onPostPublished,
   viewedProfile, viewedProfilePosts, isProfileLoading,
-  isFeedLoading, viewedPost, isPostLoading, isModerator
+  isFeedLoading, viewedPost, isPostLoading, isModerator,
+  showWelcomeMessage
 }) => {
   const renderContent = () => {
     switch (currentView) {
@@ -51,6 +53,7 @@ const MainContent: React.FC<MainContentProps> = ({
                   onViewChange={onViewChange} 
                   onUserUpdate={onUserUpdate}
                   onVote={onVote}
+                  isFirstLogin={showWelcomeMessage}
                 />;
       case 'Profile':
         if (isProfileLoading) return <div className="bg-white p-6 rounded-xl border border-slate-200 text-center"><p className="text-slate-500">Carregando perfil...</p></div>;

@@ -37,6 +37,7 @@ const App: React.FC = () => {
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [isFeedLoading, setIsFeedLoading] = useState(false);
   const [isPostLoading, setIsPostLoading] = useState(false);
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
 
   const isModerator = user?.is_moderator || session?.user?.email === 'produwagner@gmail.com';
 
@@ -134,6 +135,11 @@ const App: React.FC = () => {
     getSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (_event === 'SIGNED_IN' && localStorage.getItem('isNewUser') === 'true') {
+        setCurrentView({ view: 'Meu Perfil' });
+        setShowWelcomeMessage(true);
+        localStorage.removeItem('isNewUser');
+      }
       setSession(session);
     });
 
@@ -436,6 +442,7 @@ const App: React.FC = () => {
               viewedPost={viewedPost}
               isPostLoading={isPostLoading}
               isModerator={isModerator}
+              showWelcomeMessage={showWelcomeMessage}
             />
           </div>
           <div className="col-span-12 lg:col-span-3">

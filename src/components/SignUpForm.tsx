@@ -40,6 +40,7 @@ const SignUpForm: React.FC = () => {
     if (error) {
       setError(error.message);
     } else {
+      localStorage.setItem('isNewUser', 'true');
       setMessage('Cadastro realizado com sucesso! Verifique seu e-mail para confirmar sua conta.');
     }
   };

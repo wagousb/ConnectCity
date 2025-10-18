@@ -7,8 +7,8 @@ import ProfilePictureModal from './ProfilePictureModal';
 import { useProfilePictureManager } from '@/hooks/useProfilePictureManager';
 import { useBannerImageManager } from '@/hooks/useBannerImageManager';
 import { supabase } from '@/integrations/supabase/client';
-import Contribution from './Contribution';
 import RoleBadge from './RoleBadge';
+import WelcomeBanner from './WelcomeBanner';
 
 interface ProfilePageProps {
   profileUser: User;
@@ -17,6 +17,7 @@ interface ProfilePageProps {
   onVote: (postId: string, rating: number) => void;
   onViewChange: (view: { view: string; userId?: string; postId?: string }) => void;
   onUserUpdate: (newProfileData: Partial<User>) => void;
+  isFirstLogin?: boolean;
 }
 
 interface GroupedContribution {
@@ -26,7 +27,7 @@ interface GroupedContribution {
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ 
-  profileUser, currentUser, posts, onVote, onViewChange, onUserUpdate
+  profileUser, currentUser, posts, onVote, onViewChange, onUserUpdate, isFirstLogin
 }) => {
   const [activeTab, setActiveTab] = useState('Ideias enviadas');
   const [contributions, setContributions] = useState<GroupedContribution[]>([]);
@@ -97,6 +98,11 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
     <>
       {isOwnProfile && (
         <>
+          <WelcomeBanner 
+            user={profileUser} 
+            isFirstLogin={isFirstLogin} 
+            onNavigateToSettings={() => onViewChange({ view: 'Configurações' })}
+          />
           <ProfilePictureModal
             isOpen={isProfilePicModalOpen}
             onClose={closeProfilePicModal}

@@ -163,3 +163,15 @@ export const FileTextIcon = (props: React.SVGProps<SVGSVGElement>) => (
         <line x1="10" y1="9" x2="8" y2="9"/>
     </svg>
 );
+
+export const PartyPopperIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M5.8 11.3 2 22l10.7-3.79" />
+        <path d="M4 14.5s1.5-1.5 3-2 3 2 3 2" />
+        <path d="m14.5 4-1-1" />
+        <path d="m18.5 8-1-1" />
+        <path d="M12 2v4" />
+        <path d="M6.5 6.5 10 10" />
+        <path d="m18 2-6 6" />
+    </svg>
+);
