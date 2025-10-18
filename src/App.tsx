@@ -33,7 +33,7 @@ const App: React.FC = () => {
   const fetchPosts = useCallback(async () => {
     const { data, error } = await supabase
       .from('posts')
-      .select('*, author:profiles(*)')
+      .select('*, author:profiles!user_id(*)')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -41,25 +41,27 @@ const App: React.FC = () => {
       return;
     }
 
-    const formattedPosts: Post[] = data.map(post => ({
-      id: post.id,
-      content: post.content,
-      imageUrl: post.image_url,
-      timestamp: timeAgo(post.created_at),
-      author: {
-        id: post.author.id,
-        name: post.author.name,
-        handle: post.author.handle,
-        avatarUrl: post.author.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
-        bannerUrl: post.author.banner_url,
-        bio: post.author.bio,
-        followers: post.author.followers,
-        following: post.author.following,
-      },
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      saved: false, // Lógica de "salvos" precisaria ser implementada separadamente
+    const formattedPosts: Post[] = data
+      .filter(post => post.author) // Garante que o post tem um autor
+      .map(post => ({
+        id: post.id,
+        content: post.content,
+        imageUrl: post.image_url,
+        timestamp: timeAgo(post.created_at),
+        author: {
+          id: post.author.id,
+          name: post.author.name,
+          handle: post.author.handle,
+          avatarUrl: post.author.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
+          bannerUrl: post.author.banner_url,
+          bio: post.author.bio,
+          followers: post.author.followers,
+          following: post.author.following,
+        },
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        saved: false, // Lógica de "salvos" precisaria ser implementada separadamente
     }));
     setPosts(formattedPosts);
   }, []);
