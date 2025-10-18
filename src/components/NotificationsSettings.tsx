@@ -12,7 +12,6 @@ const NotificationsSettings: React.FC<NotificationsSettingsProps> = ({ user, onB
   const [settings, setSettings] = useState({
     likes: user.notifications_on_likes ?? true,
     comments: user.notifications_on_comments ?? true,
-    followers: user.notifications_on_new_followers ?? true,
   });
   const [loading, setLoading] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -46,7 +45,6 @@ const NotificationsSettings: React.FC<NotificationsSettingsProps> = ({ user, onB
   const notificationOptions = [
     { key: 'likes' as keyof typeof settings, label: 'Curtidas', description: 'Receber notificações sobre curtidas em suas publicações.' },
     { key: 'comments' as keyof typeof settings, label: 'Comentários', description: 'Receber notificações quando alguém comentar em suas publicações.' },
-    { key: 'followers' as keyof typeof settings, label: 'Novos Seguidores', description: 'Receber notificações quando alguém começar a seguir você.' },
   ];
 
   return (

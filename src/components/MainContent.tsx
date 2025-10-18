@@ -5,7 +5,6 @@ import ProfilePage from '@/components/ProfilePage';
 import FeedPage from '@/components/FeedPage';
 import NetworkPage from '@/components/NetworkPage';
 import SettingsPage from '@/components/SettingsPage';
-import FollowListPage from '@/pages/FollowListPage';
 import NotificationsPage from '@/pages/NotificationsPage';
 
 interface MainContentProps {
@@ -19,8 +18,6 @@ interface MainContentProps {
   onViewChange: (view: { view: string; userId?: string }) => void;
   onUserUpdate: (newProfileData: Partial<User>) => void;
   onPostPublished: () => void;
-  followingIds: Set<string>;
-  onFollowToggle: (targetUserId: string) => void;
   viewedProfile: User | null;
   viewedProfilePosts: Post[];
   isProfileLoading: boolean;
@@ -28,7 +25,7 @@ interface MainContentProps {
 
 const MainContent: React.FC<MainContentProps> = ({ 
   posts, currentView, user, suggestions, connectionRequests, onToggleSave, onToggleLike, 
-  onViewChange, onUserUpdate, onPostPublished, followingIds, onFollowToggle,
+  onViewChange, onUserUpdate, onPostPublished,
   viewedProfile, viewedProfilePosts, isProfileLoading
 }) => {
   const renderContent = () => {
@@ -44,8 +41,6 @@ const MainContent: React.FC<MainContentProps> = ({
                   onToggleSave={onToggleSave} 
                   onViewChange={onViewChange} 
                   onUserUpdate={onUserUpdate}
-                  onFollowToggle={onFollowToggle}
-                  isFollowing={false}
                   onToggleLike={onToggleLike}
                 />;
       case 'Profile':
@@ -58,8 +53,6 @@ const MainContent: React.FC<MainContentProps> = ({
                   onToggleSave={onToggleSave} 
                   onViewChange={onViewChange} 
                   onUserUpdate={onUserUpdate}
-                  onFollowToggle={onFollowToggle}
-                  isFollowing={followingIds.has(viewedProfile.id)}
                   onToggleLike={onToggleLike}
                 />;
       case 'Minha Rede':
@@ -85,26 +78,6 @@ const MainContent: React.FC<MainContentProps> = ({
         );
       case 'Configurações':
         return <SettingsPage user={user} onViewChange={(viewName) => onViewChange({ view: viewName })} />;
-      case 'Seguindo':
-        return <FollowListPage 
-                  type="following" 
-                  currentUserId={user.id}
-                  profileUserId={user.id} 
-                  onFollowToggle={onFollowToggle} 
-                  followingIds={followingIds}
-                  onBack={() => onViewChange({ view: 'Meu Perfil' })}
-                  onViewChange={onViewChange}
-                />;
-      case 'Seguidores':
-        return <FollowListPage 
-                  type="followers" 
-                  currentUserId={user.id}
-                  profileUserId={user.id} 
-                  onFollowToggle={onFollowToggle} 
-                  followingIds={followingIds}
-                  onBack={() => onViewChange({ view: 'Meu Perfil' })}
-                  onViewChange={onViewChange}
-                />;
       case 'Notificações':
         return <NotificationsPage user={user} onViewChange={onViewChange} />;
       default:

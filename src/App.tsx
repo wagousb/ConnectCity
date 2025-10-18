@@ -29,7 +29,6 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const [likedPostIds, setLikedPostIds] = useState<Set<string>>(new Set());
   
   const [currentView, setCurrentView] = useState<{ view: string; userId?: string }>({ view: 'Feed' });
@@ -106,8 +105,6 @@ const App: React.FC = () => {
             avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
             bannerUrl: profile.banner_url,
             bio: profile.bio,
-            followers: profile.followers,
-            following: profile.following,
           },
           likes: likesMap.get(post.id) || 0,
           comments: 0,
@@ -119,31 +116,6 @@ const App: React.FC = () => {
       .filter((p): p is Post => p !== null);
 
     setPosts(formattedPosts);
-  }, []);
-
-  const fetchSuggestions = useCallback(async (userId: string, currentFollowingIds: Set<string>) => {
-    const { data: profilesData, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .not('id', 'eq', userId)
-      .limit(3);
-
-    if (error) {
-      console.error('Erro ao buscar sugestões:', error);
-      return;
-    }
-
-    const formattedSuggestions: Suggestion[] = profilesData.map(profile => ({
-      id: profile.id,
-      user: {
-        id: profile.id,
-        name: profile.name || 'Usuário',
-        handle: profile.handle || 'usuário',
-        avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
-        isFollowing: currentFollowingIds.has(profile.id),
-      }
-    }));
-    setSuggestions(formattedSuggestions);
   }, []);
 
   useEffect(() => {
@@ -187,8 +159,6 @@ const App: React.FC = () => {
             handle: profileData.handle || 'usuário',
             avatarUrl: avatarUrl,
             bannerUrl: profileData.banner_url || 'https://picsum.photos/seed/banner1/1500/500',
-            followers: profileData.followers || 0,
-            following: profileData.following || 0,
             bio: profileData.bio || 'Bem-vindo ao ConnectCity!',
             date_of_birth: profileData.date_of_birth,
             is_public: profileData.is_public,
@@ -197,31 +167,15 @@ const App: React.FC = () => {
             notifications_on_new_followers: profileData.notifications_on_new_followers,
           });
         }
-
-        const { data: followingData, error: followingError } = await supabase
-          .from('followers')
-          .select('following_id')
-          .eq('follower_id', userId);
         
-        let currentFollowingIds = new Set<string>();
-        if (followingError) {
-          console.error('Error fetching following list:', followingError);
-        } else {
-          currentFollowingIds = new Set(followingData.map(f => f.following_id));
-          setFollowingIds(currentFollowingIds);
-        }
-
         await fetchPosts(userId);
-        await fetchSuggestions(userId, currentFollowingIds);
         setLoading(false);
       };
       fetchInitialData();
     } else {
       setUser(null);
-      setFollowingIds(new Set());
-      setSuggestions([]);
     }
-  }, [session, fetchPosts, fetchSuggestions]);
+  }, [session, fetchPosts]);
 
   useEffect(() => {
     const fetchViewData = async () => {
@@ -251,8 +205,6 @@ const App: React.FC = () => {
           handle: profileData.handle || 'usuário',
           avatarUrl: profileData.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
           bannerUrl: profileData.banner_url || 'https://picsum.photos/seed/banner1/1500/500',
-          followers: profileData.followers || 0,
-          following: profileData.following || 0,
           bio: profileData.bio || '',
       };
       setViewedProfile(formattedProfile);
@@ -334,42 +286,6 @@ const App: React.FC = () => {
     }
   };
 
-  const handleFollowToggle = async (targetUserId: string) => {
-    if (!user) return;
-    const isCurrentlyFollowing = followingIds.has(targetUserId);
-
-    setUser(prevUser => {
-        if (!prevUser) return null;
-        const newFollowingCount = isCurrentlyFollowing 
-            ? (prevUser.following || 1) - 1 
-            : (prevUser.following || 0) + 1;
-        return { ...prevUser, following: newFollowingCount };
-    });
-
-    if (viewedProfile && viewedProfile.id === targetUserId) {
-        setViewedProfile(prevProfile => {
-            if (!prevProfile) return null;
-            const newFollowersCount = isCurrentlyFollowing
-                ? (prevProfile.followers || 1) - 1
-                : (prevProfile.followers || 0) + 1;
-            return { ...prevProfile, followers: newFollowersCount };
-        });
-    }
-
-    setFollowingIds(prev => {
-      const newSet = new Set(prev);
-      if (isCurrentlyFollowing) newSet.delete(targetUserId);
-      else newSet.add(targetUserId);
-      return newSet;
-    });
-
-    if (isCurrentlyFollowing) {
-      await supabase.from('followers').delete().match({ follower_id: user.id, following_id: targetUserId });
-    } else {
-      await supabase.from('followers').insert({ follower_id: user.id, following_id: targetUserId });
-    }
-  };
-
   const handleToggleLike = async (postId: string, isLiked: boolean) => {
     if (!user) return;
 
@@ -419,15 +335,13 @@ const App: React.FC = () => {
               onViewChange={handleViewChange}
               onUserUpdate={handleUserUpdate}
               onPostPublished={() => fetchPosts(user.id)}
-              onFollowToggle={handleFollowToggle}
-              followingIds={followingIds}
               viewedProfile={viewedProfile}
               viewedProfilePosts={viewedProfilePosts}
               isProfileLoading={isProfileLoading}
             />
           </div>
           <div className="col-span-12 lg:col-span-3">
-             <RightSidebar suggestions={suggestions} trends={trends} onFollowToggle={handleFollowToggle} onViewChange={handleViewChange} />
+             <RightSidebar trends={trends} />
           </div>
         </div>
       </main>

@@ -3,8 +3,6 @@ export interface User {
   name: string;
   handle: string;
   avatarUrl: string;
-  followers?: number;
-  following?: number;
   bannerUrl?: string;
   bio?: string;
   date_of_birth?: string;
@@ -12,7 +10,6 @@ export interface User {
   notifications_on_likes?: boolean;
   notifications_on_comments?: boolean;
   notifications_on_new_followers?: boolean;
-  isFollowing?: boolean;
 }
 
 export interface Post {
@@ -47,7 +44,7 @@ export interface ConnectionRequest {
 
 export interface Notification {
   id: string;
-  type: 'like' | 'follow' | 'comment';
+  type: 'like' | 'comment';
   actor: User;
   is_read: boolean;
   created_at: string;

@@ -11,12 +11,6 @@ interface ProfileCardProps {
   onUserUpdate: (newProfileData: Partial<User>) => void;
 }
 
-const formatCount = (count?: number) => {
-  if (!count) return '0';
-  if (count < 1000) return count.toString();
-  return `${(count / 1000).toFixed(1).replace(/\.0$/, '')}k`;
-};
-
 const ProfileCard: React.FC<ProfileCardProps> = ({ user, onViewChange, onUserUpdate }) => {
   const {
     isCropModalOpen,
@@ -57,18 +51,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, onViewChange, onUserUpd
         </div>
         <h2 className="text-xl font-bold mt-4">{user.name}</h2>
         <p className="text-sm text-slate-500">@{user.handle}</p>
-        <div className="flex justify-around my-6 text-sm">
-          <button onClick={() => onViewChange('Seguindo')} className="text-left p-2 rounded-md hover:bg-slate-50 transition-colors">
-            <p className="font-bold text-lg text-center">{formatCount(user.following)}</p>
-            <p className="text-slate-500">Seguindo</p>
-          </button>
-          <button onClick={() => onViewChange('Seguidores')} className="text-left p-2 rounded-md hover:bg-slate-50 transition-colors">
-            <p className="font-bold text-lg text-center">{formatCount(user.followers)}</p>
-            <p className="text-slate-500">Seguidores</p>
-          </button>
-        </div>
         <button 
-          className="w-full bg-primary text-white font-semibold py-3 rounded-lg hover:bg-primary-700 transition-colors duration-300"
+          className="mt-6 w-full bg-primary text-white font-semibold py-3 rounded-lg hover:bg-primary-700 transition-colors duration-300"
           onClick={() => onViewChange('Meu Perfil')}
         >
           Meu Perfil

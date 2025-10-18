@@ -15,21 +15,12 @@ interface ProfilePageProps {
   onToggleLike: (postId: string, isLiked: boolean) => void;
   onViewChange: (view: { view: string; userId?: string }) => void;
   onUserUpdate: (newProfileData: Partial<User>) => void;
-  onFollowToggle: (targetUserId: string) => void;
-  isFollowing: boolean;
 }
 
-const formatCount = (count?: number) => {
-  if (!count) return '0';
-  if (count < 1000) return count.toString();
-  return `${(count / 1000).toFixed(1).replace(/\.0$/, '')}k`;
-};
-
 const ProfilePage: React.FC<ProfilePageProps> = ({ 
-  profileUser, currentUser, posts, onToggleSave, onToggleLike, onViewChange, onUserUpdate, onFollowToggle, isFollowing 
+  profileUser, currentUser, posts, onToggleSave, onToggleLike, onViewChange, onUserUpdate
 }) => {
   const [activeTab, setActiveTab] = useState('Publicações');
-  const [isHoveringFollow, setIsHoveringFollow] = useState(false);
   const tabs = ['Publicações', 'Respostas', 'Mídia', 'Curtidas'];
   const isOwnProfile = profileUser.id === currentUser.id;
 
@@ -103,29 +94,16 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
               )}
             </button>
           </div>
-          <div className="absolute top-4 right-4">
-            {isOwnProfile ? (
+          {isOwnProfile && (
+            <div className="absolute top-4 right-4">
               <button
                 onClick={openBannerCropModal}
                 className="bg-white/80 backdrop-blur-sm text-slate-800 font-semibold px-4 py-2 rounded-full text-sm hover:bg-white transition-colors flex items-center space-x-2">
                 <PencilIcon className="h-4 w-4" />
                 <span>Editar Capa</span>
               </button>
-            ) : (
-              <button 
-                onClick={() => onFollowToggle(profileUser.id)}
-                onMouseEnter={() => setIsHoveringFollow(true)}
-                onMouseLeave={() => setIsHoveringFollow(false)}
-                className={`font-semibold px-6 py-2 rounded-full text-sm transition-colors ${
-                  isFollowing 
-                    ? (isHoveringFollow ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-200 text-slate-800')
-                    : 'bg-primary text-white hover:bg-primary-700'
-                }`}
-              >
-                {isFollowing ? (isHoveringFollow ? 'Deixar de seguir' : 'Seguindo') : 'Seguir'}
-              </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         <div className="pt-16 md:pt-20 px-6 pb-6">
@@ -134,8 +112,6 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
           <p className="mt-4 text-slate-700">{profileUser.bio}</p>
 
           <div className="flex items-center space-x-6 mt-4 text-sm text-slate-500">
-            <span><span className="font-bold text-slate-800">{formatCount(profileUser.following)}</span> Seguindo</span>
-            <span><span className="font-bold text-slate-800">{formatCount(profileUser.followers)}</span> Seguidores</span>
             <span><span className="font-bold text-slate-800">{posts.length}</span> Publicações</span>
           </div>
         </div>

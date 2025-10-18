@@ -39,18 +39,20 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
       if (error) {
         console.error('Error fetching notifications:', error);
       } else {
-        const formattedNotifications: Notification[] = data.map(n => ({
-          id: n.id,
-          type: n.type,
-          is_read: n.is_read,
-          created_at: n.created_at,
-          entity_id: n.entity_id,
-          actor: {
-            id: n.actor.id,
-            name: n.actor.name,
-            handle: n.actor.handle,
-            avatarUrl: n.actor.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(n.actor.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
-          }
+        const formattedNotifications: Notification[] = data
+          .filter(n => n.type !== 'follow')
+          .map(n => ({
+            id: n.id,
+            type: n.type,
+            is_read: n.is_read,
+            created_at: n.created_at,
+            entity_id: n.entity_id,
+            actor: {
+              id: n.actor.id,
+              name: n.actor.name,
+              handle: n.actor.handle,
+              avatarUrl: n.actor.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(n.actor.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
+            }
         }));
         setNotifications(formattedNotifications);
       }
@@ -83,10 +85,7 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
         icon = <div className="bg-red-500 p-2 rounded-full"><HeartIcon className={iconClasses} /></div>;
         text = <p>{actorName} curtiu sua publicação.</p>;
         break;
-      case 'follow':
-        icon = <div className="bg-primary p-2 rounded-full"><UsersIcon className={iconClasses} /></div>;
-        text = <p>{actorName} começou a seguir você.</p>;
-        break;
+      // 'follow' case removed
       default:
         return null;
     }
