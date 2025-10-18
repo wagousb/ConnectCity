@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { User } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeftIcon } from './Icons';
+import ImageUpload from './ImageUpload';
 
 interface ProfileSettingsFormProps {
   user: User;
@@ -56,6 +57,20 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user, onBack 
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
+        <ImageUpload
+          label="Foto de Perfil"
+          bucketName="avatars"
+          userId={user.id}
+          currentUrl={avatarUrl}
+          onUpload={(url) => setAvatarUrl(url)}
+        />
+        <ImageUpload
+          label="Foto de Capa"
+          bucketName="banners"
+          userId={user.id}
+          currentUrl={bannerUrl}
+          onUpload={(url) => setBannerUrl(url)}
+        />
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-slate-700">Nome</label>
           <input
@@ -83,26 +98,6 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({ user, onBack 
             rows={3}
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-          />
-        </div>
-        <div>
-          <label htmlFor="avatarUrl" className="block text-sm font-medium text-slate-700">URL do Avatar</label>
-          <input
-            type="text"
-            id="avatarUrl"
-            value={avatarUrl}
-            onChange={(e) => setAvatarUrl(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-          />
-        </div>
-        <div>
-          <label htmlFor="bannerUrl" className="block text-sm font-medium text-slate-700">URL do Banner</label>
-          <input
-            type="text"
-            id="bannerUrl"
-            value={bannerUrl}
-            onChange={(e) => setBannerUrl(e.target.value)}
             className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
           />
         </div>

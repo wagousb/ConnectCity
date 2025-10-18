@@ -23,7 +23,7 @@ const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, sug
         return <FeedPage user={user} posts={posts} onToggleSave={onToggleSave} />;
       case 'Meu Perfil':
         const userPosts = posts.filter(post => post.author.id === user.id);
-        return <ProfilePage user={user} posts={userPosts} onToggleSave={onToggleSave} />;
+        return <ProfilePage user={user} posts={userPosts} onToggleSave={onToggleSave} onViewChange={onViewChange} />;
       case 'Minha Rede':
         return <NetworkPage requests={connectionRequests} suggestions={suggestions} />;
       case 'Salvos':

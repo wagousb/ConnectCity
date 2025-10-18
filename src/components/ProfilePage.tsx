@@ -7,9 +7,10 @@ interface ProfilePageProps {
   user: User;
   posts: Post[];
   onToggleSave: (postId: string) => void;
+  onViewChange: (view: string) => void;
 }
 
-const ProfilePage: React.FC<ProfilePageProps> = ({ user, posts, onToggleSave }) => {
+const ProfilePage: React.FC<ProfilePageProps> = ({ user, posts, onToggleSave, onViewChange }) => {
   const [activeTab, setActiveTab] = useState('Publicações');
   const tabs = ['Publicações', 'Respostas', 'Mídia', 'Curtidas'];
 
@@ -30,9 +31,11 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, posts, onToggleSave }) 
             />
         </div>
         <div className="absolute top-4 right-4">
-             <button className="bg-white/80 backdrop-blur-sm text-slate-800 font-semibold px-4 py-2 rounded-full text-sm hover:bg-white transition-colors flex items-center space-x-2">
+             <button 
+                onClick={() => onViewChange('Configurações')}
+                className="bg-white/80 backdrop-blur-sm text-slate-800 font-semibold px-4 py-2 rounded-full text-sm hover:bg-white transition-colors flex items-center space-x-2">
                 <PencilIcon className="h-4 w-4" />
-                <span>Editar Perfil</span>
+                <span>Editar Capa</span>
             </button>
         </div>
       </div>
