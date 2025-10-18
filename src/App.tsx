@@ -143,6 +143,12 @@ const App: React.FC = () => {
     ));
   };
 
+  const handleUserUpdate = (newProfileData: Partial<User>) => {
+    if (user) {
+      setUser({ ...user, ...newProfileData });
+    }
+  };
+
   if (loading) {
     return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500">Carregando...</div>;
   }
@@ -164,7 +170,7 @@ const App: React.FC = () => {
       <main className="max-w-screen-xl mx-auto py-8 px-4 md:px-6 lg:px-8">
         <div className="grid grid-cols-12 gap-8">
           <div className="col-span-12 lg:col-span-3">
-            <LeftSidebar user={user} currentView={currentView} onViewChange={handleViewChange} />
+            <LeftSidebar user={user} currentView={currentView} onViewChange={handleViewChange} onUserUpdate={handleUserUpdate} />
           </div>
           <div className="col-span-12 lg:col-span-6">
             <MainContent 
@@ -175,6 +181,7 @@ const App: React.FC = () => {
               connectionRequests={connectionRequests}
               onToggleSave={handleToggleSave}
               onViewChange={handleViewChange}
+              onUserUpdate={handleUserUpdate}
             />
           </div>
           <div className="col-span-12 lg:col-span-3">
