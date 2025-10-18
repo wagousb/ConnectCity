@@ -35,7 +35,7 @@ const App: React.FC = () => {
       .from('posts')
       .select(`
         *,
-        author:profiles!inner (
+        author:profiles (
           id,
           name,
           handle,
