@@ -15,13 +15,14 @@ interface MainContentProps {
   onToggleSave: (postId: string) => void;
   onViewChange: (view: string) => void;
   onUserUpdate: (newProfileData: Partial<User>) => void;
+  onPostPublished: () => void;
 }
 
-const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, suggestions, connectionRequests, onToggleSave, onViewChange, onUserUpdate }) => {
+const MainContent: React.FC<MainContentProps> = ({ posts, currentView, user, suggestions, connectionRequests, onToggleSave, onViewChange, onUserUpdate, onPostPublished }) => {
   const renderContent = () => {
     switch (currentView) {
       case 'Feed':
-        return <FeedPage user={user} posts={posts} onToggleSave={onToggleSave} />;
+        return <FeedPage user={user} posts={posts} onToggleSave={onToggleSave} onPostPublished={onPostPublished} />;
       case 'Meu Perfil':
         const userPosts = posts.filter(post => post.author.id === user.id);
         return <ProfilePage user={user} posts={userPosts} onToggleSave={onToggleSave} onViewChange={onViewChange} onUserUpdate={onUserUpdate} />;

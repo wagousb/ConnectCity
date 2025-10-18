@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { User, Post, Suggestion, Trend, ConnectionRequest } from '@/types';
 import Header from '@/components/Header';
 import LeftSidebar from '@/components/LeftSidebar';
@@ -8,15 +8,69 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Session } from '@supabase/supabase-js';
 import Login from '@/pages/Login';
 
+const timeAgo = (date: string | Date): string => {
+    const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + "a";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + "m";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + "d";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + "h";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + "min";
+    return Math.floor(seconds) + "s";
+}
+
 const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [currentView, setCurrentView] = useState('Feed');
+
+  const fetchPosts = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*, author:profiles(*)')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Erro ao buscar posts:', error);
+      return;
+    }
+
+    const formattedPosts: Post[] = data.map(post => ({
+      id: post.id,
+      content: post.content,
+      imageUrl: post.image_url,
+      timestamp: timeAgo(post.created_at),
+      author: {
+        id: post.author.id,
+        name: post.author.name,
+        handle: post.author.handle,
+        avatarUrl: post.author.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
+        bannerUrl: post.author.banner_url,
+        bio: post.author.bio,
+        followers: post.author.followers,
+        following: post.author.following,
+      },
+      likes: 0,
+      comments: 0,
+      shares: 0,
+      saved: false, // Lógica de "salvos" precisaria ser implementada separadamente
+    }));
+    setPosts(formattedPosts);
+  }, []);
 
   useEffect(() => {
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
+      if (session) {
+        await fetchPosts();
+      }
       setLoading(false);
     };
 
@@ -29,7 +83,7 @@ const App: React.FC = () => {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchPosts]);
 
   useEffect(() => {
     if (session?.user) {
@@ -69,51 +123,6 @@ const App: React.FC = () => {
       setUser(null);
     }
   }, [session]);
-
-  const [currentView, setCurrentView] = useState('Feed');
-  const [posts, setPosts] = useState<Post[]>([
-    {
-      id: 'p1',
-      author: { id: 'u2', name: 'Carlos Silva', handle: 'carlossilva', avatarUrl: 'https://ui-avatars.com/api/?name=Carlos+Silva&background=eef2ff&color=4f46e5' },
-      content: 'Acabei de lançar um novo projeto de código aberto no GitHub! É uma biblioteca de componentes de UI para React. Confiram e me digam o que acham. #react #opensource #development\n\nhttps://github.com/example/repo',
-      timestamp: '2h',
-      likes: 128,
-      comments: 24,
-      shares: 15,
-      saved: false,
-    },
-    {
-      id: 'p2',
-      author: { id: 'u1', name: 'alex johnson', handle: 'alexj', avatarUrl: 'https://ui-avatars.com/api/?name=Alex+Johnson&background=eef2ff&color=4f46e5' },
-      content: 'Explorando as novas funcionalidades do CSS Grid e Flexbox. Incrível como a web evoluiu! Qual é a sua propriedade CSS favorita?',
-      imageUrl: 'https://picsum.photos/seed/post2/600/400',
-      timestamp: '5h',
-      likes: 256,
-      comments: 64,
-      shares: 32,
-      saved: true,
-    },
-    {
-      id: 'p3',
-      author: { id: 'u3', name: 'Beatriz Costa', handle: 'beacosta', avatarUrl: 'https://ui-avatars.com/api/?name=Beatriz+Costa&background=eef2ff&color=4f46e5' },
-      content: 'Participando de um webinar sobre IA generativa. O futuro é agora! 🤯',
-      timestamp: '1d',
-      likes: 98,
-      comments: 12,
-      shares: 5,
-      saved: false,
-    },
-    {
-      id: 'p4',
-      author: { id: 'u1', name: 'alex johnson', handle: 'alexj', avatarUrl: 'https://ui-avatars.com/api/?name=Alex+Johnson&background=eef2ff&color=4f46e5' },
-      content: 'Dica do dia: Use `Promise.allSettled` quando precisar que todas as promessas sejam concluídas, independentemente de sucesso ou falha. Muito útil para lidar com múltiplas chamadas de API de forma robusta. #javascript #protip',
-      timestamp: '2d',
-      likes: 412,
-      comments: 88,
-      shares: 50,
-      saved: false,
-    }
-  ]);
   
   const [suggestions] = useState<Suggestion[]>([
     { id: 's1', user: { id: 'u4', name: 'Daniel Almeida', handle: 'danielalmeida', avatarUrl: 'https://ui-avatars.com/api/?name=Daniel+Almeida&background=eef2ff&color=4f46e5' } },
@@ -157,13 +166,6 @@ const App: React.FC = () => {
     return <Login />;
   }
 
-  const userPosts = posts.map(post => {
-    if (post.author.handle === 'alexj') {
-      return { ...post, author: user };
-    }
-    return post;
-  });
-
   return (
     <div className="bg-slate-50 min-h-screen">
       <Header user={user} onViewChange={handleViewChange} />
@@ -174,7 +176,7 @@ const App: React.FC = () => {
           </div>
           <div className="col-span-12 lg:col-span-6">
             <MainContent 
-              posts={userPosts} 
+              posts={posts} 
               currentView={currentView} 
               user={user} 
               suggestions={suggestions}
@@ -182,6 +184,7 @@ const App: React.FC = () => {
               onToggleSave={handleToggleSave}
               onViewChange={handleViewChange}
               onUserUpdate={handleUserUpdate}
+              onPostPublished={fetchPosts}
             />
           </div>
           <div className="col-span-12 lg:col-span-3">

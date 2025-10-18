@@ -7,12 +7,13 @@ interface FeedPageProps {
     user: User;
     posts: Post[];
     onToggleSave: (postId: string) => void;
+    onPostPublished: () => void;
 }
 
-const FeedPage: React.FC<FeedPageProps> = ({ user, posts, onToggleSave }) => {
+const FeedPage: React.FC<FeedPageProps> = ({ user, posts, onToggleSave, onPostPublished }) => {
     return (
         <div className="space-y-6">
-            <PostComposer user={user} />
+            <PostComposer user={user} onPostPublished={onPostPublished} />
             {posts.map(post => (
                 <PostCard key={post.id} post={post} onToggleSave={onToggleSave} />
             ))}
