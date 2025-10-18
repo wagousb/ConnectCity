@@ -124,7 +124,9 @@ const App: React.FC = () => {
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
-      setLoading(false);
+      if (!session) {
+        setLoading(false);
+      }
     };
 
     getSession();
@@ -139,7 +141,11 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (session?.user) {
+    // This effect runs when the session changes.
+    // We only want to fetch the user's profile and posts on the initial load.
+    // The `!user` check prevents this from running every time the tab is focused,
+    // which can cause a session refresh.
+    if (session?.user && !user) {
       const fetchInitialData = async () => {
         setLoading(true);
         const userId = session.user.id;
@@ -174,10 +180,11 @@ const App: React.FC = () => {
         setLoading(false);
       };
       fetchInitialData();
-    } else {
+    } else if (!session?.user) {
+      // Handle logout
       setUser(null);
     }
-  }, [session, fetchPosts]);
+  }, [session, user, fetchPosts]);
 
   useEffect(() => {
     const fetchViewData = async () => {
