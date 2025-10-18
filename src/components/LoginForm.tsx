@@ -1,0 +1,71 @@
+import React, { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+
+const LoginForm: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setError('E-mail ou senha inválidos.');
+    }
+  };
+
+  return (
+    <form className="space-y-4" onSubmit={handleLogin}>
+      <div>
+        <label className="text-sm font-medium text-slate-700" htmlFor="email">
+          Endereço de e-mail
+        </label>
+        <input
+          id="email"
+          className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+          type="email"
+          placeholder="seu@email.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-slate-700" htmlFor="password">
+          Sua senha
+        </label>
+        <input
+          id="password"
+          className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+          type="password"
+          placeholder="Sua senha"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </div>
+      {error && <p className="text-sm text-red-600 text-center">{error}</p>}
+      <div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:bg-primary-300"
+        >
+          {loading ? 'Entrando...' : 'Entrar'}
+        </button>
+      </div>
+    </form>
+  );
+};
+
+export default LoginForm;

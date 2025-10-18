@@ -1,0 +1,118 @@
+import React, { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+
+const SignUpForm: React.FC = () => {
+  const [name, setName] = useState('');
+  const [handle, setHandle] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setMessage(null);
+
+    if (password.length < 6) {
+      setError('A senha deve ter pelo menos 6 caracteres.');
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+          handle,
+        },
+      },
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setError(error.message);
+    } else {
+      setMessage('Cadastro realizado com sucesso! Verifique seu e-mail para confirmar sua conta.');
+    }
+  };
+
+  return (
+    <form className="space-y-4" onSubmit={handleSignUp}>
+      <div>
+        <label className="text-sm font-medium text-slate-700" htmlFor="name">
+          Nome completo
+        </label>
+        <input
+          id="name"
+          className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+          type="text"
+          placeholder="Seu nome completo"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-slate-700" htmlFor="handle">
+          Nome de usuário
+        </label>
+        <input
+          id="handle"
+          className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+          type="text"
+          placeholder="ex: seunome"
+          value={handle}
+          onChange={(e) => setHandle(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-slate-700" htmlFor="email">
+          E-mail
+        </label>
+        <input
+          id="email"
+          className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+          type="email"
+          placeholder="seu@email.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-slate-700" htmlFor="password">
+          Senha
+        </label>
+        <input
+          id="password"
+          className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+          type="password"
+          placeholder="Mínimo de 6 caracteres"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </div>
+      {error && <p className="text-sm text-red-600 text-center">{error}</p>}
+      {message && <p className="text-sm text-green-600 text-center">{message}</p>}
+      <div>
+        <button
+          type="submit"
+          disabled={loading || !!message}
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:bg-primary-300"
+        >
+          {loading ? 'Cadastrando...' : 'Cadastrar'}
+        </button>
+      </div>
+    </form>
+  );
+};
+
+export default SignUpForm;
