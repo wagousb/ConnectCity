@@ -33,7 +33,19 @@ const App: React.FC = () => {
   const fetchPosts = useCallback(async () => {
     const { data, error } = await supabase
       .from('posts')
-      .select('*, author:profiles!user_id(*)')
+      .select(`
+        *,
+        author:profiles (
+          id,
+          name,
+          handle,
+          avatar_url,
+          banner_url,
+          bio,
+          followers,
+          following
+        )
+      `)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -49,14 +61,14 @@ const App: React.FC = () => {
         imageUrl: post.image_url,
         timestamp: timeAgo(post.created_at),
         author: {
-          id: post.author.id,
-          name: post.author.name,
-          handle: post.author.handle,
-          avatarUrl: post.author.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
-          bannerUrl: post.author.banner_url,
-          bio: post.author.bio,
-          followers: post.author.followers,
-          following: post.author.following,
+          id: (post.author as any).id,
+          name: (post.author as any).name,
+          handle: (post.author as any).handle,
+          avatarUrl: (post.author as any).avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent((post.author as any).name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
+          bannerUrl: (post.author as any).banner_url,
+          bio: (post.author as any).bio,
+          followers: (post.author as any).followers,
+          following: (post.author as any).following,
         },
         likes: 0,
         comments: 0,
