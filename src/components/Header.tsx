@@ -1,17 +1,50 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { User } from '@/types';
-import { HomeIcon, SearchIcon, UsersIcon, BellIcon } from '@/components/Icons';
+import { HomeIcon, SearchIcon, UsersIcon, BellIcon, SettingsIcon, LogoutIcon, ShieldCheckIcon, UserCircleIcon } from '@/components/Icons';
 import RoleBadge from './RoleBadge';
+import { supabase } from '@/integrations/supabase/client';
 
 interface HeaderProps {
   user: User;
   onViewChange: (view: { view: string; userId?: string }) => void;
   hasUnreadNotifications: boolean;
+  isModerator: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotifications }) => {
+const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotifications, isModerator }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+        console.error('Error logging out:', error);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const menuItems = [
+    { name: 'Meu Perfil', icon: <UserCircleIcon className="h-5 w-5" />, action: () => onViewChange({ view: 'Meu Perfil' }) },
+    { name: 'Configurações', icon: <SettingsIcon className="h-5 w-5" />, action: () => onViewChange({ view: 'Configurações' }) },
+  ];
+
+  if (isModerator) {
+    menuItems.push({ name: 'Moderação', icon: <ShieldCheckIcon className="h-5 w-5" />, action: () => onViewChange({ view: 'Moderação' }) });
+  }
+
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+    <header className="bg-white border-b border-slate-200 sticky top-0 z-20">
       <div className="max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
@@ -32,7 +65,7 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotificati
               />
             </div>
           </div>
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-2 md:space-x-6">
             <button 
               onClick={() => onViewChange({ view: 'Feed' })}
               className="text-slate-500 hover:text-primary p-2 rounded-full hover:bg-primary-50 hidden md:flex">
@@ -51,18 +84,59 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotificati
                 <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
               )}
             </button>
-            <button 
-              onClick={() => onViewChange({ view: 'Meu Perfil' })}
-              className="flex items-center space-x-3 cursor-pointer p-1 rounded-md hover:bg-slate-100">
-              <img src={user.avatarUrl} alt={user.name} className="h-9 w-9 rounded-full" />
-              <div className="hidden lg:block text-sm text-left">
-                <div className="flex items-center gap-2">
-                    <p className="font-semibold text-slate-800 whitespace-nowrap">{user.name}</p>
-                    <RoleBadge role={user.role} />
+            <div className="relative" ref={menuRef}>
+              <button 
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="flex items-center space-x-3 cursor-pointer p-1 rounded-full hover:bg-slate-100">
+                <img src={user.avatarUrl} alt={user.name} className="h-9 w-9 rounded-full" />
+                <div className="hidden lg:block text-sm text-left">
+                  <div className="flex items-center gap-2">
+                      <p className="font-semibold text-slate-800 whitespace-nowrap">{user.name}</p>
+                      <RoleBadge role={user.role} />
+                  </div>
+                  <p className="text-slate-500">@{user.handle}</p>
                 </div>
-                <p className="text-slate-500">@{user.handle}</p>
-              </div>
-            </button>
+              </button>
+              {isMenuOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-slate-200 py-2">
+                  <div className="px-4 py-2 border-b border-slate-200">
+                    <p className="font-bold text-slate-800">{user.name}</p>
+                    <p className="text-sm text-slate-500">@{user.handle}</p>
+                  </div>
+                  <ul className="py-2">
+                    {menuItems.map(item => (
+                      <li key={item.name}>
+                        <a
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            item.action();
+                            setIsMenuOpen(false);
+                          }}
+                          className="flex items-center space-x-3 px-4 py-2 text-slate-700 hover:bg-slate-50"
+                        >
+                          {item.icon}
+                          <span>{item.name}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="border-t border-slate-200">
+                    <a
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleLogout();
+                      }}
+                      className="flex items-center space-x-3 px-4 py-3 text-slate-700 hover:bg-red-50 hover:text-red-600"
+                    >
+                      <LogoutIcon className="h-5 w-5" />
+                      <span>Sair</span>
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

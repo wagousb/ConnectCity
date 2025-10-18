@@ -420,11 +420,11 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen">
-      <Header user={user} onViewChange={handleViewChange} hasUnreadNotifications={hasUnreadNotifications} />
+      <Header user={user} onViewChange={handleViewChange} hasUnreadNotifications={hasUnreadNotifications} isModerator={isModerator} />
       <main className="max-w-screen-xl mx-auto py-8 px-4 md:px-6 lg:px-8">
         <div className="grid grid-cols-12 gap-8">
-          <div className="col-span-12 lg:col-span-3">
-            <LeftSidebar user={user} currentView={currentView.view} onViewChange={handleViewChange} onUserUpdate={handleUserUpdate} isModerator={isModerator} />
+          <div className="hidden lg:block lg:col-span-3">
+            <LeftSidebar user={user} currentView={currentView.view} onViewChange={handleViewChange} isModerator={isModerator} />
           </div>
           <div className="col-span-12 lg:col-span-6">
             <MainContent 
@@ -445,7 +445,7 @@ const App: React.FC = () => {
               showWelcomeMessage={showWelcomeMessage}
             />
           </div>
-          <div className="col-span-12 lg:col-span-3">
+          <div className="hidden lg:block lg:col-span-3">
              <RightSidebar trends={trends} />
           </div>
         </div>

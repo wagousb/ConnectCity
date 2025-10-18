@@ -7,14 +7,13 @@ interface LeftSidebarProps {
   user: User;
   currentView: string;
   onViewChange: (view: { view: string; userId?: string }) => void;
-  onUserUpdate: (newProfileData: Partial<User>) => void;
   isModerator: boolean;
 }
 
-const LeftSidebar: React.FC<LeftSidebarProps> = ({ user, currentView, onViewChange, onUserUpdate, isModerator }) => {
+const LeftSidebar: React.FC<LeftSidebarProps> = ({ user, currentView, onViewChange, isModerator }) => {
   return (
     <aside className="space-y-6 sticky top-24">
-      <ProfileCard user={user} onViewChange={(viewName) => onViewChange({ view: viewName })} onUserUpdate={onUserUpdate} />
+      <ProfileCard user={user} onViewChange={(viewName) => onViewChange({ view: viewName })} />
       <NavLinks activeLink={currentView} onLinkClick={(viewName) => onViewChange({ view: viewName })} isModerator={isModerator} />
     </aside>
   );
