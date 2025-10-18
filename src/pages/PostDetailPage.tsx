@@ -9,9 +9,11 @@ interface PostDetailPageProps {
   currentUser: User;
   onVote: (postId: string, rating: number) => void;
   onViewChange: (view: { view: string; userId?: string; postId?: string }) => void;
+  onPostDeleted: (postId: string) => void;
+  onPostUpdated: (updatedPost: Post) => void;
 }
 
-const PostDetailPage: React.FC<PostDetailPageProps> = ({ post, currentUser, onVote, onViewChange }) => {
+const PostDetailPage: React.FC<PostDetailPageProps> = ({ post, currentUser, onVote, onViewChange, onPostDeleted, onPostUpdated }) => {
   return (
     <div className="space-y-6">
       <div className="mb-4">
@@ -23,7 +25,14 @@ const PostDetailPage: React.FC<PostDetailPageProps> = ({ post, currentUser, onVo
           <span>Voltar para o Feed</span>
         </button>
       </div>
-      <PostCard post={post} currentUser={currentUser} onVote={onVote} onViewChange={onViewChange} />
+      <PostCard 
+        post={post} 
+        currentUser={currentUser} 
+        onVote={onVote} 
+        onViewChange={onViewChange} 
+        onPostDeleted={onPostDeleted}
+        onPostUpdated={onPostUpdated}
+      />
     </div>
   );
 };

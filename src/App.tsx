@@ -101,6 +101,7 @@ const App: React.FC = () => {
           imageUrl: post.image_url,
           document_url: post.document_url,
           timestamp: timeAgo(post.created_at),
+          edited_at: post.edited_at,
           author: {
             id: profile.id,
             name: profile.name,
@@ -259,6 +260,7 @@ const App: React.FC = () => {
                 id: post.id, title: post.title, target_entity: post.target_entity, content: post.content, imageUrl: post.image_url, document_url: post.document_url,
                 timestamp: timeAgo(post.created_at), author: formattedProfile, comments: (post.comments as any)[0]?.count || 0, shares: 0,
                 average_rating: postRating ? postRating.sum / postRating.total : 0, user_rating: postRating?.userRating || 0, total_votes: postRating?.total || 0,
+                edited_at: post.edited_at,
               }
             });
             setViewedProfilePosts(formattedPosts);
@@ -311,6 +313,7 @@ const App: React.FC = () => {
           imageUrl: postData.image_url,
           document_url: postData.document_url,
           timestamp: timeAgo(postData.created_at),
+          edited_at: postData.edited_at,
           author: {
             id: profileData.id,
             name: profileData.name,
@@ -410,6 +413,23 @@ const App: React.FC = () => {
     }
   };
 
+  const handlePostDeleted = (postId: string) => {
+    setPosts(posts.filter(p => p.id !== postId));
+    setViewedProfilePosts(viewedProfilePosts.filter(p => p.id !== postId));
+    if (currentView.view === 'PostDetail' && currentView.postId === postId) {
+      setCurrentView({ view: 'Feed' });
+    }
+  };
+
+  const handlePostUpdated = (updatedPost: Post) => {
+    const mapFn = (p: Post) => p.id === updatedPost.id ? updatedPost : p;
+    setPosts(posts.map(mapFn));
+    setViewedProfilePosts(viewedProfilePosts.map(mapFn));
+    if (viewedPost && viewedPost.id === updatedPost.id) {
+      setViewedPost(updatedPost);
+    }
+  };
+
   if (loading) {
     return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500">Carregando...</div>;
   }
@@ -435,6 +455,8 @@ const App: React.FC = () => {
               onViewChange={handleViewChange}
               onUserUpdate={handleUserUpdate}
               onPostPublished={() => fetchPosts(user.id)}
+              onPostDeleted={handlePostDeleted}
+              onPostUpdated={handlePostUpdated}
               viewedProfile={viewedProfile}
               viewedProfilePosts={viewedProfilePosts}
               isProfileLoading={isProfileLoading}

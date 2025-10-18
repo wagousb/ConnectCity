@@ -17,6 +17,8 @@ interface ProfilePageProps {
   onVote: (postId: string, rating: number) => void;
   onViewChange: (view: { view: string; userId?: string; postId?: string }) => void;
   onUserUpdate: (newProfileData: Partial<User>) => void;
+  onPostDeleted: (postId: string) => void;
+  onPostUpdated: (updatedPost: Post) => void;
   isFirstLogin?: boolean;
 }
 
@@ -27,7 +29,7 @@ interface GroupedContribution {
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ 
-  profileUser, currentUser, posts, onVote, onViewChange, onUserUpdate, isFirstLogin
+  profileUser, currentUser, posts, onVote, onViewChange, onUserUpdate, onPostDeleted, onPostUpdated, isFirstLogin
 }) => {
   const [activeTab, setActiveTab] = useState('Ideias enviadas');
   const [contributions, setContributions] = useState<GroupedContribution[]>([]);
@@ -201,7 +203,15 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
             <div className="space-y-6 p-6">
               {posts.length > 0 ? (
                 posts.map(post => (
-                  <PostCard key={post.id} post={post} currentUser={currentUser} onVote={onVote} onViewChange={onViewChange} />
+                  <PostCard 
+                    key={post.id} 
+                    post={post} 
+                    currentUser={currentUser} 
+                    onVote={onVote} 
+                    onViewChange={onViewChange} 
+                    onPostDeleted={onPostDeleted}
+                    onPostUpdated={onPostUpdated}
+                  />
                 ))
               ) : (
                 <p className="text-slate-500 text-center py-8">Nenhuma ideia enviada ainda.</p>
