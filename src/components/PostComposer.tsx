@@ -132,7 +132,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished }) =>
             required
           >
             <option value="" disabled>Escolha um destinatário</option>
-            <option value="Prefeitura (executivo)">Prefeitura (executivo)</option>
+            <option value="Prefeitura (Executivo)">Prefeitura (Executivo)</option>
             <option value="Câmara de vereadores (Legislativo)">Câmara de vereadores (Legislativo)</option>
             <option value="Secretários">Secretários</option>
           </select>
