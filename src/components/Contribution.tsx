@@ -71,13 +71,17 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
   };
 
   return (
-    <div className="flex space-x-3">
-      <img src={comment.author.avatarUrl} alt={comment.author.name} className="h-10 w-10 rounded-full" />
+    <div className="flex items-start space-x-3">
+      <div className="flex flex-col items-center">
+        <img src={comment.author.avatarUrl} alt={comment.author.name} className="h-10 w-10 rounded-full" />
+        <div className="mt-1">
+          <RoleBadge role={comment.author.role} />
+        </div>
+      </div>
       <div className="flex-1">
         <div className="bg-slate-50 rounded-lg p-3">
           <div className="flex items-center space-x-2">
             <span className="font-bold text-sm">{comment.author.name}</span>
-            <RoleBadge role={comment.author.role} />
             <span className="text-xs text-slate-500">@{comment.author.handle}</span>
             <span className="text-xs text-slate-400">&middot; {timeAgo(comment.created_at)}</span>
           </div>

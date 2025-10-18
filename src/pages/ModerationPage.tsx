@@ -53,15 +53,19 @@ const ModerationPage: React.FC = () => {
       <div className="space-y-4">
         {users.map(user => (
           <div key={user.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-200">
-            <div className="flex items-center space-x-4">
-              <img src={user.avatarUrl} alt={user.name} className="h-12 w-12 rounded-full" />
+            <div className="flex items-start space-x-4">
+              <div className="flex flex-col items-center">
+                <img src={user.avatarUrl} alt={user.name} className="h-12 w-12 rounded-full" />
+                <div className="mt-1">
+                  <RoleBadge role={user.role} />
+                </div>
+              </div>
               <div>
                 <p className="font-bold text-slate-800">{user.name}</p>
                 <p className="text-sm text-slate-500">@{user.handle}</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-                <RoleBadge role={user.role} />
                 <select
                     value={user.role}
                     onChange={(e) => handleRoleChange(user.id, e.target.value)}

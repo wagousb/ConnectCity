@@ -51,15 +51,17 @@ const MembersPage: React.FC<MembersPageProps> = ({ currentUser, onViewChange }) 
           {members.map(member => (
             <div
               key={member.id}
-              className="flex items-center space-x-4 p-3 rounded-lg hover:bg-slate-50 cursor-pointer"
+              className="flex items-start space-x-4 p-3 rounded-lg hover:bg-slate-50 cursor-pointer"
               onClick={() => onViewChange({ view: 'Profile', userId: member.id })}
             >
-              <img src={member.avatarUrl} alt={member.name} className="h-12 w-12 rounded-full" />
-              <div>
-                <div className="flex items-center space-x-2">
-                    <p className="font-bold text-slate-800 hover:underline">{member.name}</p>
-                    <RoleBadge role={member.role} />
+              <div className="flex flex-col items-center">
+                <img src={member.avatarUrl} alt={member.name} className="h-12 w-12 rounded-full" />
+                <div className="mt-1">
+                  <RoleBadge role={member.role} />
                 </div>
+              </div>
+              <div>
+                <p className="font-bold text-slate-800 hover:underline">{member.name}</p>
                 <p className="text-sm text-slate-500">@{member.handle}</p>
               </div>
             </div>

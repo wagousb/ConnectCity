@@ -55,16 +55,21 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200">
       <div className="flex items-start justify-between">
-        <div 
-          className="flex items-center space-x-4 cursor-pointer"
-          onClick={() => onViewChange({ view: 'Profile', userId: post.author.id })}
-        >
-          <img src={post.author.avatarUrl} alt={post.author.name} className="h-12 w-12 rounded-full" />
-          <div>
-            <div className="flex items-center space-x-2">
-                <p className="font-bold hover:underline">{post.author.name}</p>
-                <RoleBadge role={post.author.role} />
+        <div className="flex items-start space-x-4">
+          <div 
+            className="flex flex-col items-center cursor-pointer"
+            onClick={() => onViewChange({ view: 'Profile', userId: post.author.id })}
+          >
+            <img src={post.author.avatarUrl} alt={post.author.name} className="h-12 w-12 rounded-full" />
+            <div className="mt-1">
+              <RoleBadge role={post.author.role} />
             </div>
+          </div>
+          <div 
+            className="cursor-pointer"
+            onClick={() => onViewChange({ view: 'Profile', userId: post.author.id })}
+          >
+            <p className="font-bold hover:underline">{post.author.name}</p>
             <p className="text-sm text-slate-500">@{post.author.handle} &middot; {post.timestamp}</p>
           </div>
         </div>
