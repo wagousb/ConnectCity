@@ -29,6 +29,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const [currentView, setCurrentView] = useState('Feed');
 
   const fetchPosts = useCallback(async () => {
@@ -93,7 +94,7 @@ const App: React.FC = () => {
     setPosts(formattedPosts);
   }, []);
 
-  const fetchSuggestions = useCallback(async (userId: string) => {
+  const fetchSuggestions = useCallback(async (userId: string, currentFollowingIds: Set<string>) => {
     const { data: profilesData, error } = await supabase
       .from('profiles')
       .select('*')
@@ -112,6 +113,7 @@ const App: React.FC = () => {
         name: profile.name || 'Usuário',
         handle: profile.handle || 'usuário',
         avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
+        isFollowing: currentFollowingIds.has(profile.id),
       }
     }));
     setSuggestions(formattedSuggestions);
@@ -121,9 +123,6 @@ const App: React.FC = () => {
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
-      if (session) {
-        await fetchPosts();
-      }
       setLoading(false);
     };
 
@@ -131,55 +130,72 @@ const App: React.FC = () => {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (_event === 'SIGNED_IN') {
-        fetchPosts();
-      }
     });
 
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [fetchPosts]);
+  }, []);
 
   useEffect(() => {
     if (session?.user) {
-      const fetchProfileAndSuggestions = async () => {
-        const { data, error } = await supabase
+      const fetchInitialData = async () => {
+        setLoading(true);
+        // Fetch profile
+        const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
           .single();
 
-        if (error) {
-          console.error('Erro ao buscar perfil:', error);
-        } else if (data) {
-          const nameForAvatar = data.name || session.user.email || 'U';
-          const avatarUrl = data.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&background=eef2ff&color=4f46e5&font-size=0.5`;
-
+        if (profileError) {
+          console.error('Erro ao buscar perfil:', profileError);
+        } else if (profileData) {
+          const nameForAvatar = profileData.name || session.user.email || 'U';
+          const avatarUrl = profileData.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&background=eef2ff&color=4f46e5&font-size=0.5`;
           const profile: User = {
-            id: data.id,
-            name: data.name || session.user.email || 'Usuário',
-            handle: data.handle || 'usuário',
+            id: profileData.id,
+            name: profileData.name || session.user.email || 'Usuário',
+            handle: profileData.handle || 'usuário',
             avatarUrl: avatarUrl,
-            bannerUrl: data.banner_url || 'https://picsum.photos/seed/banner1/1500/500',
-            followers: data.followers || 0,
-            following: data.following || 0,
-            bio: data.bio || 'Bem-vindo ao ConnectCity!',
-            date_of_birth: data.date_of_birth,
-            is_public: data.is_public,
-            notifications_on_likes: data.notifications_on_likes,
-            notifications_on_comments: data.notifications_on_comments,
-            notifications_on_new_followers: data.notifications_on_new_followers,
+            bannerUrl: profileData.banner_url || 'https://picsum.photos/seed/banner1/1500/500',
+            followers: profileData.followers || 0,
+            following: profileData.following || 0,
+            bio: profileData.bio || 'Bem-vindo ao ConnectCity!',
+            date_of_birth: profileData.date_of_birth,
+            is_public: profileData.is_public,
+            notifications_on_likes: profileData.notifications_on_likes,
+            notifications_on_comments: profileData.notifications_on_comments,
+            notifications_on_new_followers: profileData.notifications_on_new_followers,
           };
           setUser(profile);
         }
-        await fetchSuggestions(session.user.id);
+
+        // Fetch following IDs
+        const { data: followingData, error: followingError } = await supabase
+          .from('followers')
+          .select('following_id')
+          .eq('follower_id', session.user.id);
+        
+        let currentFollowingIds = new Set<string>();
+        if (followingError) {
+          console.error('Error fetching following list:', followingError);
+        } else {
+          currentFollowingIds = new Set(followingData.map(f => f.following_id));
+          setFollowingIds(currentFollowingIds);
+        }
+
+        await fetchPosts();
+        await fetchSuggestions(session.user.id, currentFollowingIds);
+        setLoading(false);
       };
-      fetchProfileAndSuggestions();
+      fetchInitialData();
     } else {
       setUser(null);
+      setFollowingIds(new Set());
+      setSuggestions([]);
     }
-  }, [session, fetchSuggestions]);
+  }, [session, fetchPosts, fetchSuggestions]);
   
   const [trends] = useState<Trend[]>([
     { id: 't1', hashtag: '#ReactJS', postCount: '12.5k publicações' },
@@ -206,6 +222,52 @@ const App: React.FC = () => {
   const handleUserUpdate = (newProfileData: Partial<User>) => {
     if (user) {
       setUser({ ...user, ...newProfileData });
+    }
+  };
+
+  const handleFollowToggle = async (targetUserId: string) => {
+    if (!user) return;
+
+    const isCurrentlyFollowing = followingIds.has(targetUserId);
+    const originalSuggestions = [...suggestions];
+    const originalFollowingIds = new Set(followingIds);
+    const originalUser = user;
+
+    // Optimistic UI Update
+    const newSuggestions = suggestions.map(s =>
+        s.user.id === targetUserId
+            ? { ...s, user: { ...s.user, isFollowing: !isCurrentlyFollowing } }
+            : s
+    );
+    setSuggestions(newSuggestions);
+
+    const newFollowingIds = new Set(originalFollowingIds);
+    if (isCurrentlyFollowing) {
+        newFollowingIds.delete(targetUserId);
+    } else {
+        newFollowingIds.add(targetUserId);
+    }
+    setFollowingIds(newFollowingIds);
+    
+    setUser(currentUser => currentUser ? { ...currentUser, following: (currentUser.following || 0) + (isCurrentlyFollowing ? -1 : 1) } : null);
+
+    // Database Operation
+    if (isCurrentlyFollowing) {
+        const { error } = await supabase.from('followers').delete().match({ follower_id: user.id, following_id: targetUserId });
+        if (error) {
+            console.error("Error unfollowing:", error);
+            setSuggestions(originalSuggestions);
+            setFollowingIds(originalFollowingIds);
+            setUser(originalUser);
+        }
+    } else {
+        const { error } = await supabase.from('followers').insert({ follower_id: user.id, following_id: targetUserId });
+        if (error) {
+            console.error("Error following:", error);
+            setSuggestions(originalSuggestions);
+            setFollowingIds(originalFollowingIds);
+            setUser(originalUser);
+        }
     }
   };
 
@@ -239,7 +301,7 @@ const App: React.FC = () => {
             />
           </div>
           <div className="col-span-12 lg:col-span-3">
-             <RightSidebar suggestions={suggestions} trends={trends} />
+             <RightSidebar suggestions={suggestions} trends={trends} onFollowToggle={handleFollowToggle} />
           </div>
         </div>
       </main>

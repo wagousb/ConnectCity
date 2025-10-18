@@ -12,6 +12,7 @@ export interface User {
   notifications_on_likes?: boolean;
   notifications_on_comments?: boolean;
   notifications_on_new_followers?: boolean;
+  isFollowing?: boolean;
 }
 
 export interface Post {

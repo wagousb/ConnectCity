@@ -6,12 +6,13 @@ import TrendingTopics from '@/components/TrendingTopics';
 interface RightSidebarProps {
   suggestions: Suggestion[];
   trends: Trend[];
+  onFollowToggle: (targetUserId: string) => void;
 }
 
-const RightSidebar: React.FC<RightSidebarProps> = ({ suggestions, trends }) => {
+const RightSidebar: React.FC<RightSidebarProps> = ({ suggestions, trends, onFollowToggle }) => {
   return (
     <aside className="space-y-6 sticky top-24">
-      <WhoToFollow suggestions={suggestions} />
+      <WhoToFollow suggestions={suggestions} onFollowToggle={onFollowToggle} />
       <TrendingTopics trends={trends} />
     </aside>
   );
