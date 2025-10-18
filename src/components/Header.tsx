@@ -37,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange }) => {
               <HomeIcon className="h-6 w-6" />
             </button>
             <button 
-              onClick={() => onViewChange({ view: 'Minha Rede' })}
+              onClick={() => onViewChange({ view: 'Membros' })}
               className="text-slate-500 hover:text-primary p-2 rounded-full hover:bg-primary-50">
               <UsersIcon className="h-6 w-6" />
             </button>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import type { User, Post, Suggestion, Trend, ConnectionRequest } from '@/types';
+import type { User, Post, Trend } from '@/types';
 import Header from '@/components/Header';
 import LeftSidebar from '@/components/LeftSidebar';
 import MainContent from '@/components/MainContent';
@@ -28,7 +28,6 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [likedPostIds, setLikedPostIds] = useState<Set<string>>(new Set());
   
   const [currentView, setCurrentView] = useState<{ view: string; userId?: string }>({ view: 'Feed' });
@@ -258,11 +257,6 @@ const App: React.FC = () => {
     { id: 't4', hashtag: '#UXDesign', postCount: '3.7k publicações' },
   ]);
   
-  const [connectionRequests] = useState<ConnectionRequest[]>([
-      { id: 'cr1', user: { id: 'u7', name: 'Helena Santos', handle: 'helenasantos', avatarUrl: 'https://ui-avatars.com/api/?name=Helena+Santos&background=eef2ff&color=4f46e5' }, mutuals: 12 },
-      { id: 'cr2', user: { id: 'u8', name: 'Igor Martins', handle: 'igormartins', avatarUrl: 'https://ui-avatars.com/api/?name=Igor+Martins&background=eef2ff&color=4f46e5' }, mutuals: 5 },
-  ]);
-
   const handleViewChange = (view: { view: string; userId?: string }) => {
     if (view.view === 'Profile' && view.userId === currentView.userId && currentView.view === 'Profile') {
       return;
@@ -328,8 +322,6 @@ const App: React.FC = () => {
               posts={posts} 
               currentView={currentView.view} 
               user={user} 
-              suggestions={suggestions}
-              connectionRequests={connectionRequests}
               onToggleSave={handleToggleSave}
               onToggleLike={handleToggleLike}
               onViewChange={handleViewChange}

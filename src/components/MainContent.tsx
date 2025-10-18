@@ -1,9 +1,9 @@
 import React from 'react';
-import type { Post, User, Suggestion, ConnectionRequest } from '@/types';
+import type { Post, User } from '@/types';
 import PostCard from '@/components/PostCard';
 import ProfilePage from '@/components/ProfilePage';
 import FeedPage from '@/components/FeedPage';
-import NetworkPage from '@/components/NetworkPage';
+import MembersPage from '@/pages/MembersPage';
 import SettingsPage from '@/components/SettingsPage';
 import NotificationsPage from '@/pages/NotificationsPage';
 
@@ -11,8 +11,6 @@ interface MainContentProps {
   posts: Post[];
   currentView: string;
   user: User;
-  suggestions: Suggestion[];
-  connectionRequests: ConnectionRequest[];
   onToggleSave: (postId: string) => void;
   onToggleLike: (postId: string, isLiked: boolean) => void;
   onViewChange: (view: { view: string; userId?: string }) => void;
@@ -24,7 +22,7 @@ interface MainContentProps {
 }
 
 const MainContent: React.FC<MainContentProps> = ({ 
-  posts, currentView, user, suggestions, connectionRequests, onToggleSave, onToggleLike, 
+  posts, currentView, user, onToggleSave, onToggleLike, 
   onViewChange, onUserUpdate, onPostPublished,
   viewedProfile, viewedProfilePosts, isProfileLoading
 }) => {
@@ -55,8 +53,8 @@ const MainContent: React.FC<MainContentProps> = ({
                   onUserUpdate={onUserUpdate}
                   onToggleLike={onToggleLike}
                 />;
-      case 'Minha Rede':
-        return <NetworkPage requests={connectionRequests} suggestions={suggestions} />;
+      case 'Membros':
+        return <MembersPage currentUser={user} onViewChange={onViewChange} />;
       case 'Salvos':
         const savedPosts = posts.filter(post => post.saved);
         return (
