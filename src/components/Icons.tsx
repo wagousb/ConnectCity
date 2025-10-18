@@ -145,3 +145,11 @@ export const ThumbsDownIcon = (props: React.SVGProps<SVGSVGElement>) => (
         <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a2 2 0 0 1-3-1.88z" />
     </svg>
 );
+
+export const LightbulbIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M9 18h6" />
+        <path d="M10 22h4" />
+        <path d="M12 2a7 7 0 0 0-7 7c0 3.03 1.09 5.14 2.5 6.58.91.91 1.5 2.32 1.5 3.42V20h6v-1c0-1.1.59-2.51 1.5-3.42C17.91 14.14 19 12.03 19 9a7 7 0 0 0-7-7z" />
+    </svg>
+);
