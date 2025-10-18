@@ -131,10 +131,10 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished }) =>
             className={`w-full border-slate-200 border rounded-lg p-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary-200 ${!targetEntity ? 'text-slate-400' : 'text-slate-900'}`}
             required
           >
-            <option value="" disabled>Escolha o destino</option>
-            <option value="Poder Executivo (prefeitura)">Poder Executivo (prefeitura)</option>
-            <option value="Poder legislativo (Câmara dos vereadores)">Poder legislativo (Câmara dos vereadores)</option>
-            <option value="Secretaria">Secretaria</option>
+            <option value="" disabled>Escolha um destinatário</option>
+            <option value="Prefeitura (executivo)">Prefeitura (executivo)</option>
+            <option value="Câmara de vereadores (Legislativo)">Câmara de vereadores (Legislativo)</option>
+            <option value="Secretários">Secretários</option>
           </select>
           <textarea
             value={description}
