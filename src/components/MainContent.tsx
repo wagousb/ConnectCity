@@ -16,8 +16,6 @@ interface MainContentProps {
   onViewChange: (view: { view: string; userId?: string; postId?: string }) => void;
   onUserUpdate: (newProfileData: Partial<User>) => void;
   onPostPublished: () => void;
-  onPostDeleted: (postId: string) => void;
-  onPostUpdated: (updatedPost: Post) => void;
   viewedProfile: User | null;
   viewedProfilePosts: Post[];
   isProfileLoading: boolean;
@@ -31,7 +29,6 @@ interface MainContentProps {
 const MainContent: React.FC<MainContentProps> = ({ 
   posts, currentView, user, onVote,
   onViewChange, onUserUpdate, onPostPublished,
-  onPostDeleted, onPostUpdated,
   viewedProfile, viewedProfilePosts, isProfileLoading,
   isFeedLoading, viewedPost, isPostLoading, isModerator,
   showWelcomeMessage
@@ -46,7 +43,7 @@ const MainContent: React.FC<MainContentProps> = ({
             </div>
           );
         }
-        return <FeedPage user={user} posts={posts} onVote={onVote} onPostPublished={onPostPublished} onViewChange={onViewChange} onPostDeleted={onPostDeleted} onPostUpdated={onPostUpdated} />;
+        return <FeedPage user={user} posts={posts} onVote={onVote} onPostPublished={onPostPublished} onViewChange={onViewChange} />;
       case 'Meu Perfil':
         const userPosts = posts.filter(post => post.author.id === user.id);
         return <ProfilePage 
@@ -56,8 +53,6 @@ const MainContent: React.FC<MainContentProps> = ({
                   onViewChange={onViewChange} 
                   onUserUpdate={onUserUpdate}
                   onVote={onVote}
-                  onPostDeleted={onPostDeleted}
-                  onPostUpdated={onPostUpdated}
                   isFirstLogin={showWelcomeMessage}
                 />;
       case 'Profile':
@@ -70,13 +65,11 @@ const MainContent: React.FC<MainContentProps> = ({
                   onViewChange={onViewChange} 
                   onUserUpdate={onUserUpdate}
                   onVote={onVote}
-                  onPostDeleted={onPostDeleted}
-                  onPostUpdated={onPostUpdated}
                 />;
       case 'PostDetail':
         if (isPostLoading) return <div className="bg-white p-6 rounded-xl border border-slate-200 text-center"><p className="text-slate-500">Carregando ideia...</p></div>;
         if (!viewedPost) return <div className="bg-white p-6 rounded-xl border border-slate-200 text-center"><p className="text-slate-500">Ideia não encontrada.</p></div>;
-        return <PostDetailPage post={viewedPost} currentUser={user} onVote={onVote} onViewChange={onViewChange} onPostDeleted={onPostDeleted} onPostUpdated={onPostUpdated} />;
+        return <PostDetailPage post={viewedPost} currentUser={user} onVote={onVote} onViewChange={onViewChange} />;
       case 'Membros':
         return <MembersPage currentUser={user} onViewChange={onViewChange} />;
       case 'Configurações':

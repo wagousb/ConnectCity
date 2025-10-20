@@ -28,20 +28,6 @@ export interface Post {
   average_rating?: number;
   user_rating?: number;
   total_votes?: number;
-  edited_at?: string;
-}
-
-export interface PostEdit {
-  id: string;
-  post_id: string;
-  editor_id: string;
-  previous_title: string;
-  new_title: string;
-  previous_content: string;
-  new_content: string;
-  previous_target_entity: string;
-  new_target_entity: string;
-  edited_at: string;
 }
 
 export interface Comment {
