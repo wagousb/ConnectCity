@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@/types';
-import RoleBadge from '@/components/RoleBadge';
 import { ShieldCheckIcon, FileTextIcon } from '@/components/Icons';
 
 const ModerationPage: React.FC = () => {

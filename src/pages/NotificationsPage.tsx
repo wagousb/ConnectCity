@@ -73,7 +73,7 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
       }
 
       const formattedNotifications: Notification[] = data
-        .map(n => ({
+        .map((n: any) => ({
           id: n.id,
           type: n.type,
           is_read: n.is_read,
@@ -87,6 +87,7 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
             name: n.actor.name,
             handle: n.actor.handle,
             avatarUrl: n.actor.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(n.actor.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
+            role: n.actor.role || 'cidadão', // Ensure role is included
           }
       }));
       setNotifications(formattedNotifications);

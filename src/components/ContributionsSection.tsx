@@ -24,7 +24,7 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
       console.error('Error fetching comments:', error);
       setComments([]);
     } else {
-      const commentsData = data.map((c: any) => ({
+      const commentsData: CommentType[] = data.map((c: any) => ({
         id: c.id,
         content: c.content,
         created_at: c.created_at,

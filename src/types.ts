@@ -1,3 +1,19 @@
+export interface Profile {
+  id: string;
+  name: string;
+  handle: string;
+  avatar_url?: string;
+  banner_url?: string;
+  bio?: string;
+  date_of_birth?: string;
+  is_public?: boolean;
+  notifications_on_likes?: boolean;
+  notifications_on_comments?: boolean;
+  notifications_on_new_followers?: boolean;
+  role: string;
+  is_moderator?: boolean;
+}
+
 export interface User {
   id: string;
   name: string;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { User } from '@/types';
-import { UserCircleIcon, ShieldCheckIcon, BellIcon, BookmarkIcon, SettingsIcon } from '@/components/Icons';
+import { UserCircleIcon, ShieldCheckIcon, BellIcon, SettingsIcon } from '@/components/Icons';
 import ProfileSettingsForm from './ProfileSettingsForm';
 import AccountSettings from './AccountSettings';
 import PrivacySettings from './PrivacySettings';

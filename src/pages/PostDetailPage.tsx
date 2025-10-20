@@ -24,6 +24,7 @@ const PostDetailPage: React.FC<PostDetailPageProps> = ({ post, currentUser, onVo
         </button>
       </div>
       <PostCard post={post} currentUser={currentUser} onVote={onVote} onViewChange={onViewChange} />
+      <ContributionsSection postId={post.id} postAuthorId={post.author.id} currentUser={currentUser} />
     </div>
   );
 };

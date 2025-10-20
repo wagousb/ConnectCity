@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import type { User, Post, Trend } from '@/types';
+import type { User, Post, Trend, Profile } from '@/types';
 import Header from '@/components/Header';
 import LeftSidebar from '@/components/LeftSidebar';
 import MainContent from '@/components/MainContent';
@@ -66,7 +66,7 @@ const App: React.FC = () => {
       console.error('Erro ao buscar perfis:', profilesError);
       return;
     }
-    const profilesMap = new Map(profilesData.map((profile) => [profile.id, profile]));
+    const profilesMap = new Map(profilesData.map((profile: Profile) => [profile.id, profile]));
 
     const postIds = postsData.map(p => p.id);
     
@@ -86,7 +86,7 @@ const App: React.FC = () => {
         }
     });
 
-    const formattedPosts: Post[] = postsData
+    const formattedPosts: (Post | null)[] = postsData
       .map(post => {
         const profile = profilesMap.get(post.user_id);
         if (!profile) return null;
@@ -117,10 +117,9 @@ const App: React.FC = () => {
           user_rating: postRating?.userRating || 0,
           total_votes: postRating?.total || 0,
         };
-      })
-      .filter((p): p is Post => p !== null);
+      });
 
-    setPosts(formattedPosts);
+    setPosts(formattedPosts.filter((p): p is Post => p !== null));
   }, []);
 
   useEffect(() => {
@@ -250,7 +249,7 @@ const App: React.FC = () => {
             ratingsData?.forEach(rating => {
                 if (!ratingsMap.has(rating.post_id)) ratingsMap.set(rating.post_id, { total: 0, sum: 0 });
                 const postRating = ratingsMap.get(rating.post_id)!;
-                postRating.total += 1; postRating.sum += rating.sum;
+                postRating.total += 1; postRating.sum += rating.rating;
                 if (rating.user_id === user.id) postRating.userRating = rating.rating;
             });
             const formattedPosts: Post[] = postsData.map(post => {
