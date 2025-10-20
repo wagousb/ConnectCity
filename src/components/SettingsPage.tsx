@@ -11,7 +11,7 @@ interface SettingsPageProps {
   onViewChange: (view: string) => void;
 }
 
-const SettingsPage: React.FC<SettingsPageProps> = ({ user, onViewChange }) => {
+const SettingsPage: React.FC<SettingsPageProps> = ({ user }) => {
   const [activeSetting, setActiveSetting] = useState<string | null>(null);
 
   const settingsItems = [
