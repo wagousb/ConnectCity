@@ -19,8 +19,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
 
   const getEntityBadgeColor = (entity: string) => {
     switch (entity) {
-      case 'Prefeitura (Executivo)': return 'bg-blue-100 text-blue-800';
-      case 'Câmara de vereadores (Legislativo)': return 'bg-green-100 text-green-800';
+      case 'Prefeitura': return 'bg-blue-100 text-blue-800';
+      case 'Câmara de Vereadores': return 'bg-green-100 text-green-800';
       case 'Secretários': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-slate-100 text-slate-800';
     }
@@ -76,9 +76,12 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
       </div>
       
       <div className="mt-6">
-        <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${getEntityBadgeColor(post.target_entity)}`}>
-          Para: {post.target_entity}
-        </span>
+        <p className="text-xs font-semibold text-slate-500 mb-1">
+          Para: 
+          <span className={`ml-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${getEntityBadgeColor(post.target_entity)}`}>
+            {post.target_entity}
+          </span>
+        </p>
         <h3 
           className="text-xl font-bold text-slate-800 hover:underline cursor-pointer mt-2"
           onClick={() => onViewChange({ view: 'PostDetail', postId: post.id })}

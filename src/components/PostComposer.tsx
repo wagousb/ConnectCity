@@ -149,8 +149,8 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFi
             required
           >
             <option value="" disabled>Escolha um destinatário</option>
-            <option value="Prefeitura (Executivo)">Prefeitura (Executivo)</option>
-            <option value="Câmara de vereadores (Legislativo)">Câmara de vereadores (Legislativo)</option>
+            <option value="Prefeitura">Prefeitura</option>
+            <option value="Câmara de Vereadores">Câmara de Vereadores</option>
             <option value="Secretários">Secretários</option>
           </select>
           <div className="relative">
