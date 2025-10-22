@@ -51,7 +51,7 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotificati
               <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl">
                 I
               </span>
-              <span className="font-bold text-xl text-slate-800">Itamorotinga</span>
+              <span className="font-bold text-xl text-slate-800 font-script">Itamorotinga</span>
             </button>
             <div className="relative hidden md:block">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
