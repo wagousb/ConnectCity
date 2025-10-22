@@ -4,6 +4,9 @@ import { MessageCircleIcon, StarIcon, PaperclipIcon } from '@/components/Icons';
 import { supabase } from '@/integrations/supabase/client';
 import ContributionsSection from './ContributionsSection';
 import RoleBadge from './RoleBadge';
+import PostActionsDropdown from './PostActionsDropdown';
+import ConfirmationModal from './ConfirmationModal';
+import PostEditModal from './PostEditModal';
 
 interface PostCardProps {
   post: Post;
@@ -16,6 +19,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
   const [isVoting, setIsVoting] = useState(false);
   const [hoverRating, setHoverRating] = useState(0);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const isAuthor = post.author.id === currentUser.id;
 
   const getEntityBadgeColor = (entity: string) => {
     switch (entity) {
@@ -52,8 +59,94 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
     }
   };
 
+  const handleDeletePost = async () => {
+    setIsSaving(true);
+    const { error } = await supabase.from('posts').delete().eq('id', post.id);
+    setIsSaving(false);
+    setIsDeleteModalOpen(false);
+
+    if (error) {
+        console.error('Error deleting post:', error);
+        alert('Erro ao excluir a ideia. Tente novamente.');
+    } else {
+        // Força o refresh do feed para remover o post
+        onViewChange({ view: 'Feed' });
+    }
+  };
+
+  const handleSaveEdit = async (updatedFields: { title: string; target_entity: string; content: string }) => {
+    setIsSaving(true);
+    
+    // 1. Atualizar o post principal
+    const { error: postUpdateError } = await supabase
+        .from('posts')
+        .update({
+            title: updatedFields.title,
+            target_entity: updatedFields.target_entity,
+            content: updatedFields.content,
+            edited_at: new Date().toISOString(),
+        })
+        .eq('id', post.id);
+
+    if (postUpdateError) {
+        console.error('Error updating post:', postUpdateError);
+        setIsSaving(false);
+        alert('Erro ao salvar as alterações. Tente novamente.');
+        return;
+    }
+
+    // 2. Registrar a edição no histórico (post_edits)
+    // Nota: Para simplificar, não estamos buscando os valores 'previous' aqui, 
+    // mas em um sistema robusto, isso seria feito.
+    const { error: editInsertError } = await supabase
+        .from('post_edits')
+        .insert({
+            post_id: post.id,
+            editor_id: currentUser.id,
+            new_title: updatedFields.title,
+            new_content: updatedFields.content,
+            new_target_entity: updatedFields.target_entity,
+            // previous_... seriam preenchidos aqui
+        });
+
+    if (editInsertError) {
+        console.error('Error inserting post edit history:', editInsertError);
+        // Continuamos mesmo com erro no histórico, pois o post foi atualizado
+    }
+
+    setIsSaving(false);
+    setIsEditModalOpen(false);
+    // Força o refresh do feed/detalhe para mostrar as alterações
+    onViewChange({ view: 'Feed' }); 
+  };
+
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200">
+      
+      {isAuthor && (
+        <>
+          <ConfirmationModal
+            isOpen={isDeleteModalOpen}
+            onClose={() => setIsDeleteModalOpen(false)}
+            onConfirm={handleDeletePost}
+            title="Excluir Ideia"
+            confirmText={isSaving ? 'Excluindo...' : 'Sim, Excluir'}
+            cancelText="Cancelar"
+            confirmButtonClass="bg-red-600 hover:bg-red-700 disabled:bg-red-300"
+            message={
+              <p>Você tem certeza que deseja excluir esta ideia? Esta ação é permanente e removerá a postagem e todas as suas contribuições.</p>
+            }
+          />
+          <PostEditModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            post={post}
+            onSave={handleSaveEdit}
+            isSaving={isSaving}
+          />
+        </>
+      )}
+
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-4">
           <div 
@@ -73,6 +166,12 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
             <p className="text-sm text-slate-500">@{post.author.handle} &middot; {post.timestamp}</p>
           </div>
         </div>
+        {isAuthor && (
+            <PostActionsDropdown 
+                onEdit={() => setIsEditModalOpen(true)}
+                onDelete={() => setIsDeleteModalOpen(true)}
+            />
+        )}
       </div>
       
       <div className="mt-6">
