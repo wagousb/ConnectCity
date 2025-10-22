@@ -73,14 +73,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
             <p className="text-sm text-slate-500">@{post.author.handle} &middot; {post.timestamp}</p>
           </div>
         </div>
+      </div>
+      
+      <div className="mt-6">
         <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${getEntityBadgeColor(post.target_entity)}`}>
           Para: {post.target_entity}
         </span>
-      </div>
-      
-      <div className="mt-8">
         <h3 
-          className="text-xl font-bold text-slate-800 hover:underline cursor-pointer"
+          className="text-xl font-bold text-slate-800 hover:underline cursor-pointer mt-2"
           onClick={() => onViewChange({ view: 'PostDetail', postId: post.id })}
         >
           {post.title}
