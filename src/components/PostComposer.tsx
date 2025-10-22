@@ -23,7 +23,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFi
   const imageInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
 
-  const titleText = isFirstPost ? "Sua primeira ideia começa aqui!" : "Mente borbulhando com ideias?";
+  const titleText = isFirstPost ? "Sua primeira ideia começa aqui!" : "Pronto para formalizar sua próxima ideia?";
   const subtitleText = isFirstPost 
     ? "Toda grande mudança começa com um pensamento. Compartilhe o seu com a cidade." 
     : "Não guarde para você! Publique seu novo projeto e continue fazendo a diferença.";
