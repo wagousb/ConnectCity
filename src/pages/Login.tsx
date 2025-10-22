@@ -10,8 +10,8 @@ const Login: React.FC = () => {
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg border border-slate-200">
         <div className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <img src="/logo-itamorotinga.png" alt="Itamorotinga Logo" className="w-10 h-10" />
-            <span className="font-bold text-3xl text-slate-800 font-script">Itamorotinga</span>
+            <img src="/logo-itamorotinga.png" alt="Itamorotinga Logo" className="w-12 h-12" />
+            <span className="font-bold text-4xl text-slate-800 font-script">Itamorotinga</span>
           </div>
           <h2 className="text-xl font-semibold text-slate-700">
             {isLoginView ? 'Bem-vindo de volta!' : 'Crie sua conta'}
