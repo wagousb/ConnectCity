@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HomeIcon, UsersIcon, BellIcon, SettingsIcon, LogoutIcon, ShieldCheckIcon, StarIcon } from '@/components/Icons';
+import { HomeIcon, UsersIcon, BellIcon, SettingsIcon, LogoutIcon, ShieldCheckIcon, StarIcon, CheckCircleIcon } from '@/components/Icons';
 import { supabase } from '@/integrations/supabase/client';
 
 interface NavLinksProps {
@@ -14,6 +14,7 @@ const NavLinks: React.FC<NavLinksProps> = ({ activeLink, onLinkClick, isModerato
   const links = [
     { name: 'Feed', icon: <HomeIcon className="h-6 w-6" /> },
     { name: 'Ranking', icon: <StarIcon className="h-6 w-6" /> },
+    { name: 'Ideias Realizadas', icon: <CheckCircleIcon className="h-6 w-6" /> },
     { name: 'Membros', icon: <UsersIcon className="h-6 w-6" /> },
     { name: 'Notificações', icon: <BellIcon className="h-6 w-6" /> },
     { name: 'Configurações', icon: <SettingsIcon className="h-6 w-6" /> },
