@@ -14,12 +14,17 @@ interface SettingsPageProps {
 const SettingsPage: React.FC<SettingsPageProps> = ({ user }) => {
   const [activeSetting, setActiveSetting] = useState<string | null>(null);
 
-  const settingsItems = [
+  const baseSettingsItems = [
     { name: 'Perfil', icon: <UserCircleIcon className="h-6 w-6 text-primary" />, description: "Atualize sua foto, nome e informações pessoais." },
     { name: 'Conta', icon: <SettingsIcon className="h-6 w-6 text-primary" />, description: "Gerencie seu e-mail, senha e configurações de conta." },
-    { name: 'Privacidade e Segurança', icon: <ShieldCheckIcon className="h-6 w-6 text-primary" />, description: "Controle quem vê suas informações e a segurança da sua conta." },
     { name: 'Notificações', icon: <BellIcon className="h-6 w-6 text-primary" />, description: "Escolha quais notificações você quer receber e como." },
   ];
+
+  const moderatorSettingsItem = { name: 'Privacidade e Segurança', icon: <ShieldCheckIcon className="h-6 w-6 text-primary" />, description: "Controle quem vê suas informações e a segurança da sua conta." };
+
+  const settingsItems = user.is_moderator 
+    ? [...baseSettingsItems, moderatorSettingsItem]
+    : baseSettingsItems;
 
   const handleItemClick = (name: string) => {
     setActiveSetting(name);
@@ -32,6 +37,16 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ user }) => {
       case 'Conta':
         return <AccountSettings onBack={() => setActiveSetting(null)} />;
       case 'Privacidade e Segurança':
+        if (!user.is_moderator) {
+            // Fallback de segurança caso o usuário tente acessar via URL/estado
+            return (
+                <div className="bg-white p-6 rounded-xl border border-slate-200 text-center">
+                    <h1 className="text-2xl font-bold text-red-600">Acesso Negado</h1>
+                    <p className="text-slate-500 mt-2">Você não tem permissão para acessar esta configuração.</p>
+                    <button onClick={() => setActiveSetting(null)} className="mt-4 text-primary hover:underline">Voltar para Configurações</button>
+                </div>
+            );
+        }
         return <PrivacySettings user={user} onBack={() => setActiveSetting(null)} />;
       case 'Notificações':
         return <NotificationsSettings user={user} onBack={() => setActiveSetting(null)} />;
