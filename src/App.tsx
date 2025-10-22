@@ -147,6 +147,11 @@ const App: React.FC = () => {
     };
   }, []);
 
+  // Efeito para rolar a tela para o topo em cada mudança de view
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentView]);
+
   useEffect(() => {
     if (session?.user && !user) {
       const fetchInitialData = async () => {
