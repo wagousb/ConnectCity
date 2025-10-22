@@ -23,7 +23,7 @@ const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ user, isFirstLogin, onNav
         </div>
         <div>
           {isFirstLogin && (
-            <h3 className="font-bold text-primary">Bem-vindo(a) ao ConnectCity, {user.name}!</h3>
+            <h3 className="font-bold text-primary">Bem-vindo(a) ao Itamorotinga, {user.name}!</h3>
           )}
           <p className="text-sm text-slate-700 mt-1">
             Seu perfil é sua identidade na comunidade. Que tal personalizá-lo? Adicione uma bio e troque sua foto para que outros membros possam te conhecer melhor.

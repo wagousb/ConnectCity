@@ -11,9 +11,9 @@ const Login: React.FC = () => {
         <div className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <span className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-2xl">
-              C
+              I
             </span>
-            <span className="font-bold text-2xl text-slate-800">ConnectCity</span>
+            <span className="font-bold text-2xl text-slate-800">Itamorotinga</span>
           </div>
           <h2 className="text-xl font-semibold text-slate-700">
             {isLoginView ? 'Bem-vindo de volta!' : 'Crie sua conta'}

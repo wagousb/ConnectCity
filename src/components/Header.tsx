@@ -49,9 +49,9 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotificati
           <div className="flex items-center space-x-8">
             <button onClick={() => onViewChange({ view: 'Feed' })} className="flex items-center space-x-2 cursor-pointer">
               <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl">
-                C
+                I
               </span>
-              <span className="font-bold text-xl text-slate-800">ConnectCity</span>
+              <span className="font-bold text-xl text-slate-800">Itamorotinga</span>
             </button>
             <div className="relative hidden md:block">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

@@ -170,7 +170,7 @@ const App: React.FC = () => {
             handle: profileData.handle || 'usuário',
             avatarUrl: avatarUrl,
             bannerUrl: profileData.banner_url || 'https://picsum.photos/seed/banner1/1500/500',
-            bio: profileData.bio || 'Bem-vindo ao ConnectCity!',
+            bio: profileData.bio || 'Bem-vindo ao Itamorotinga!',
             date_of_birth: profileData.date_of_birth,
             is_public: profileData.is_public,
             notifications_on_likes: profileData.notifications_on_likes,
