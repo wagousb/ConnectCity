@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import LoginForm from '@/components/LoginForm';
 import SignUpForm from '@/components/SignUpForm';
+import { LightbulbIcon } from '@/components/Icons';
 
 const Login: React.FC = () => {
   const [isLoginView, setIsLoginView] = useState(true);
@@ -8,23 +9,16 @@ const Login: React.FC = () => {
   const title = isLoginView ? 'Bem-vindo de volta!' : 'Junte-se à comunidade';
   const subtitle = isLoginView ? 'Faça login para continuar' : 'Crie sua conta e comece a fazer a diferença';
 
-  const Logo = ({ isWhite = false }: { isWhite?: boolean }) => (
-    <div className="flex items-center space-x-3">
-      <img src="/logo-itamorotinga.png" alt="Itamorotinga Logo" className={`w-10 h-10 ${isWhite ? 'brightness-0 invert' : ''}`} />
-      <div className="flex flex-col items-start">
-        <span className={`font-bold text-3xl font-script ${isWhite ? 'text-white' : 'text-slate-800'}`}>Itamorotinga</span>
-        <img src="/serra-da-logo-itamorotinga.png" alt="Serra de Itamorotinga" className={`h-3 w-full object-contain -mt-1 ${isWhite ? 'brightness-0 invert' : ''}`} />
-      </div>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-5xl bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col md:flex-row">
         
         {/* Coluna de Marketing/Boas-vindas (Esquerda) */}
         <div className="md:w-1/2 bg-primary-600 p-8 md:p-12 text-white flex flex-col justify-center space-y-6">
-          <Logo isWhite={true} />
+          <div className="flex items-center space-x-3">
+            <LightbulbIcon className="h-8 w-8" />
+            <h1 className="font-bold text-3xl font-script">Itamorotinga</h1>
+          </div>
           <h2 className="text-3xl font-bold leading-snug">
             Sua voz, o futuro da nossa cidade.
           </h2>
@@ -51,7 +45,8 @@ const Login: React.FC = () => {
         <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
           <div className="text-center mb-6">
             <div className="flex items-center justify-center space-x-2 mb-4 md:hidden">
-              <Logo />
+              <img src="/logo-itamorotinga.png" alt="Itamorotinga Logo" className="w-10 h-10" />
+              <span className="font-bold text-3xl text-slate-800 font-script">Itamorotinga</span>
             </div>
             <h2 className="text-2xl font-bold text-slate-800">{title}</h2>
             <p className="text-md text-slate-500 mt-1">{subtitle}</p>
