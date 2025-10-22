@@ -4,9 +4,11 @@ import { PencilIcon, TrashIcon, MoreVerticalIcon } from './Icons';
 interface PostActionsDropdownProps {
   onEdit: () => void;
   onDelete: () => void;
+  onReport: () => void;
+  isAuthor: boolean;
 }
 
-const PostActionsDropdown: React.FC<PostActionsDropdownProps> = ({ onEdit, onDelete }) => {
+const PostActionsDropdown: React.FC<PostActionsDropdownProps> = ({ onEdit, onDelete, onReport, isAuthor }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -40,24 +42,38 @@ const PostActionsDropdown: React.FC<PostActionsDropdownProps> = ({ onEdit, onDel
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-slate-200 z-10">
           <ul className="py-1">
-            <li>
-              <button
-                onClick={() => handleAction(onEdit)}
-                className="flex items-center space-x-3 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
-              >
-                <PencilIcon className="h-4 w-4" />
-                <span>Editar Ideia</span>
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => handleAction(onDelete)}
-                className="flex items-center space-x-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-              >
-                <TrashIcon className="h-4 w-4" />
-                <span>Excluir Ideia</span>
-              </button>
-            </li>
+            {isAuthor ? (
+              <>
+                <li>
+                  <button
+                    onClick={() => handleAction(onEdit)}
+                    className="flex items-center space-x-3 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                  >
+                    <PencilIcon className="h-4 w-4" />
+                    <span>Editar Ideia</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => handleAction(onDelete)}
+                    className="flex items-center space-x-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                    <span>Excluir Ideia</span>
+                  </button>
+                </li>
+              </>
+            ) : (
+              <li>
+                <button
+                  onClick={() => handleAction(onReport)}
+                  className="flex items-center space-x-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                  <span>Denunciar</span>
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       )}

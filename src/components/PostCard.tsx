@@ -7,6 +7,7 @@ import RoleBadge from './RoleBadge';
 import PostActionsDropdown from './PostActionsDropdown';
 import ConfirmationModal from './ConfirmationModal';
 import PostEditModal from './PostEditModal';
+import ReportPostModal from './ReportPostModal';
 
 interface PostCardProps {
   post: Post;
@@ -21,7 +22,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isReporting, setIsReporting] = useState(false);
+  
   const isAuthor = post.author.id === currentUser.id;
 
   const getEntityBadgeColor = (entity: string) => {
@@ -96,8 +100,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
     }
 
     // 2. Registrar a edição no histórico (post_edits)
-    // Nota: Para simplificar, não estamos buscando os valores 'previous' aqui, 
-    // mas em um sistema robusto, isso seria feito.
     const { error: editInsertError } = await supabase
         .from('post_edits')
         .insert({
@@ -106,12 +108,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
             new_title: updatedFields.title,
             new_content: updatedFields.content,
             new_target_entity: updatedFields.target_entity,
-            // previous_... seriam preenchidos aqui
         });
 
     if (editInsertError) {
         console.error('Error inserting post edit history:', editInsertError);
-        // Continuamos mesmo com erro no histórico, pois o post foi atualizado
     }
 
     setIsSaving(false);
@@ -120,32 +120,53 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
     onViewChange({ view: 'Feed' }); 
   };
 
+  const handleReportPost = async (reason: string) => {
+    setIsReporting(true);
+    const { error } = await supabase.from('reports').insert({
+        post_id: post.id,
+        reporter_id: currentUser.id,
+        reason: reason,
+    });
+    setIsReporting(false);
+
+    if (error) {
+        console.error('Error reporting post:', error);
+        alert('Erro ao enviar a denúncia. Tente novamente.');
+    } else {
+        alert('Denúncia enviada com sucesso. Agradecemos sua contribuição para manter a comunidade segura.');
+    }
+  };
+
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200">
       
-      {isAuthor && (
-        <>
-          <ConfirmationModal
-            isOpen={isDeleteModalOpen}
-            onClose={() => setIsDeleteModalOpen(false)}
-            onConfirm={handleDeletePost}
-            title="Excluir Ideia"
-            confirmText={isSaving ? 'Excluindo...' : 'Sim, Excluir'}
-            cancelText="Cancelar"
-            confirmButtonClass="bg-red-600 hover:bg-red-700 disabled:bg-red-300"
-            message={
-              <p>Você tem certeza que deseja excluir esta ideia? Esta ação é permanente e removerá a postagem e todas as suas contribuições.</p>
-            }
-          />
-          <PostEditModal
-            isOpen={isEditModalOpen}
-            onClose={() => setIsEditModalOpen(false)}
-            post={post}
-            onSave={handleSaveEdit}
-            isSaving={isSaving}
-          />
-        </>
-      )}
+      {/* Modals */}
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeletePost}
+        title="Excluir Ideia"
+        confirmText={isSaving ? 'Excluindo...' : 'Sim, Excluir'}
+        cancelText="Cancelar"
+        confirmButtonClass="bg-red-600 hover:bg-red-700 disabled:bg-red-300"
+        message={
+          <p>Você tem certeza que deseja excluir esta ideia? Esta ação é permanente e removerá a postagem e todas as suas contribuições.</p>
+        }
+      />
+      <PostEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        post={post}
+        onSave={handleSaveEdit}
+        isSaving={isSaving}
+      />
+      <ReportPostModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        onReport={handleReportPost}
+        isSubmitting={isReporting}
+      />
+      {/* End Modals */}
 
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-4">
@@ -166,12 +187,12 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
             <p className="text-sm text-slate-500">@{post.author.handle} &middot; {post.timestamp}</p>
           </div>
         </div>
-        {isAuthor && (
-            <PostActionsDropdown 
-                onEdit={() => setIsEditModalOpen(true)}
-                onDelete={() => setIsDeleteModalOpen(true)}
-            />
-        )}
+        <PostActionsDropdown 
+            onEdit={() => setIsEditModalOpen(true)}
+            onDelete={() => setIsDeleteModalOpen(true)}
+            onReport={() => setIsReportModalOpen(true)}
+            isAuthor={isAuthor}
+        />
       </div>
       
       <div className="mt-6">
