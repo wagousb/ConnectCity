@@ -48,9 +48,7 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotificati
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
             <button onClick={() => onViewChange({ view: 'Feed' })} className="flex items-center space-x-2 cursor-pointer">
-              <span className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl">
-                I
-              </span>
+              <img src="/logo-itamorotinga.png" alt="Itamorotinga Logo" className="w-8 h-8" />
               <span className="font-bold text-2xl text-slate-800 font-script">Itamorotinga</span>
             </button>
             <div className="relative hidden md:block">

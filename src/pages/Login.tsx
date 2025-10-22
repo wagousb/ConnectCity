@@ -10,9 +10,7 @@ const Login: React.FC = () => {
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg border border-slate-200">
         <div className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <span className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-2xl">
-              I
-            </span>
+            <img src="/logo-itamorotinga.png" alt="Itamorotinga Logo" className="w-10 h-10" />
             <span className="font-bold text-3xl text-slate-800 font-script">Itamorotinga</span>
           </div>
           <h2 className="text-xl font-semibold text-slate-700">
