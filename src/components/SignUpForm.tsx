@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { EyeIcon, EyeOffIcon } from './Icons';
 
 const SignUpForm: React.FC = () => {
   const [name, setName] = useState('');
@@ -10,6 +11,7 @@ const SignUpForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,15 +108,25 @@ const SignUpForm: React.FC = () => {
         <label className="text-sm font-medium text-slate-700" htmlFor="password">
           Senha
         </label>
-        <input
-          id="password"
-          className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-          type="password"
-          placeholder="Mínimo de 6 caracteres"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <div className="relative mt-1">
+          <input
+            id="password"
+            className="block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm pr-10"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Mínimo de 6 caracteres"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-700"
+            aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+          >
+            {showPassword ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
       {error && <p className="text-sm text-red-600 text-center">{error}</p>}
       {message && <p className="text-sm text-green-600 text-center">{message}</p>}
