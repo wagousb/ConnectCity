@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Notification, User } from '@/types';
-import { MessageCircleIcon, StarIcon, ThumbsUpIcon, ThumbsDownIcon } from '@/components/Icons';
+import { MessageCircleIcon, StarIcon, ThumbsUpIcon, ThumbsDownIcon, CheckCircleIcon, MegaphoneIcon } from '@/components/Icons';
 
 const timeAgo = (date: string | Date): string => {
     const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
@@ -135,6 +135,14 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
       case 'comment_disagree':
         icon = <div className="bg-red-500 p-2 rounded-full"><ThumbsDownIcon className={iconClasses} /></div>;
         text = <p className="text-slate-600">{actorName} discordou da sua contribuição na ideia {ideaName}.</p>;
+        break;
+      case 'announcement':
+        icon = <div className="bg-green-600 p-2 rounded-full"><CheckCircleIcon className={iconClasses} /></div>;
+        text = <p className="text-slate-600">O {actorName} anunciou um novo projeto: {ideaName}.</p>;
+        break;
+      case 'speech':
+        icon = <div className="bg-primary p-2 rounded-full"><MegaphoneIcon className={iconClasses} /></div>;
+        text = <p className="text-slate-600">O {actorName} fez um pronunciamento oficial: {ideaName}.</p>;
         break;
       default:
         return null;

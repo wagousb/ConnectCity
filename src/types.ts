@@ -79,7 +79,7 @@ export interface ConnectionRequest {
 
 export interface Notification {
   id: string;
-  type: 'comment' | 'rating' | 'reply' | 'comment_agree' | 'comment_disagree';
+  type: 'comment' | 'rating' | 'reply' | 'comment_agree' | 'comment_disagree' | 'announcement' | 'speech';
   actor: User;
   is_read: boolean;
   created_at: string;

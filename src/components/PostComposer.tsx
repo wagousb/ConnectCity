@@ -127,7 +127,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFi
             documentUrl = data.publicUrl;
         }
 
-        const { error: insertError } = await supabase.from('posts').insert({
+        const { data: newPost, error: insertError } = await supabase.from('posts').insert({
             user_id: user.id,
             type: postType, // Novo campo
             title,
@@ -136,9 +136,24 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFi
             image_url: imageUrl,
             document_url: documentUrl,
             status: postType === 'announcement' ? 'implemented' : 'pending', // Anúncios são marcados como implementados
-        });
+        }).select('id').single();
 
         if (insertError) throw new Error(`Erro ao publicar: ${insertError.message}`);
+
+        // Se for anúncio ou pronunciamento, notificar todos os usuários via Edge Function
+        if (newPost && (postType === 'announcement' || postType === 'speech')) {
+            const { error: fnError } = await supabase.functions.invoke('notify-all-users', {
+                body: {
+                    post_id: newPost.id,
+                    actor_id: user.id,
+                    post_type: postType,
+                },
+            });
+
+            if (fnError) {
+                console.error('Erro ao notificar todos os usuários:', fnError);
+            }
+        }
 
         resetForm();
         onPostPublished();
