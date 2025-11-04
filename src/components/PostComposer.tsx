@@ -11,6 +11,8 @@ interface PostComposerProps {
 
 const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFirstPost }) => {
   const isMayor = user.role === 'prefeito';
+  const isSecretary = user.role === 'secretário';
+  const canAnnounce = isMayor || isSecretary;
   
   const [postType, setPostType] = useState<'idea' | 'announcement' | 'speech'>('idea');
   const [title, setTitle] = useState('');
@@ -167,7 +169,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFi
 
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200">
-      {isMayor && (
+      {canAnnounce && (
         <div className="mb-4 flex space-x-4 border-b border-slate-100 pb-4">
           <button 
             onClick={() => setPostType('idea')}
@@ -178,15 +180,29 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFi
           <button 
             onClick={() => setPostType('announcement')}
             className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${postType === 'announcement' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+            disabled={!canAnnounce && postType !== 'announcement'}
           >
             <CheckCircleIcon className="h-4 w-4 inline mr-1" /> Anúncio de Projeto
           </button>
-          <button 
-            onClick={() => setPostType('speech')}
-            className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${postType === 'speech' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
-          >
-            <MegaphoneIcon className="h-4 w-4 inline mr-1" /> Pronunciamento
-          </button>
+          {isMayor && (
+            <button 
+              onClick={() => setPostType('speech')}
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${postType === 'speech' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+            >
+              <MegaphoneIcon className="h-4 w-4 inline mr-1" /> Pronunciamento
+            </button>
+          )}
+        </div>
+      )}
+      
+      {!canAnnounce && (
+        <div className="mb-4 flex space-x-4 border-b border-slate-100 pb-4">
+            <button 
+                onClick={() => setPostType('idea')}
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors bg-primary text-white`}
+            >
+                <LightbulbIcon className="h-4 w-4 inline mr-1" /> Ideia de Projeto
+            </button>
         </div>
       )}
 
