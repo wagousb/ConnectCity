@@ -43,10 +43,7 @@ const Login: React.FC = () => {
         {/* Coluna de Formulário (Direita) */}
         <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
           <div className="text-center mb-6">
-            <div className="flex items-center justify-center space-x-2 mb-4 md:hidden">
-              <img src="/logo-itamorotinga.png" alt="Itamorotinga Logo" className="w-10 h-10" />
-              <span className="font-bold text-3xl text-slate-800 font-script">Itamorotinga</span>
-            </div>
+            {/* O logo duplicado foi removido daqui */}
             <h2 className="text-2xl font-bold text-slate-800">{title}</h2>
             <p className="text-md text-slate-500 mt-1">{subtitle}</p>
           </div>

@@ -12,6 +12,7 @@ const SignUpForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isCapsLockOn, setIsCapsLockOn] = useState(false);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +45,14 @@ const SignUpForm: React.FC = () => {
     } else {
       localStorage.setItem('isNewUser', 'true');
       setMessage('Cadastro realizado com sucesso! Verifique seu e-mail para confirmar sua conta.');
+    }
+  };
+
+  const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.getModifierState('CapsLock')) {
+      setIsCapsLockOn(true);
+    } else {
+      setIsCapsLockOn(false);
     }
   };
 
@@ -116,6 +125,8 @@ const SignUpForm: React.FC = () => {
             placeholder="Mínimo de 6 caracteres"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={checkCapsLock}
+            onKeyUp={checkCapsLock}
             required
           />
           <button
@@ -127,6 +138,11 @@ const SignUpForm: React.FC = () => {
             {showPassword ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
           </button>
         </div>
+        {isCapsLockOn && (
+          <p className="mt-1 text-xs text-red-500 font-medium">
+            Atenção: Caps Lock ativado.
+          </p>
+        )}
       </div>
       {error && <p className="text-sm text-red-600 text-center">{error}</p>}
       {message && <p className="text-sm text-green-600 text-center">{message}</p>}

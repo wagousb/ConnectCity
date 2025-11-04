@@ -8,6 +8,7 @@ const LoginForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isCapsLockOn, setIsCapsLockOn] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,6 +24,14 @@ const LoginForm: React.FC = () => {
 
     if (error) {
       setError('E-mail ou senha inválidos.');
+    }
+  };
+
+  const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.getModifierState('CapsLock')) {
+      setIsCapsLockOn(true);
+    } else {
+      setIsCapsLockOn(false);
     }
   };
 
@@ -54,6 +63,8 @@ const LoginForm: React.FC = () => {
             placeholder="Sua senha"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={checkCapsLock}
+            onKeyUp={checkCapsLock}
             required
           />
           <button
@@ -65,6 +76,11 @@ const LoginForm: React.FC = () => {
             {showPassword ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
           </button>
         </div>
+        {isCapsLockOn && (
+          <p className="mt-1 text-xs text-red-500 font-medium">
+            Atenção: Caps Lock ativado.
+          </p>
+        )}
       </div>
       {error && <p className="text-sm text-red-600 text-center">{error}</p>}
       <div>
