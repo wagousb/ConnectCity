@@ -30,7 +30,20 @@ serve(async (req: Request) => {
     return new Response(null, { headers: corsHeaders })
   }
   
-  const { post_id, actor_id, post_type } = await req.json() as NotificationPayload
+  // Authentication is skipped here as this function is called internally by the app
+  // after a successful post insertion by an authenticated user.
+
+  let payload: NotificationPayload;
+  try {
+    payload = await req.json() as NotificationPayload;
+  } catch (e) {
+    return new Response(JSON.stringify({ error: 'Invalid JSON payload' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
+  const { post_id, actor_id, post_type } = payload;
 
   if (!post_id || !actor_id || !post_type) {
     return new Response(JSON.stringify({ error: 'Missing required fields: post_id, actor_id, post_type' }), {
