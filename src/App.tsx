@@ -95,6 +95,7 @@ const App: React.FC = () => {
 
         return {
           id: post.id,
+          type: post.type || 'idea', // Inclui o novo campo 'type'
           title: post.title,
           target_entity: post.target_entity,
           content: post.content,
@@ -260,9 +261,20 @@ const App: React.FC = () => {
             const formattedPosts: Post[] = postsData.map(post => {
               const postRating = ratingsMap.get(post.id);
               return {
-                id: post.id, title: post.title, target_entity: post.target_entity, content: post.content, imageUrl: post.image_url, document_url: post.document_url,
-                timestamp: timeAgo(post.created_at), author: formattedProfile, comments: (post.comments as any)[0]?.count || 0, shares: 0,
-                average_rating: postRating ? postRating.sum / postRating.total : 0, user_rating: postRating?.userRating || 0, total_votes: postRating?.total || 0,
+                id: post.id, 
+                type: post.type || 'idea', // Inclui o novo campo 'type'
+                title: post.title, 
+                target_entity: post.target_entity, 
+                content: post.content, 
+                imageUrl: post.image_url, 
+                document_url: post.document_url,
+                timestamp: timeAgo(post.created_at), 
+                author: formattedProfile, 
+                comments: (post.comments as any)[0]?.count || 0, 
+                shares: 0,
+                average_rating: postRating ? postRating.sum / postRating.total : 0, 
+                user_rating: postRating?.userRating || 0, 
+                total_votes: postRating?.total || 0,
               }
             });
             setViewedProfilePosts(formattedPosts);
@@ -309,6 +321,7 @@ const App: React.FC = () => {
         
         const formattedPost: Post = {
           id: postData.id,
+          type: postData.type || 'idea', // Inclui o novo campo 'type'
           title: postData.title,
           target_entity: postData.target_entity,
           content: postData.content,

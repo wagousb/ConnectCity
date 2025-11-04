@@ -32,9 +32,10 @@ export interface User {
 
 export interface Post {
   id: string;
+  type: 'idea' | 'announcement' | 'speech'; // Novo campo
   author: User;
   title: string;
-  target_entity: string;
+  target_entity?: string | null;
   content: string;
   imageUrl?: string;
   document_url?: string;

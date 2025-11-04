@@ -89,6 +89,7 @@ const ImplementedIdeasPage: React.FC<ImplementedIdeasPageProps> = ({ currentUser
 
         return {
           id: post.id,
+          type: post.type || 'idea', // Adicionado o campo 'type'
           title: post.title,
           target_entity: post.target_entity,
           content: post.content,

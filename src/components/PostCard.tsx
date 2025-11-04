@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Post, User } from '@/types';
-import { MessageCircleIcon, StarIcon, PaperclipIcon } from '@/components/Icons';
+import { MessageCircleIcon, StarIcon, PaperclipIcon, MegaphoneIcon, CheckCircleIcon } from '@/components/Icons';
 import { supabase } from '@/integrations/supabase/client';
 import ContributionsSection from './ContributionsSection';
 import RoleBadge from './RoleBadge';
@@ -27,6 +27,9 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
   const [isReporting, setIsReporting] = useState(false);
   
   const isAuthor = post.author.id === currentUser.id;
+  const isIdea = post.type === 'idea';
+  const isAnnouncement = post.type === 'announcement';
+  const isSpeech = post.type === 'speech';
 
   const getEntityBadgeColor = (entity: string) => {
     switch (entity) {
@@ -38,7 +41,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
   };
 
   const handleVote = async (rating: number) => {
-    if (!currentUser) return;
+    if (!currentUser || !isIdea) return; // Só permite votar em ideias
 
     const isFirstVote = !post.user_rating || post.user_rating === 0;
 
@@ -86,7 +89,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
         .from('posts')
         .update({
             title: updatedFields.title,
-            target_entity: updatedFields.target_entity,
+            target_entity: isIdea ? updatedFields.target_entity : null,
             content: updatedFields.content,
             edited_at: new Date().toISOString(),
         })
@@ -105,9 +108,12 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
         .insert({
             post_id: post.id,
             editor_id: currentUser.id,
+            previous_title: post.title, // Adicionado para histórico
             new_title: updatedFields.title,
+            previous_content: post.content, // Adicionado para histórico
             new_content: updatedFields.content,
-            new_target_entity: updatedFields.target_entity,
+            previous_target_entity: post.target_entity, // Adicionado para histórico
+            new_target_entity: isIdea ? updatedFields.target_entity : null,
         });
 
     if (editInsertError) {
@@ -137,6 +143,26 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
     }
   };
 
+  const getPostTypeHeader = () => {
+    if (isAnnouncement) {
+        return (
+            <div className="flex items-center space-x-2 text-green-600 font-semibold text-sm mb-2">
+                <CheckCircleIcon className="h-5 w-5 fill-green-600" />
+                <span>Anúncio de Projeto Implementado</span>
+            </div>
+        );
+    }
+    if (isSpeech) {
+        return (
+            <div className="flex items-center space-x-2 text-primary font-semibold text-sm mb-2">
+                <MegaphoneIcon className="h-5 w-5" />
+                <span>Pronunciamento Oficial</span>
+            </div>
+        );
+    }
+    return null;
+  };
+
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200">
       
@@ -145,12 +171,12 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDeletePost}
-        title="Excluir Ideia"
+        title={`Excluir ${isIdea ? 'Ideia' : isAnnouncement ? 'Anúncio' : 'Pronunciamento'}`}
         confirmText={isSaving ? 'Excluindo...' : 'Sim, Excluir'}
         cancelText="Cancelar"
         confirmButtonClass="bg-red-600 hover:bg-red-700 disabled:bg-red-300"
         message={
-          <p>Você tem certeza que deseja excluir esta ideia? Esta ação é permanente e removerá a postagem e todas as suas contribuições.</p>
+          <p>Você tem certeza que deseja excluir esta {isIdea ? 'ideia' : isAnnouncement ? 'anúncio' : 'pronunciamento'}? Esta ação é permanente e removerá a postagem e todas as suas contribuições.</p>
         }
       />
       <PostEditModal
@@ -196,12 +222,15 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
       </div>
       
       <div className="mt-6">
-        <p className="text-xs font-semibold text-slate-500 mb-1">
-          Para: 
-          <span className={`ml-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${getEntityBadgeColor(post.target_entity)}`}>
-            {post.target_entity}
-          </span>
-        </p>
+        {getPostTypeHeader()}
+        {isIdea && post.target_entity && (
+            <p className="text-xs font-semibold text-slate-500 mb-1">
+                Para: 
+                <span className={`ml-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${getEntityBadgeColor(post.target_entity)}`}>
+                    {post.target_entity}
+                </span>
+            </p>
+        )}
         <h3 
           className="text-xl font-bold text-slate-800 hover:underline cursor-pointer mt-2"
           onClick={() => onViewChange({ view: 'PostDetail', postId: post.id })}
@@ -213,7 +242,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
 
       {post.imageUrl && (
         <div className="my-4">
-          <img src={post.imageUrl} alt="Imagem do projeto" className="rounded-lg w-full object-cover" />
+          <img src={post.imageUrl} alt="Imagem do projeto" className="rounded-lg max-h-96 w-full object-cover" />
         </div>
       )}
 
@@ -236,22 +265,25 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
           <MessageCircleIcon className="h-5 w-5" />
           <span className="text-sm font-medium">{post.comments} Contribuições</span>
         </button>
-        <button 
-          className="flex items-center space-x-2 hover:text-amber-500"
-          onClick={() => setIsVoting(!isVoting)}
-        >
-          <StarIcon className={`h-5 w-5 transition-colors ${post.user_rating && post.user_rating > 0 ? 'text-amber-400 fill-amber-400' : (post.average_rating && post.average_rating > 0 ? 'text-amber-400' : '')}`} />
-          {post.total_votes && post.total_votes > 0 ? (
-            <span className="text-sm font-medium">
-              {post.average_rating?.toFixed(1)} ({post.total_votes} {post.total_votes === 1 ? 'voto' : 'votos'})
-            </span>
-          ) : (
-            <span className="text-sm font-medium">{post.user_rating && post.user_rating > 0 ? 'Avaliado' : 'Votar'}</span>
-          )}
-        </button>
+        
+        {isIdea && (
+            <button 
+              className="flex items-center space-x-2 hover:text-amber-500"
+              onClick={() => setIsVoting(!isVoting)}
+            >
+              <StarIcon className={`h-5 w-5 transition-colors ${post.user_rating && post.user_rating > 0 ? 'text-amber-400 fill-amber-400' : (post.average_rating && post.average_rating > 0 ? 'text-amber-400' : '')}`} />
+              {post.total_votes && post.total_votes > 0 ? (
+                <span className="text-sm font-medium">
+                  {post.average_rating?.toFixed(1)} ({post.total_votes} {post.total_votes === 1 ? 'voto' : 'votos'})
+                </span>
+              ) : (
+                <span className="text-sm font-medium">{post.user_rating && post.user_rating > 0 ? 'Avaliado' : 'Votar'}</span>
+              )}
+            </button>
+        )}
       </div>
 
-      {isVoting && (
+      {isVoting && isIdea && (
         <div className="flex items-center justify-center space-x-1 mt-4 border-t border-slate-200 pt-4">
             {[1, 2, 3, 4, 5].map((star) => (
                 <StarIcon
