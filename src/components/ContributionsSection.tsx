@@ -77,7 +77,6 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
       setNewComment('');
       await fetchComments();
       
-      // Notification for original post author (only for top-level comments)
       if (!parentId && currentUser.id !== postAuthorId) {
         await supabase.from('notifications').insert({
             user_id: postAuthorId,
@@ -88,17 +87,9 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
         });
       }
 
-      // Notification for parent comment author (for replies)
       if (parentId) {
-        const { data: parentComment, error: parentError } = await supabase
-            .from('comments')
-            .select('user_id')
-            .eq('id', parentId)
-            .single();
-        
-        if (parentError) {
-            console.error('Error fetching parent comment for notification:', parentError);
-        } else if (parentComment && parentComment.user_id !== currentUser.id) {
+        const { data: parentComment } = await supabase.from('comments').select('user_id').eq('id', parentId).single();
+        if (parentComment && parentComment.user_id !== currentUser.id) {
             await supabase.from('notifications').insert({
                 user_id: parentComment.user_id,
                 actor_id: currentUser.id,
@@ -125,6 +116,21 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
     setComments(prevComments => removeCommentFromState(prevComments, commentId));
   };
 
+  const handleCommentUpdated = (commentId: string, newContent: string) => {
+    const updateContent = (commentList: CommentType[]): CommentType[] => {
+        return commentList.map(c => {
+            if (c.id === commentId) {
+                return { ...c, content: newContent };
+            }
+            if (c.replies && c.replies.length > 0) {
+                return { ...c, replies: updateContent(c.replies) };
+            }
+            return c;
+        });
+    };
+    setComments(prevComments => updateContent(prevComments));
+  };
+
   const updateCommentInState = (
     commentList: CommentType[],
     commentId: string,
@@ -138,21 +144,13 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
 
         if (isRemovingVote) {
           user_vote = null;
-          if (voteType === 'agree') agree_count--;
-          else disagree_count--;
+          if (voteType === 'agree') agree_count--; else disagree_count--;
         } else if (isSwitchingVote) {
           user_vote = voteType;
-          if (voteType === 'agree') {
-            agree_count++;
-            disagree_count--;
-          } else {
-            agree_count--;
-            disagree_count++;
-          }
-        } else { // First vote
+          if (voteType === 'agree') { agree_count++; disagree_count--; } else { agree_count--; disagree_count++; }
+        } else {
           user_vote = voteType;
-          if (voteType === 'agree') agree_count++;
-          else disagree_count++;
+          if (voteType === 'agree') agree_count++; else disagree_count++;
         }
         return { ...c, user_vote, agree_count, disagree_count };
       }
@@ -165,23 +163,16 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
 
   const handleCommentVote = async (comment: CommentType, voteType: 'agree' | 'disagree') => {
     const originalComments = JSON.parse(JSON.stringify(comments));
-    
-    const newOptimisticComments = updateCommentInState(comments, comment.id, voteType);
-    setComments(newOptimisticComments);
+    setComments(prev => updateCommentInState(prev, comment.id, voteType));
 
     const isRemovingVote = comment.user_vote === voteType;
     const isFirstVote = !comment.user_vote;
 
     let error;
     if (isRemovingVote) {
-      const { error: deleteError } = await supabase.from('comment_votes').delete().match({ comment_id: comment.id, user_id: currentUser.id });
-      error = deleteError;
+      ({ error } = await supabase.from('comment_votes').delete().match({ comment_id: comment.id, user_id: currentUser.id }));
     } else {
-      const { error: upsertError } = await supabase.from('comment_votes').upsert(
-        { comment_id: comment.id, user_id: currentUser.id, vote_type: voteType },
-        { onConflict: 'comment_id, user_id' }
-      );
-      error = upsertError;
+      ({ error } = await supabase.from('comment_votes').upsert({ comment_id: comment.id, user_id: currentUser.id, vote_type: voteType }, { onConflict: 'comment_id, user_id' }));
     }
 
     if (error) {
@@ -214,6 +205,7 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
               onPostReply={handlePostComment} 
               onVote={handleCommentVote} 
               onCommentDeleted={handleCommentDeleted}
+              onCommentUpdated={handleCommentUpdated}
             />
           ))}
           {comments.length === 0 && <p className="text-slate-500 text-sm text-center py-4">Nenhuma contribuição ainda. Seja o primeiro!</p>}
