@@ -3,13 +3,17 @@ import LoginForm from '@/components/LoginForm';
 import SignUpForm from '@/components/SignUpForm';
 import { usePwaInstall } from '@/contexts/PwaInstallContext';
 import { DownloadIcon } from '@/components/Icons';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 const Login: React.FC = () => {
   const [isLoginView, setIsLoginView] = useState(true);
   const { canInstall, triggerInstall } = usePwaInstall();
+  const isMobile = useIsMobile();
 
   const title = isLoginView ? 'Bem-vindo de volta!' : 'Junte-se à comunidade';
   const subtitle = isLoginView ? 'Faça login para continuar' : 'Crie sua conta e comece a fazer a diferença';
+
+  const showInstallButton = canInstall && isMobile;
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 md:p-8">
@@ -60,7 +64,7 @@ const Login: React.FC = () => {
             </button>
           </p>
 
-          {canInstall && (
+          {showInstallButton && (
             <div className="mt-8 pt-6 border-t border-slate-100">
                 <button
                     onClick={triggerInstall}

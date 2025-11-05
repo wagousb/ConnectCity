@@ -6,6 +6,7 @@ import AccountSettings from './AccountSettings';
 import PrivacySettings from './PrivacySettings';
 import NotificationsSettings from './NotificationsSettings';
 import { usePwaInstall } from '@/contexts/PwaInstallContext';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface SettingsPageProps {
   user: User;
@@ -15,6 +16,7 @@ interface SettingsPageProps {
 const SettingsPage: React.FC<SettingsPageProps> = ({ user }) => {
   const [activeSetting, setActiveSetting] = useState<string | null>(null);
   const { canInstall, triggerInstall } = usePwaInstall();
+  const isMobile = useIsMobile();
 
   const baseSettingsItems = [
     { name: 'Perfil', icon: <UserCircleIcon className="h-6 w-6 text-primary" />, description: "Atualize sua foto, nome e informações pessoais." },
@@ -69,7 +71,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ user }) => {
                   </div>
                 </div>
               ))}
-              {canInstall && (
+              {canInstall && isMobile && (
                 <div onClick={triggerInstall} className="flex items-start space-x-4 p-4 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
                   <div className="bg-primary-50 p-3 rounded-full">
                       <DownloadIcon className="h-6 w-6 text-primary" />
