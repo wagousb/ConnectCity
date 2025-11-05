@@ -91,7 +91,7 @@ const MainContent: React.FC<MainContentProps> = ({
                 </div>
             );
         }
-        return <ModerationPage />;
+        return <ModerationPage onViewChange={onViewChange} />;
       default:
         return (
             <div className="bg-white p-6 rounded-xl border border-slate-200">

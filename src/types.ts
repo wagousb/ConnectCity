@@ -93,3 +93,16 @@ export interface Notification {
   comment_id?: string;
   commentContent?: string;
 }
+
+export interface Report {
+  id: string;
+  post_id: string;
+  reporter_id: string;
+  reason: string;
+  status: 'pending' | 'resolved' | 'rejected';
+  created_at: string;
+  
+  // Dados populados via join/fetch
+  post_title: string;
+  reporter_handle: string;
+}

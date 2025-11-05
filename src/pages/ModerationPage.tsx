@@ -1,38 +1,78 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { User } from '@/types';
+import type { User, Report, Profile } from '@/types';
 import { ShieldCheckIcon, FileTextIcon } from '@/components/Icons';
+import ReportCard from '@/components/ReportCard';
 
-const ModerationPage: React.FC = () => {
+interface ModerationPageProps {
+  onViewChange: (view: { view: string; postId?: string }) => void;
+}
+
+const ModerationPage: React.FC<ModerationPageProps> = ({ onViewChange }) => {
   const [users, setUsers] = useState<User[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('permissions');
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      const { data, error } = await supabase.from('profiles').select('*');
-      if (error) {
-        console.error('Error fetching users:', error);
-        setError('Não foi possível carregar os usuários.');
-      } else {
-        const formattedUsers: User[] = data.map(profile => ({
-          id: profile.id,
-          name: profile.name || 'Usuário',
-          handle: profile.handle || 'usuário',
-          avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
-          role: profile.role || 'cidadão',
-          is_moderator: profile.is_moderator,
-        }));
-        setUsers(formattedUsers);
-      }
-      setLoading(false);
-    };
-    fetchUsers();
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from('profiles').select('*');
+    if (error) {
+      console.error('Error fetching users:', error);
+      setError('Não foi possível carregar os usuários.');
+      setUsers([]);
+    } else {
+      const formattedUsers: User[] = data.map(profile => ({
+        id: profile.id,
+        name: profile.name || 'Usuário',
+        handle: profile.handle || 'usuário',
+        avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
+        role: profile.role || 'cidadão',
+        is_moderator: profile.is_moderator,
+      }));
+      setUsers(formattedUsers);
+    }
+    setLoading(false);
   }, []);
+
+  const fetchReports = useCallback(async () => {
+    setLoading(true);
+    const { data: reportsData, error: reportsError } = await supabase
+      .from('reports')
+      .select('*, post:post_id(title), reporter:reporter_id(handle)')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: true });
+
+    if (reportsError) {
+      console.error('Error fetching reports:', reportsError);
+      setError('Não foi possível carregar as denúncias.');
+      setReports([]);
+    } else {
+      const formattedReports: Report[] = reportsData.map((r: any) => ({
+        id: r.id,
+        post_id: r.post_id,
+        reporter_id: r.reporter_id,
+        reason: r.reason,
+        status: r.status,
+        created_at: r.created_at,
+        post_title: r.post.title,
+        reporter_handle: r.reporter.handle || 'usuário',
+      }));
+      setReports(formattedReports);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'permissions') {
+      fetchUsers();
+    } else if (activeTab === 'reports') {
+      fetchReports();
+    }
+  }, [activeTab, fetchUsers, fetchReports]);
 
   const handleRoleChange = (userId: string, newRole: string) => {
     setUsers(users.map(user => user.id === userId ? { ...user, role: newRole } : user));
@@ -64,6 +104,22 @@ const ModerationPage: React.FC = () => {
       console.error('Failed updates:', failedUpdates);
     } else {
       setMessage({ type: 'success', text: 'Todas as permissões foram atualizadas com sucesso!' });
+    }
+  };
+
+  const handleUpdateReportStatus = async (reportId: string, newStatus: 'resolved' | 'rejected') => {
+    const { error } = await supabase
+      .from('reports')
+      .update({ status: newStatus })
+      .eq('id', reportId);
+
+    if (error) {
+      console.error(`Error updating report ${reportId}:`, error);
+      setMessage({ type: 'error', text: `Erro ao atualizar a denúncia ${reportId}.` });
+    } else {
+      setMessage({ type: 'success', text: `Denúncia marcada como ${newStatus === 'resolved' ? 'resolvida' : 'rejeitada'}.` });
+      // Remove the report optimistically
+      setReports(prevReports => prevReports.filter(r => r.id !== reportId));
     }
   };
 
@@ -112,13 +168,31 @@ const ModerationPage: React.FC = () => {
     );
   };
 
-  const renderReports = () => (
-    <div className="text-center py-16">
-      <FileTextIcon className="h-12 w-12 mx-auto text-slate-300" />
-      <h3 className="mt-4 text-lg font-semibold text-slate-800">Nenhum relatório no momento</h3>
-      <p className="mt-1 text-sm text-slate-500">Relatórios de usuários e publicações aparecerão aqui.</p>
-    </div>
-  );
+  const renderReports = () => {
+    if (loading) return <p className="text-center text-slate-500 py-8">Carregando denúncias...</p>;
+    if (error) return <p className="text-center text-red-500 py-8">{error}</p>;
+
+    return (
+      <div className="space-y-4">
+        {reports.length === 0 ? (
+          <div className="text-center py-16">
+            <FileTextIcon className="h-12 w-12 mx-auto text-slate-300" />
+            <h3 className="mt-4 text-lg font-semibold text-slate-800">Nenhuma denúncia pendente</h3>
+            <p className="mt-1 text-sm text-slate-500">Todas as denúncias foram revisadas. Bom trabalho!</p>
+          </div>
+        ) : (
+          reports.map(report => (
+            <ReportCard 
+              key={report.id} 
+              report={report} 
+              onUpdateStatus={handleUpdateReportStatus} 
+              onViewPost={(postId) => onViewChange({ view: 'PostDetail', postId })}
+            />
+          ))
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200">
@@ -158,7 +232,7 @@ const ModerationPage: React.FC = () => {
             className={`flex items-center space-x-2 py-3 px-1 font-semibold text-sm transition-colors duration-200 ${activeTab === 'reports' ? 'border-b-2 border-primary text-primary' : 'border-b-2 border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'}`}
           >
             <FileTextIcon className="h-5 w-5" />
-            <span>Relatórios</span>
+            <span>Denúncias ({reports.length})</span>
           </button>
         </nav>
       </div>
