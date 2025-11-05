@@ -88,7 +88,7 @@ const NavLinks: React.FC<NavLinksProps> = ({ activeLink, onLinkClick, isModerato
               href="#"
               onClick={(e) => {
                 e.preventDefault();
-                handleLogout();
+                handleLogout(); // Chama a função de logout diretamente
               }}
               className="flex items-center space-x-4 p-3 rounded-lg font-semibold transition-colors duration-200 text-slate-600 hover:bg-red-50 hover:text-red-600"
             >
