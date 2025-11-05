@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import LoginForm from '@/components/LoginForm';
 import SignUpForm from '@/components/SignUpForm';
+import { usePwaInstall } from '@/contexts/PwaInstallContext';
+import { DownloadIcon } from '@/components/Icons';
 
 const Login: React.FC = () => {
   const [isLoginView, setIsLoginView] = useState(true);
+  const { canInstall, triggerInstall } = usePwaInstall();
 
   const title = isLoginView ? 'Bem-vindo de volta!' : 'Junte-se à comunidade';
   const subtitle = isLoginView ? 'Faça login para continuar' : 'Crie sua conta e comece a fazer a diferença';
@@ -56,6 +59,18 @@ const Login: React.FC = () => {
               {isLoginView ? 'Cadastre-se' : 'Faça login'}
             </button>
           </p>
+
+          {canInstall && (
+            <div className="mt-8 pt-6 border-t border-slate-100">
+                <button
+                    onClick={triggerInstall}
+                    className="w-full flex items-center justify-center bg-primary-50 text-primary font-semibold px-6 py-3 rounded-lg text-sm hover:bg-primary-100 transition-colors shadow-sm"
+                >
+                    <DownloadIcon className="h-5 w-5 mr-2" />
+                    Baixar o aplicativo Itamorotinga
+                </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
