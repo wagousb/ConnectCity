@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import type { Comment as CommentType, User } from '@/types';
-import { ThumbsUpIcon, ThumbsDownIcon } from './Icons';
+import { ThumbsUpIcon, ThumbsDownIcon, TrashIcon } from './Icons';
 import RoleBadge from './RoleBadge';
+import { supabase } from '@/integrations/supabase/client';
 
 const timeAgo = (date: string | Date): string => {
     const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
@@ -23,13 +24,17 @@ interface ContributionProps {
   currentUser: User;
   onPostReply: (content: string, parentId: string | null) => Promise<void>;
   onVote: (comment: CommentType, voteType: 'agree' | 'disagree') => void;
+  onCommentDeleted: (commentId: string) => void; // Nova prop para notificar a seção pai
 }
 
-const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPostReply, onVote }) => {
+const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPostReply, onVote, onCommentDeleted }) => {
   const [isReplying, setIsReplying] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [isPostingReply, setIsPostingReply] = useState(false);
   const [isVoting, setIsVoting] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
+
+  const isAuthor = comment.author.id === currentUser.id;
 
   const handleVoteClick = async (voteType: 'agree' | 'disagree') => {
     if (isVoting) return;
@@ -45,6 +50,38 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
     setReplyContent('');
     setIsReplying(false);
   };
+
+  const handleDeleteComment = async () => {
+    if (!window.confirm('Tem certeza que deseja excluir esta contribuição?')) return;
+
+    // Exclusão otimista
+    setIsDeleted(true);
+
+    const { error } = await supabase
+      .from('comments')
+      .delete()
+      .eq('id', comment.id);
+
+    if (error) {
+      console.error('Error deleting comment:', error);
+      setIsDeleted(false); // Reverte se houver erro
+      alert('Erro ao excluir o comentário. Tente novamente.');
+    } else {
+      // Notifica o componente pai (ContributionsSection) para remover o comentário da lista
+      onCommentDeleted(comment.id);
+    }
+  };
+
+  if (isDeleted) {
+    return (
+      <div className="flex items-start space-x-3 opacity-50 italic text-slate-500">
+        <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center"></div>
+        <div className="flex-1 bg-slate-50 rounded-lg p-3">
+          <p className="text-sm">Comentário excluído pelo usuário.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-start space-x-3">
@@ -81,12 +118,29 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
             <span>{comment.disagree_count} Discordo</span>
           </button>
           <button onClick={() => setIsReplying(!isReplying)} className="hover:underline">Responder</button>
+          
+          {isAuthor && (
+            <button 
+              onClick={handleDeleteComment}
+              className="p-1 rounded-full text-slate-400 hover:text-red-600 transition-colors"
+              title="Excluir comentário"
+            >
+              <TrashIcon className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         {(comment.replies && comment.replies.length > 0) || isReplying ? (
           <div className="mt-3 space-y-3 pl-6 border-l-2 border-slate-100">
             {comment.replies && comment.replies.map(reply => (
-              <Contribution key={reply.id} comment={reply} currentUser={currentUser} onPostReply={onPostReply} onVote={onVote} />
+              <Contribution 
+                key={reply.id} 
+                comment={reply} 
+                currentUser={currentUser} 
+                onPostReply={onPostReply} 
+                onVote={onVote} 
+                onCommentDeleted={onCommentDeleted} // Passa a prop para os replies
+              />
             ))}
             
             {isReplying && (

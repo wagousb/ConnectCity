@@ -112,6 +112,19 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
     setIsPosting(false);
   };
 
+  const removeCommentFromState = (commentList: CommentType[], commentId: string): CommentType[] => {
+    return commentList
+      .filter(c => c.id !== commentId)
+      .map(c => ({
+        ...c,
+        replies: c.replies ? removeCommentFromState(c.replies, commentId) : [],
+      }));
+  };
+
+  const handleCommentDeleted = (commentId: string) => {
+    setComments(prevComments => removeCommentFromState(prevComments, commentId));
+  };
+
   const updateCommentInState = (
     commentList: CommentType[],
     commentId: string,
@@ -194,7 +207,14 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
       ) : (
         <div className="space-y-4">
           {comments.map(comment => (
-            <Contribution key={comment.id} comment={comment} currentUser={currentUser} onPostReply={handlePostComment} onVote={handleCommentVote} />
+            <Contribution 
+              key={comment.id} 
+              comment={comment} 
+              currentUser={currentUser} 
+              onPostReply={handlePostComment} 
+              onVote={handleCommentVote} 
+              onCommentDeleted={handleCommentDeleted}
+            />
           ))}
           {comments.length === 0 && <p className="text-slate-500 text-sm text-center py-4">Nenhuma contribuição ainda. Seja o primeiro!</p>}
         </div>
