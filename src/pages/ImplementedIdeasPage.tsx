@@ -128,7 +128,7 @@ const ImplementedIdeasPage: React.FC<ImplementedIdeasPageProps> = ({ currentUser
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200">
       <h1 className="text-2xl font-bold mb-6 flex items-center space-x-3">
-        <CheckCircleIcon className="h-7 w-7 text-green-600 fill-green-600" />
+        <CheckCircleIcon className="h-7 w-7 text-green-600" />
         <span>Ideias que Viraram Realidade</span>
       </h1>
       <p className="text-slate-500 mb-6">Celebre as ideias da comunidade que foram implementadas e fizeram a diferença na cidade!</p>
