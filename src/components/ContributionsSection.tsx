@@ -30,6 +30,7 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
         created_at: c.created_at,
         post_id: c.post_id,
         parent_comment_id: c.parent_comment_id,
+        is_deleted: c.is_deleted,
         author: {
           id: c.user_id,
           name: c.author_name,
@@ -103,56 +104,41 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
     setIsPosting(false);
   };
 
-  const handleCommentUpdated = (commentId: string, newContent: string) => {
-    const updateContent = (commentList: CommentType[]): CommentType[] => {
+  const handleCommentUpdated = (commentId: string, updates: Partial<CommentType>) => {
+    const updateCommentInTree = (commentList: CommentType[]): CommentType[] => {
         return commentList.map(c => {
             if (c.id === commentId) {
-                return { ...c, content: newContent };
+                return { ...c, ...updates };
             }
             if (c.replies && c.replies.length > 0) {
-                return { ...c, replies: updateContent(c.replies) };
+                return { ...c, replies: updateCommentInTree(c.replies) };
             }
             return c;
         });
     };
-    setComments(prevComments => updateContent(prevComments));
-  };
-
-  const updateCommentInState = (
-    commentList: CommentType[],
-    commentId: string,
-    voteType: 'agree' | 'disagree'
-  ): CommentType[] => {
-    return commentList.map(c => {
-      if (c.id === commentId) {
-        let { agree_count, disagree_count, user_vote } = c;
-        const isRemovingVote = user_vote === voteType;
-        const isSwitchingVote = user_vote && user_vote !== voteType;
-
-        if (isRemovingVote) {
-          user_vote = null;
-          if (voteType === 'agree') agree_count--; else disagree_count--;
-        } else if (isSwitchingVote) {
-          user_vote = voteType;
-          if (voteType === 'agree') { agree_count++; disagree_count--; } else { agree_count--; disagree_count++; }
-        } else {
-          user_vote = voteType;
-          if (voteType === 'agree') agree_count++; else disagree_count++;
-        }
-        return { ...c, user_vote, agree_count, disagree_count };
-      }
-      if (c.replies && c.replies.length > 0) {
-        return { ...c, replies: updateCommentInState(c.replies, commentId, voteType) };
-      }
-      return c;
-    });
+    setComments(prevComments => updateCommentInTree(prevComments));
   };
 
   const handleCommentVote = async (comment: CommentType, voteType: 'agree' | 'disagree') => {
     const originalComments = JSON.parse(JSON.stringify(comments));
-    setComments(prev => updateCommentInState(prev, comment.id, voteType));
+    
+    let newOptimisticComment = { ...comment };
+    const isRemovingVote = newOptimisticComment.user_vote === voteType;
+    const isSwitchingVote = newOptimisticComment.user_vote && newOptimisticComment.user_vote !== voteType;
 
-    const isRemovingVote = comment.user_vote === voteType;
+    if (isRemovingVote) {
+      newOptimisticComment.user_vote = null;
+      if (voteType === 'agree') newOptimisticComment.agree_count--; else newOptimisticComment.disagree_count--;
+    } else if (isSwitchingVote) {
+      newOptimisticComment.user_vote = voteType;
+      if (voteType === 'agree') { newOptimisticComment.agree_count++; newOptimisticComment.disagree_count--; } else { newOptimisticComment.agree_count--; newOptimisticComment.disagree_count++; }
+    } else {
+      newOptimisticComment.user_vote = voteType;
+      if (voteType === 'agree') newOptimisticComment.agree_count++; else newOptimisticComment.disagree_count++;
+    }
+    
+    handleCommentUpdated(comment.id, newOptimisticComment);
+
     const isFirstVote = !comment.user_vote;
 
     let error;

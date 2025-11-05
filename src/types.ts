@@ -25,6 +25,7 @@ export interface User {
   is_public?: boolean;
   notifications_on_likes?: boolean;
   notifications_on_comments?: boolean;
+
   notifications_on_new_followers?: boolean;
   role: string;
   is_moderator?: boolean;
@@ -58,6 +59,7 @@ export interface Comment {
   user_vote?: 'agree' | 'disagree' | null;
   post_id: string;
   parent_comment_id?: string | null;
+  is_deleted?: boolean;
 }
 
 export interface Suggestion {

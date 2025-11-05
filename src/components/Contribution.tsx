@@ -25,7 +25,7 @@ interface ContributionProps {
   currentUser: User;
   onPostReply: (content: string, parentId: string | null) => Promise<void>;
   onVote: (comment: CommentType, voteType: 'agree' | 'disagree') => void;
-  onCommentUpdated: (commentId: string, newContent: string) => void;
+  onCommentUpdated: (commentId: string, updates: Partial<CommentType>) => void;
 }
 
 const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPostReply, onVote, onCommentUpdated }) => {
@@ -33,7 +33,6 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
   const [replyContent, setReplyContent] = useState('');
   const [isPostingReply, setIsPostingReply] = useState(false);
   const [isVoting, setIsVoting] = useState(false);
-  const [isDeleted, setIsDeleted] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
@@ -54,16 +53,17 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
     setIsReplying(false);
   };
 
-  const handleDeleteComment = async () => {
-    if (!window.confirm('Tem certeza que deseja excluir esta contribuição?')) return;
-    
-    const { error } = await supabase.from('comments').delete().eq('id', comment.id);
+  const handleDeleteToggle = async (shouldBeDeleted: boolean) => {
+    const { error } = await supabase
+      .from('comments')
+      .update({ is_deleted: shouldBeDeleted })
+      .eq('id', comment.id);
     
     if (error) {
-      console.error('Error deleting comment:', error);
-      alert('Erro ao excluir o comentário. Tente novamente.');
+      console.error('Error updating delete status:', error);
+      alert('Ocorreu um erro. Tente novamente.');
     } else {
-      setIsDeleted(true);
+      onCommentUpdated(comment.id, { is_deleted: shouldBeDeleted });
     }
   };
 
@@ -79,18 +79,10 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
       console.error('Error updating comment:', error);
       alert('Erro ao salvar a edição. Tente novamente.');
     } else {
-      onCommentUpdated(comment.id, newContent);
+      onCommentUpdated(comment.id, { content: newContent });
       setIsEditModalOpen(false);
     }
   };
-
-  if (isDeleted) {
-    return (
-      <div className="flex items-center space-x-3 text-sm text-slate-500 italic pl-14">
-        <p>Contribuição apagada pelo usuário.</p>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -104,49 +96,63 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
       <div className="flex items-start space-x-3">
         <div className="flex flex-col items-center flex-shrink-0">
           <img src={comment.author.avatarUrl} alt={comment.author.name} className="h-10 w-10 rounded-full" />
-          <div className="mt-1">
-            <RoleBadge role={comment.author.role} size="xs" />
-          </div>
+          {!comment.is_deleted && (
+            <div className="mt-1">
+              <RoleBadge role={comment.author.role} size="xs" />
+            </div>
+          )}
         </div>
         <div className="flex-1">
-          <div className="bg-slate-50 rounded-lg p-3">
-            <div className="flex items-center space-x-2">
-              <span className="font-bold text-sm">{comment.author.name.split(' ')[0]}</span>
-              <span className="text-xs text-slate-500">@{comment.author.handle}</span>
-              <span className="text-xs text-slate-400">&middot; {timeAgo(comment.created_at)}</span>
+          {comment.is_deleted ? (
+            <div className="bg-slate-50 rounded-lg p-3 text-sm text-slate-500 italic">
+              Contribuição apagada pelo usuário.
             </div>
-            <p className="text-sm text-slate-800 mt-1 whitespace-pre-wrap">{comment.content}</p>
-          </div>
+          ) : (
+            <div className="bg-slate-50 rounded-lg p-3">
+              <div className="flex items-center space-x-2">
+                <span className="font-bold text-sm">{comment.author.name.split(' ')[0]}</span>
+                <span className="text-xs text-slate-500">@{comment.author.handle}</span>
+                <span className="text-xs text-slate-400">&middot; {timeAgo(comment.created_at)}</span>
+              </div>
+              <p className="text-sm text-slate-800 mt-1 whitespace-pre-wrap">{comment.content}</p>
+            </div>
+          )}
           <div className="flex items-center space-x-1 mt-1 text-xs text-slate-500 font-medium">
-            
-            <button className={`group flex items-center space-x-1 p-1 rounded-full transition-colors duration-200 disabled:opacity-50 ${comment.user_vote === 'agree' ? 'text-green-600' : 'hover:text-green-600'}`} onClick={() => handleVoteClick('agree')} disabled={isVoting}>
-                <ThumbsUpIcon className="h-4 w-4" />
-                <span className="font-semibold">{comment.agree_count}</span>
-                <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1">Concordo</span>
-            </button>
-
-            <button className={`group flex items-center space-x-1 p-1 rounded-full transition-colors duration-200 disabled:opacity-50 ${comment.user_vote === 'disagree' ? 'text-red-600' : 'hover:text-red-600'}`} onClick={() => handleVoteClick('disagree')} disabled={isVoting}>
-                <ThumbsDownIcon className="h-4 w-4" />
-                <span className="font-semibold">{comment.disagree_count}</span>
-                <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1">Discordo</span>
-            </button>
-
+            {!comment.is_deleted && (
+              <>
+                <button className={`group flex items-center space-x-1 p-1 rounded-full transition-colors duration-200 disabled:opacity-50 ${comment.user_vote === 'agree' ? 'text-green-600' : 'hover:text-green-600'}`} onClick={() => handleVoteClick('agree')} disabled={isVoting}>
+                    <ThumbsUpIcon className="h-4 w-4" />
+                    <span className="font-semibold">{comment.agree_count}</span>
+                    <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1">Concordo</span>
+                </button>
+                <button className={`group flex items-center space-x-1 p-1 rounded-full transition-colors duration-200 disabled:opacity-50 ${comment.user_vote === 'disagree' ? 'text-red-600' : 'hover:text-red-600'}`} onClick={() => handleVoteClick('disagree')} disabled={isVoting}>
+                    <ThumbsDownIcon className="h-4 w-4" />
+                    <span className="font-semibold">{comment.disagree_count}</span>
+                    <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1">Discordo</span>
+                </button>
+              </>
+            )}
             <button className="group flex items-center space-x-1 p-1 rounded-full hover:text-primary transition-colors duration-200" onClick={() => setIsReplying(!isReplying)}>
                 <ReplyIcon className="h-4 w-4" />
                 <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1">Responder</span>
             </button>
-
             {isAuthor && (
-              <>
-                <button className="group flex items-center space-x-1 p-1 rounded-full hover:text-primary transition-colors duration-200" onClick={() => setIsEditModalOpen(true)}>
-                    <PencilIcon className="h-4 w-4" />
-                    <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1">Editar</span>
+              comment.is_deleted ? (
+                <button className="group flex items-center space-x-1 p-1 rounded-full hover:text-primary transition-colors duration-200" onClick={() => handleDeleteToggle(false)}>
+                    <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1 font-semibold">Desfazer</span>
                 </button>
-                <button className="group flex items-center space-x-1 p-1 rounded-full hover:text-red-600 transition-colors duration-200" onClick={handleDeleteComment}>
-                    <TrashIcon className="h-4 w-4" />
-                    <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1">Excluir</span>
-                </button>
-              </>
+              ) : (
+                <>
+                  <button className="group flex items-center space-x-1 p-1 rounded-full hover:text-primary transition-colors duration-200" onClick={() => setIsEditModalOpen(true)}>
+                      <PencilIcon className="h-4 w-4" />
+                      <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1">Editar</span>
+                  </button>
+                  <button className="group flex items-center space-x-1 p-1 rounded-full hover:text-red-600 transition-colors duration-200" onClick={() => handleDeleteToggle(true)}>
+                      <TrashIcon className="h-4 w-4" />
+                      <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1">Excluir</span>
+                  </button>
+                </>
+              )
             )}
           </div>
 
