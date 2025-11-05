@@ -8,7 +8,6 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Session } from '@supabase/supabase-js';
 import Login from '@/pages/Login';
 import PwaReloadPrompt from '@/components/PwaReloadPrompt';
-import PwaInstallPrompt from '@/components/PwaInstallPrompt';
 
 const timeAgo = (date: string | Date): string => {
     const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
@@ -444,7 +443,6 @@ const App: React.FC = () => {
   if (!session || !user) {
     return (
       <>
-        <PwaInstallPrompt />
         <Login />
       </>
     );
@@ -453,7 +451,6 @@ const App: React.FC = () => {
   return (
     <div className="bg-slate-50 min-h-screen">
       <PwaReloadPrompt />
-      <PwaInstallPrompt />
       <Header user={user} onViewChange={handleViewChange} hasUnreadNotifications={hasUnreadNotifications} isModerator={isModerator} />
       <main className="max-w-screen-xl mx-auto py-8 px-4 md:px-6 lg:px-8">
         <div className="grid grid-cols-12 gap-8">

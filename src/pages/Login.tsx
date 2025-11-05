@@ -72,6 +72,7 @@ const Login: React.FC = () => {
             </button>
           </p>
 
+          {/* Botão de Download PWA movido para baixo da seção de login/cadastro */}
           {showInstallButton && (
             <div className="mt-8 pt-6 border-t border-slate-100">
                 <button
