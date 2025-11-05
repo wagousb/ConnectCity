@@ -12,13 +12,17 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotifications, isModerator }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
+    setIsLoggingOut(true);
     const { error } = await supabase.auth.signOut();
     if (error) {
         console.error('Error logging out:', error);
+        setIsLoggingOut(false); // Re-enable button if error occurs
     }
+    // If successful, the App component's auth listener handles state change and redirect.
   };
 
   useEffect(() => {
@@ -116,17 +120,17 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotificati
                     ))}
                   </ul>
                   <div className="border-t border-slate-200">
-                    <a
-                      href="#"
+                    <button
                       onClick={(e) => {
                         e.preventDefault();
                         handleLogout();
                       }}
-                      className="flex items-center space-x-3 px-4 py-3 text-slate-700 hover:bg-red-50 hover:text-red-600"
+                      disabled={isLoggingOut}
+                      className="flex items-center space-x-3 w-full px-4 py-3 text-slate-700 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-slate-700"
                     >
                       <LogoutIcon className="h-5 w-5" />
-                      <span>Sair</span>
-                    </a>
+                      <span>{isLoggingOut ? 'Saindo...' : 'Sair'}</span>
+                    </button>
                   </div>
                 </div>
               )}
