@@ -29,7 +29,8 @@ const Login: React.FC = () => {
           
           <div className="relative z-10 flex flex-col justify-center h-full space-y-6">
             <div className="flex items-center space-x-3">
-              <img src="/logo-itamorotinga.png" alt="Itamorotinga Logo" className="w-10 h-10" />
+              {/* Usando a logo branca específica para o login */}
+              <img src="/logo-login-white.png" alt="Itamorotinga Logo" className="w-10 h-10" />
               <h1 className="font-bold text-3xl font-script">Itamorotinga</h1>
             </div>
             <h2 className="text-3xl font-bold leading-snug">
