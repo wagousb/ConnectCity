@@ -25,11 +25,10 @@ interface ContributionProps {
   currentUser: User;
   onPostReply: (content: string, parentId: string | null) => Promise<void>;
   onVote: (comment: CommentType, voteType: 'agree' | 'disagree') => void;
-  onCommentDeleted: (commentId: string) => void;
   onCommentUpdated: (commentId: string, newContent: string) => void;
 }
 
-const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPostReply, onVote, onCommentDeleted, onCommentUpdated }) => {
+const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPostReply, onVote, onCommentUpdated }) => {
   const [isReplying, setIsReplying] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [isPostingReply, setIsPostingReply] = useState(false);
@@ -57,14 +56,14 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
 
   const handleDeleteComment = async () => {
     if (!window.confirm('Tem certeza que deseja excluir esta contribuição?')) return;
-    setIsDeleted(true);
+    
     const { error } = await supabase.from('comments').delete().eq('id', comment.id);
+    
     if (error) {
       console.error('Error deleting comment:', error);
-      setIsDeleted(false);
       alert('Erro ao excluir o comentário. Tente novamente.');
     } else {
-      onCommentDeleted(comment.id);
+      setIsDeleted(true);
     }
   };
 
@@ -87,11 +86,8 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
 
   if (isDeleted) {
     return (
-      <div className="flex items-start space-x-3 opacity-50 italic text-slate-500">
-        <div className="h-10 w-10 rounded-full bg-slate-100 flex-shrink-0"></div>
-        <div className="flex-1 bg-slate-50 rounded-lg p-3">
-          <p className="text-sm">Comentário excluído pelo usuário.</p>
-        </div>
+      <div className="flex items-center space-x-3 text-sm text-slate-500 italic pl-14">
+        <p>Contribuição apagada pelo usuário.</p>
       </div>
     );
   }
@@ -121,48 +117,34 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
             </div>
             <p className="text-sm text-slate-800 mt-1 whitespace-pre-wrap">{comment.content}</p>
           </div>
-          <div className="flex items-center space-x-4 mt-1 text-xs text-slate-500 font-medium">
-            <button 
-              onClick={() => handleVoteClick('agree')} 
-              disabled={isVoting}
-              className={`flex items-center space-x-1 hover:text-green-600 ${comment.user_vote === 'agree' ? 'text-green-600' : ''} disabled:opacity-50`}
-              title="Concordo"
-            >
-              <ThumbsUpIcon className="h-4 w-4" />
-              <span>{comment.agree_count}</span>
-            </button>
-            <button 
-              onClick={() => handleVoteClick('disagree')} 
-              disabled={isVoting}
-              className={`flex items-center space-x-1 hover:text-red-600 ${comment.user_vote === 'disagree' ? 'text-red-600' : ''} disabled:opacity-50`}
-              title="Discordo"
-            >
-              <ThumbsDownIcon className="h-4 w-4" />
-              <span>{comment.disagree_count}</span>
-            </button>
-            <button 
-              onClick={() => setIsReplying(!isReplying)} 
-              className="flex items-center space-x-1 hover:text-primary p-1 rounded-full"
-              title="Responder"
-            >
-              <ReplyIcon className="h-4 w-4" />
-            </button>
+          <div className="flex items-center space-x-1 mt-1 text-xs text-slate-500 font-medium">
             
+            <button className={`group flex items-center space-x-1 p-1 rounded-full transition-colors duration-200 disabled:opacity-50 ${comment.user_vote === 'agree' ? 'text-green-600' : 'hover:text-green-600'}`} onClick={() => handleVoteClick('agree')} disabled={isVoting}>
+                <ThumbsUpIcon className="h-4 w-4" />
+                <span className="font-semibold">{comment.agree_count}</span>
+                <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1">Concordo</span>
+            </button>
+
+            <button className={`group flex items-center space-x-1 p-1 rounded-full transition-colors duration-200 disabled:opacity-50 ${comment.user_vote === 'disagree' ? 'text-red-600' : 'hover:text-red-600'}`} onClick={() => handleVoteClick('disagree')} disabled={isVoting}>
+                <ThumbsDownIcon className="h-4 w-4" />
+                <span className="font-semibold">{comment.disagree_count}</span>
+                <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1">Discordo</span>
+            </button>
+
+            <button className="group flex items-center space-x-1 p-1 rounded-full hover:text-primary transition-colors duration-200" onClick={() => setIsReplying(!isReplying)}>
+                <ReplyIcon className="h-4 w-4" />
+                <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1">Responder</span>
+            </button>
+
             {isAuthor && (
               <>
-                <button 
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="p-1 rounded-full text-slate-400 hover:text-primary transition-colors"
-                  title="Editar"
-                >
-                  <PencilIcon className="h-4 w-4" />
+                <button className="group flex items-center space-x-1 p-1 rounded-full hover:text-primary transition-colors duration-200" onClick={() => setIsEditModalOpen(true)}>
+                    <PencilIcon className="h-4 w-4" />
+                    <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1">Editar</span>
                 </button>
-                <button 
-                  onClick={handleDeleteComment}
-                  className="p-1 rounded-full text-slate-400 hover:text-red-600 transition-colors"
-                  title="Excluir"
-                >
-                  <TrashIcon className="h-4 w-4" />
+                <button className="group flex items-center space-x-1 p-1 rounded-full hover:text-red-600 transition-colors duration-200" onClick={handleDeleteComment}>
+                    <TrashIcon className="h-4 w-4" />
+                    <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1">Excluir</span>
                 </button>
               </>
             )}
@@ -177,7 +159,6 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
                   currentUser={currentUser} 
                   onPostReply={onPostReply} 
                   onVote={onVote} 
-                  onCommentDeleted={onCommentDeleted}
                   onCommentUpdated={onCommentUpdated}
                 />
               ))}

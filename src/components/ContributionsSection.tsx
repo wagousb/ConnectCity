@@ -103,19 +103,6 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
     setIsPosting(false);
   };
 
-  const removeCommentFromState = (commentList: CommentType[], commentId: string): CommentType[] => {
-    return commentList
-      .filter(c => c.id !== commentId)
-      .map(c => ({
-        ...c,
-        replies: c.replies ? removeCommentFromState(c.replies, commentId) : [],
-      }));
-  };
-
-  const handleCommentDeleted = (commentId: string) => {
-    setComments(prevComments => removeCommentFromState(prevComments, commentId));
-  };
-
   const handleCommentUpdated = (commentId: string, newContent: string) => {
     const updateContent = (commentList: CommentType[]): CommentType[] => {
         return commentList.map(c => {
@@ -204,7 +191,6 @@ const ContributionsSection: React.FC<ContributionsSectionProps> = ({ postId, pos
               currentUser={currentUser} 
               onPostReply={handlePostComment} 
               onVote={handleCommentVote} 
-              onCommentDeleted={handleCommentDeleted}
               onCommentUpdated={handleCommentUpdated}
             />
           ))}

@@ -9,6 +9,7 @@ import PostDetailPage from '@/pages/PostDetailPage';
 import ModerationPage from '@/pages/ModerationPage';
 import RankingPage from '@/pages/RankingPage';
 import ImplementedIdeasPage from '@/pages/ImplementedIdeasPage';
+import CommentRankingPage from '@/pages/CommentRankingPage';
 
 interface MainContentProps {
   posts: Post[];
@@ -48,6 +49,8 @@ const MainContent: React.FC<MainContentProps> = ({
         return <FeedPage user={user} posts={posts} onVote={onVote} onPostPublished={onPostPublished} onViewChange={onViewChange} />;
       case 'Ranking':
         return <RankingPage currentUser={user} onViewChange={onViewChange} />;
+      case 'Top Contribuições':
+        return <CommentRankingPage onViewChange={onViewChange} />;
       case 'Ideias Realizadas':
         return <ImplementedIdeasPage currentUser={user} onVote={onVote} onViewChange={onViewChange} />;
       case 'Meu Perfil':
