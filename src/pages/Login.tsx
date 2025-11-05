@@ -80,7 +80,7 @@ const Login: React.FC = () => {
                     className="w-full flex items-center justify-center bg-primary-50 text-primary font-semibold px-6 py-3 rounded-lg text-sm hover:bg-primary-100 transition-colors shadow-sm"
                 >
                     <DownloadIcon className="h-5 w-5 mr-2" />
-                    Baixar o aplicativo Itamorotinga
+                    Faça o download e tenha o app Itamorotinga no seu bolso
                 </button>
             </div>
           )}
