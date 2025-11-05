@@ -53,7 +53,7 @@ const PwaInstallPrompt: React.FC = () => {
   return ReactDOM.createPortal(
     <div className="fixed inset-0 bg-slate-50 z-50 flex flex-col items-center justify-center p-4 text-center">
       <div className="w-full max-w-md">
-        <img src="/logo-itamorotinga.png" alt="Itamorotinga Logo" className="w-24 h-24 mx-auto mb-4" />
+        <img src="/logo-app.png" alt="Itamorotinga Logo" className="w-24 h-24 mx-auto mb-4" />
         <h1 className="font-bold text-4xl text-slate-800 font-script mb-2">Itamorotinga</h1>
         <h2 className="text-2xl font-bold text-slate-800 mb-2">Leve a cidade com você</h2>
         <p className="text-slate-600 mb-8">
