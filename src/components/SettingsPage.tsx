@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import type { User } from '@/types';
-import { UserCircleIcon, ShieldCheckIcon, BellIcon, SettingsIcon } from '@/components/Icons';
+import { UserCircleIcon, ShieldCheckIcon, BellIcon, SettingsIcon, DownloadIcon } from '@/components/Icons';
 import ProfileSettingsForm from './ProfileSettingsForm';
 import AccountSettings from './AccountSettings';
 import PrivacySettings from './PrivacySettings';
 import NotificationsSettings from './NotificationsSettings';
+import { usePwaInstall } from '@/contexts/PwaInstallContext';
 
 interface SettingsPageProps {
   user: User;
@@ -13,6 +14,7 @@ interface SettingsPageProps {
 
 const SettingsPage: React.FC<SettingsPageProps> = ({ user }) => {
   const [activeSetting, setActiveSetting] = useState<string | null>(null);
+  const { canInstall, triggerInstall } = usePwaInstall();
 
   const baseSettingsItems = [
     { name: 'Perfil', icon: <UserCircleIcon className="h-6 w-6 text-primary" />, description: "Atualize sua foto, nome e informações pessoais." },
@@ -67,6 +69,17 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ user }) => {
                   </div>
                 </div>
               ))}
+              {canInstall && (
+                <div onClick={triggerInstall} className="flex items-start space-x-4 p-4 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                  <div className="bg-primary-50 p-3 rounded-full">
+                      <DownloadIcon className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-800">Baixar Aplicativo</h3>
+                    <p className="text-sm text-slate-500">Instale o aplicativo em seu dispositivo para uma experiência melhor.</p>
+                  </div>
+                </div>
+              )}
             </div>
           </>
         );
