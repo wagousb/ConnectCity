@@ -163,7 +163,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
     if (isAnnouncement) {
         return (
             <div className="flex items-center space-x-2 text-green-600 font-semibold text-sm mb-2">
-                <CheckCircleIcon className="h-5 w-5 fill-green-600" />
+                <CheckCircleIcon className="h-5 w-5 text-green-600" />
                 <span>Anúncio de Projeto Implementado</span>
             </div>
         );

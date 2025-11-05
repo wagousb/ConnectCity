@@ -50,7 +50,7 @@ const PostActionsDropdown: React.FC<PostActionsDropdownProps> = ({ onEdit, onDel
                     className="flex items-center space-x-3 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
                   >
                     <PencilIcon className="h-4 w-4" />
-                    <span>Editar Ideia</span>
+                    <span>Editar</span>
                   </button>
                 </li>
                 <li>
@@ -59,7 +59,7 @@ const PostActionsDropdown: React.FC<PostActionsDropdownProps> = ({ onEdit, onDel
                     className="flex items-center space-x-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                   >
                     <TrashIcon className="h-4 w-4" />
-                    <span>Excluir Ideia</span>
+                    <span>Excluir</span>
                   </button>
                 </li>
               </>
