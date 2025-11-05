@@ -138,8 +138,8 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
             </button>
             {isAuthor && (
               comment.is_deleted ? (
-                <button className="group flex items-center space-x-1 p-1 rounded-full hover:text-primary transition-colors duration-200" onClick={() => handleDeleteToggle(false)}>
-                    <span className="overflow-hidden transition-all duration-300 max-w-0 group-hover:max-w-xs group-hover:ml-1 font-semibold">Desfazer</span>
+                <button className="flex items-center space-x-1 p-1 rounded-full text-primary hover:bg-primary-50 font-semibold transition-colors duration-200" onClick={() => handleDeleteToggle(false)}>
+                    <span>Desfazer</span>
                 </button>
               ) : (
                 <>
