@@ -95,7 +95,7 @@ const App: React.FC = () => {
 
         return {
           id: post.id,
-          type: post.type || 'idea', // Inclui o novo campo 'type'
+          type: post.type || 'idea',
           title: post.title,
           target_entity: post.target_entity,
           content: post.content,
@@ -117,6 +117,9 @@ const App: React.FC = () => {
           average_rating: postRating ? postRating.sum / postRating.total : 0,
           user_rating: postRating?.userRating || 0,
           total_votes: postRating?.total || 0,
+          start_date: post.start_date,
+          end_date: post.end_date,
+          project_status: post.project_status,
         };
       });
 
@@ -148,7 +151,6 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // Efeito para rolar a tela para o topo em cada mudança de view
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentView]);
@@ -262,7 +264,7 @@ const App: React.FC = () => {
               const postRating = ratingsMap.get(post.id);
               return {
                 id: post.id, 
-                type: post.type || 'idea', // Inclui o novo campo 'type'
+                type: post.type || 'idea',
                 title: post.title, 
                 target_entity: post.target_entity, 
                 content: post.content, 
@@ -275,6 +277,9 @@ const App: React.FC = () => {
                 average_rating: postRating ? postRating.sum / postRating.total : 0, 
                 user_rating: postRating?.userRating || 0, 
                 total_votes: postRating?.total || 0,
+                start_date: post.start_date,
+                end_date: post.end_date,
+                project_status: post.project_status,
               }
             });
             setViewedProfilePosts(formattedPosts);
@@ -321,7 +326,7 @@ const App: React.FC = () => {
         
         const formattedPost: Post = {
           id: postData.id,
-          type: postData.type || 'idea', // Inclui o novo campo 'type'
+          type: postData.type || 'idea',
           title: postData.title,
           target_entity: postData.target_entity,
           content: postData.content,
@@ -343,6 +348,9 @@ const App: React.FC = () => {
           average_rating: postRating ? postRating.sum / postRating.total : 0,
           user_rating: postRating?.userRating || 0,
           total_votes: postRating?.total || 0,
+          start_date: postData.start_date,
+          end_date: postData.end_date,
+          project_status: postData.project_status,
         };
         setViewedPost(formattedPost);
         setIsPostLoading(false);

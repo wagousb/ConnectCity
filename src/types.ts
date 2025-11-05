@@ -46,6 +46,9 @@ export interface Post {
   average_rating?: number;
   user_rating?: number;
   total_votes?: number;
+  start_date?: string;
+  end_date?: string;
+  project_status?: 'Não iniciado' | 'Em andamento' | 'Concluído';
 }
 
 export interface Comment {

@@ -89,7 +89,7 @@ const ImplementedIdeasPage: React.FC<ImplementedIdeasPageProps> = ({ currentUser
 
         return {
           id: post.id,
-          type: post.type || 'idea', // Adicionado o campo 'type'
+          type: post.type || 'idea',
           title: post.title,
           target_entity: post.target_entity,
           content: post.content,
@@ -111,6 +111,9 @@ const ImplementedIdeasPage: React.FC<ImplementedIdeasPageProps> = ({ currentUser
           average_rating: postRating ? postRating.sum / postRating.total : 0,
           user_rating: postRating?.userRating || 0,
           total_votes: postRating?.total || 0,
+          start_date: post.start_date,
+          end_date: post.end_date,
+          project_status: post.project_status,
         };
       });
 

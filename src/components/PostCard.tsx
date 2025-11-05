@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Post, User } from '@/types';
-import { MessageCircleIcon, StarIcon, PaperclipIcon, MegaphoneIcon, CheckCircleIcon } from '@/components/Icons';
+import { MessageCircleIcon, StarIcon, PaperclipIcon, MegaphoneIcon, CheckCircleIcon, CalendarIcon, ClipboardListIcon } from '@/components/Icons';
 import { supabase } from '@/integrations/supabase/client';
 import ContributionsSection from './ContributionsSection';
 import RoleBadge from './RoleBadge';
@@ -36,6 +36,15 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
       case 'Prefeitura': return 'bg-blue-100 text-blue-800';
       case 'Câmara de Vereadores': return 'bg-green-100 text-green-800';
       case 'Secretários': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-slate-100 text-slate-800';
+    }
+  };
+
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'Concluído': return 'bg-green-100 text-green-800';
+      case 'Em andamento': return 'bg-yellow-100 text-yellow-800';
+      case 'Não iniciado':
       default: return 'bg-slate-100 text-slate-800';
     }
   };
@@ -81,10 +90,16 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
     }
   };
 
-  const handleSaveEdit = async (updatedFields: { title: string; target_entity: string; content: string }) => {
+  const handleSaveEdit = async (updatedFields: { 
+    title: string; 
+    target_entity: string; 
+    content: string;
+    start_date?: string;
+    end_date?: string;
+    project_status?: 'Não iniciado' | 'Em andamento' | 'Concluído';
+  }) => {
     setIsSaving(true);
     
-    // 1. Atualizar o post principal
     const { error: postUpdateError } = await supabase
         .from('posts')
         .update({
@@ -92,6 +107,9 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
             target_entity: isIdea ? updatedFields.target_entity : null,
             content: updatedFields.content,
             edited_at: new Date().toISOString(),
+            start_date: isAnnouncement ? updatedFields.start_date || null : null,
+            end_date: isAnnouncement ? updatedFields.end_date || null : null,
+            project_status: isAnnouncement ? updatedFields.project_status || null : null,
         })
         .eq('id', post.id);
 
@@ -102,17 +120,16 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
         return;
     }
 
-    // 2. Registrar a edição no histórico (post_edits)
     const { error: editInsertError } = await supabase
         .from('post_edits')
         .insert({
             post_id: post.id,
             editor_id: currentUser.id,
-            previous_title: post.title, // Adicionado para histórico
+            previous_title: post.title,
             new_title: updatedFields.title,
-            previous_content: post.content, // Adicionado para histórico
+            previous_content: post.content,
             new_content: updatedFields.content,
-            previous_target_entity: post.target_entity, // Adicionado para histórico
+            previous_target_entity: post.target_entity,
             new_target_entity: isIdea ? updatedFields.target_entity : null,
         });
 
@@ -122,7 +139,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
 
     setIsSaving(false);
     setIsEditModalOpen(false);
-    // Força o refresh do feed/detalhe para mostrar as alterações
     onViewChange({ view: 'Feed' }); 
   };
 
@@ -166,7 +182,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200">
       
-      {/* Modals */}
       <ConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
@@ -192,7 +207,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
         onReport={handleReportPost}
         isSubmitting={isReporting}
       />
-      {/* End Modals */}
 
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-4">
@@ -239,6 +253,34 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
         </h3>
         <p className="my-2 text-slate-700 whitespace-pre-wrap">{post.content}</p>
       </div>
+
+      {isAnnouncement && (post.start_date || post.end_date || post.project_status) && (
+        <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+            {post.project_status && (
+                <div className="flex items-center space-x-2">
+                    <ClipboardListIcon className="h-5 w-5 text-slate-500" />
+                    <span className="font-semibold text-slate-700">Status:</span>
+                    <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${getStatusBadgeColor(post.project_status)}`}>
+                        {post.project_status}
+                    </span>
+                </div>
+            )}
+            {post.start_date && (
+                <div className="flex items-center space-x-2">
+                    <CalendarIcon className="h-5 w-5 text-slate-500" />
+                    <span className="font-semibold text-slate-700">Início:</span>
+                    <span className="text-slate-600">{new Date(post.start_date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
+                </div>
+            )}
+            {post.end_date && (
+                <div className="flex items-center space-x-2">
+                    <CalendarIcon className="h-5 w-5 text-slate-500" />
+                    <span className="font-semibold text-slate-700">Fim:</span>
+                    <span className="text-slate-600">{new Date(post.end_date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
+                </div>
+            )}
+        </div>
+      )}
 
       {post.imageUrl && (
         <div className="my-4">

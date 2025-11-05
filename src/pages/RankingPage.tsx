@@ -2,24 +2,23 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Post, User, Profile } from '@/types';
 import RankingCard from '@/components/RankingCard';
-import { StarIcon } from '@/components/Icons'; // Corrigido: Importação do StarIcon
+import { StarIcon } from '@/components/Icons';
 
 interface RankingPageProps {
-  currentUser: User; // Mantido, mas não usado diretamente na lógica de busca
+  currentUser: User;
   onViewChange: (view: { view: string; postId?: string }) => void;
 }
 
-const RankingPage: React.FC<RankingPageProps> = ({ onViewChange }) => { // Corrigido: Removido currentUser do destructuring
+const RankingPage: React.FC<RankingPageProps> = ({ onViewChange }) => {
   const [rankedPosts, setRankedPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchRankedPosts = useCallback(async () => {
     setLoading(true);
     
-    // 1. Buscar todos os posts e contagem de comentários
     const { data: postsData, error: postsError } = await supabase
       .from('posts')
-      .select('id, user_id, title, target_entity, content, image_url, document_url, created_at, comments(count)');
+      .select('id, user_id, title, target_entity, content, image_url, document_url, created_at, comments(count), start_date, end_date, project_status');
 
     if (postsError) {
       console.error('Erro ao buscar posts para ranking:', postsError);
@@ -27,10 +26,8 @@ const RankingPage: React.FC<RankingPageProps> = ({ onViewChange }) => { // Corri
       return;
     }
 
-    // const postIds = postsData.map(p => p.id); // Corrigido: Variável não utilizada removida
     const userIds = [...new Set(postsData.map(p => p.user_id))];
 
-    // 2. Buscar perfis
     const { data: profilesData, error: profilesError } = await supabase
       .from('profiles')
       .select('*')
@@ -43,7 +40,6 @@ const RankingPage: React.FC<RankingPageProps> = ({ onViewChange }) => { // Corri
     }
     const profilesMap = new Map(profilesData.map((profile: Profile) => [profile.id, profile]));
 
-    // 3. Buscar avaliações
     const { data: ratingsData, error: ratingsError } = await supabase
         .from('ratings')
         .select('post_id, rating');
@@ -60,8 +56,6 @@ const RankingPage: React.FC<RankingPageProps> = ({ onViewChange }) => { // Corri
         postRating.sum += rating.rating;
     });
 
-    // 4. Formatar e calcular média
-    // Corrigido: Removida a tipagem explícita 'Post[]' antes do map, e o filter garante o tipo final.
     const postsWithRatings = postsData
       .map(post => {
         const profile = profilesMap.get(post.user_id);
@@ -94,18 +88,20 @@ const RankingPage: React.FC<RankingPageProps> = ({ onViewChange }) => { // Corri
           content: post.content,
           imageUrl: post.image_url,
           document_url: post.document_url,
-          timestamp: new Date(post.created_at).toLocaleDateString(), // Simplificado para ranking
+          timestamp: new Date(post.created_at).toLocaleDateString(),
           author: authorUser,
           comments: (post.comments as any)[0]?.count || 0,
           shares: 0,
           average_rating: averageRating,
           user_rating: 0, 
           total_votes: totalVotes,
-        } as Post; // Corrigido: Usando 'as Post' para garantir o tipo após a formatação
+          start_date: post.start_date,
+          end_date: post.end_date,
+          project_status: post.project_status,
+        } as Post;
       })
-      .filter((p): p is Post => p !== null); // Corrigido: O predicado de tipo agora funciona corretamente
+      .filter((p): p is Post => p !== null);
 
-    // 5. Ordenar: 1. Média de avaliação (desc), 2. Total de votos (desc)
     postsWithRatings.sort((a, b) => {
         if (b.average_rating !== a.average_rating) {
             return b.average_rating! - a.average_rating!;

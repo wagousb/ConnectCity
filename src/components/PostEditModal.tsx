@@ -7,7 +7,14 @@ interface PostEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   post: Post;
-  onSave: (updatedPost: { title: string; target_entity: string; content: string }) => Promise<void>;
+  onSave: (updatedPost: { 
+    title: string; 
+    target_entity: string; 
+    content: string;
+    start_date?: string;
+    end_date?: string;
+    project_status?: 'Não iniciado' | 'Em andamento' | 'Concluído';
+  }) => Promise<void>;
   isSaving: boolean;
 }
 
@@ -15,20 +22,28 @@ const PostEditModal: React.FC<PostEditModalProps> = ({ isOpen, onClose, post, on
   const [title, setTitle] = useState(post.title);
   const [targetEntity, setTargetEntity] = useState(post.target_entity || '');
   const [content, setContent] = useState(post.content);
+  const [startDate, setStartDate] = useState(post.start_date || '');
+  const [endDate, setEndDate] = useState(post.end_date || '');
+  const [projectStatus, setProjectStatus] = useState(post.project_status || 'Não iniciado');
+  
   const isIdea = post.type === 'idea';
+  const isAnnouncement = post.type === 'announcement';
 
   useEffect(() => {
     if (isOpen) {
       setTitle(post.title);
       setTargetEntity(post.target_entity || '');
       setContent(post.content);
+      setStartDate(post.start_date || '');
+      setEndDate(post.end_date || '');
+      setProjectStatus(post.project_status || 'Não iniciado');
     }
   }, [isOpen, post]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim() || (isIdea && !targetEntity)) return;
-    onSave({ title, target_entity: targetEntity, content });
+    onSave({ title, target_entity: targetEntity, content, start_date: startDate, end_date: endDate, project_status: projectStatus });
   };
 
   if (!isOpen) return null;
@@ -37,7 +52,7 @@ const PostEditModal: React.FC<PostEditModalProps> = ({ isOpen, onClose, post, on
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4 border-b pb-3">
-          <h2 className="text-xl font-bold text-slate-800">Editar {isIdea ? 'Ideia' : post.type === 'announcement' ? 'Anúncio' : 'Pronunciamento'}</h2>
+          <h2 className="text-xl font-bold text-slate-800">Editar {isIdea ? 'Ideia' : isAnnouncement ? 'Anúncio' : 'Pronunciamento'}</h2>
           <button onClick={onClose} className="p-1 rounded-full hover:bg-slate-100">
             <XIcon className="h-6 w-6 text-slate-500" />
           </button>
@@ -69,6 +84,26 @@ const PostEditModal: React.FC<PostEditModalProps> = ({ isOpen, onClose, post, on
                 <option value="Câmara de Vereadores">Câmara de Vereadores</option>
                 <option value="Secretários">Secretários</option>
               </select>
+            </div>
+          )}
+          {isAnnouncement && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label htmlFor="edit-start-date" className="block text-xs font-medium text-slate-600 mb-1">Início</label>
+                    <input type="date" id="edit-start-date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full text-sm border-slate-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-200" />
+                </div>
+                <div>
+                    <label htmlFor="edit-end-date" className="block text-xs font-medium text-slate-600 mb-1">Fim</label>
+                    <input type="date" id="edit-end-date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full text-sm border-slate-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-200" />
+                </div>
+                <div>
+                    <label htmlFor="edit-project-status" className="block text-xs font-medium text-slate-600 mb-1">Status</label>
+                    <select id="edit-project-status" value={projectStatus} onChange={(e) => setProjectStatus(e.target.value as any)} className="w-full text-sm border-slate-300 rounded-md p-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary-200">
+                        <option value="Não iniciado">Não iniciado</option>
+                        <option value="Em andamento">Em andamento</option>
+                        <option value="Concluído">Concluído</option>
+                    </select>
+                </div>
             </div>
           )}
           <div>

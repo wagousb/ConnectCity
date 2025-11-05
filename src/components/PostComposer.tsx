@@ -24,6 +24,10 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFi
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [documentFile, setDocumentFile] = useState<File | null>(null);
 
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [projectStatus, setProjectStatus] = useState<'Não iniciado' | 'Em andamento' | 'Concluído'>('Não iniciado');
+
   const [isPublishing, setIsPublishing] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
@@ -98,6 +102,9 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFi
     removeImage();
     removeDocument();
     setPostType('idea');
+    setStartDate('');
+    setEndDate('');
+    setProjectStatus('Não iniciado');
   };
 
   const handlePublish = async () => {
@@ -131,18 +138,20 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFi
 
         const { data: newPost, error: insertError } = await supabase.from('posts').insert({
             user_id: user.id,
-            type: postType, // Novo campo
+            type: postType,
             title,
-            target_entity: postType === 'idea' ? targetEntity : null, // Destinatário só para ideias
+            target_entity: postType === 'idea' ? targetEntity : null,
             content: description,
             image_url: imageUrl,
             document_url: documentUrl,
-            status: postType === 'announcement' ? 'implemented' : 'pending', // Anúncios são marcados como implementados
+            status: postType === 'announcement' ? 'implemented' : 'pending',
+            start_date: postType === 'announcement' ? (startDate || null) : null,
+            end_date: postType === 'announcement' ? (endDate || null) : null,
+            project_status: postType === 'announcement' ? projectStatus : null,
         }).select('id').single();
 
         if (insertError) throw new Error(`Erro ao publicar: ${insertError.message}`);
 
-        // Se for anúncio ou pronunciamento, notificar todos os usuários via Edge Function
         if (newPost && (postType === 'announcement' || postType === 'speech')) {
             const { error: fnError } = await supabase.functions.invoke('notify-all-users', {
                 body: {
@@ -238,6 +247,26 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFi
               <option value="Câmara de Vereadores">Câmara de Vereadores</option>
               <option value="Secretários">Secretários</option>
             </select>
+          )}
+          {postType === 'announcement' && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <div>
+                    <label htmlFor="start-date" className="block text-xs font-medium text-slate-600 mb-1">Previsão de Início</label>
+                    <input type="date" id="start-date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full text-sm border-slate-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-200" />
+                </div>
+                <div>
+                    <label htmlFor="end-date" className="block text-xs font-medium text-slate-600 mb-1">Prazo de Finalização</label>
+                    <input type="date" id="end-date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full text-sm border-slate-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-200" />
+                </div>
+                <div>
+                    <label htmlFor="project-status" className="block text-xs font-medium text-slate-600 mb-1">Status do Projeto</label>
+                    <select id="project-status" value={projectStatus} onChange={(e) => setProjectStatus(e.target.value as any)} className="w-full text-sm border-slate-300 rounded-md p-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary-200">
+                        <option value="Não iniciado">Não iniciado</option>
+                        <option value="Em andamento">Em andamento</option>
+                        <option value="Concluído">Concluído</option>
+                    </select>
+                </div>
+            </div>
           )}
           <div className="relative">
             <textarea
