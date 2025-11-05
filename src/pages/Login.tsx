@@ -21,11 +21,11 @@ const Login: React.FC = () => {
         
         {/* Coluna de Marketing/Boas-vindas (Esquerda) */}
         <div 
-          className="md:w-1/2 p-8 md:p-12 text-white flex flex-col justify-center space-y-6 bg-cover bg-center"
+          className="relative md:w-1/2 p-8 md:p-12 text-white flex flex-col justify-center space-y-6 bg-cover bg-center bg-primary-800"
           style={{ backgroundImage: 'url(/serra-da-logo-itamorotinga.png)' }}
         >
           {/* Overlay escuro para garantir legibilidade do texto */}
-          <div className="absolute inset-0 bg-primary-800 bg-opacity-80 md:w-1/2"></div>
+          <div className="absolute inset-0 bg-primary-800 bg-opacity-80"></div>
           
           <div className="relative z-10 flex flex-col justify-center h-full space-y-6">
             <div className="flex items-center space-x-3">
