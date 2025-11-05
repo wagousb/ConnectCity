@@ -23,8 +23,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, onViewChange }) => {
         </div>
       </div>
       <div className="mt-8">
-        <h2 className="text-xl font-bold hover:underline cursor-pointer" onClick={() => onViewChange('Meu Perfil')}>{user.name}</h2>
-        <p className="text-sm text-slate-500 hover:underline cursor-pointer" onClick={() => onViewChange('Meu Perfil')}>@{user.handle}</p>
+        <h2 className="text-xl font-bold">{user.name}</h2>
+        <p className="text-sm text-slate-500">@{user.handle}</p>
       </div>
     </div>
   );

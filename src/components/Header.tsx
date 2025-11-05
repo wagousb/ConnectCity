@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { User } from '@/types';
-import { HomeIcon, SearchIcon, UsersIcon, BellIcon, SettingsIcon, LogoutIcon, ShieldCheckIcon, UserCircleIcon } from '@/components/Icons';
+import { HomeIcon, SearchIcon, BellIcon, SettingsIcon, LogoutIcon, ShieldCheckIcon, UserCircleIcon, StarIcon } from '@/components/Icons';
 import { supabase } from '@/integrations/supabase/client';
 
 interface HeaderProps {
@@ -73,9 +73,9 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotificati
               <HomeIcon className="h-6 w-6" />
             </button>
             <button 
-              onClick={() => onViewChange({ view: 'Membros' })}
+              onClick={() => onViewChange({ view: 'Ranking' })}
               className="text-slate-500 hover:text-primary p-2 rounded-full hover:bg-primary-50">
-              <UsersIcon className="h-6 w-6" />
+              <StarIcon className="h-6 w-6" />
             </button>
             <button 
               onClick={() => onViewChange({ view: 'Notificações' })}

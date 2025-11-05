@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Post, User, Profile } from '@/types';
 import RankingCard from '@/components/RankingCard';
-import { StarIcon } from '@/components/Icons';
+import RankedCommentCard, { type RankedComment } from '@/components/RankedCommentCard';
+import { StarIcon, ThumbsUpIcon } from '@/components/Icons';
 
 interface RankingPageProps {
   currentUser: User;
@@ -10,42 +11,28 @@ interface RankingPageProps {
 }
 
 const RankingPage: React.FC<RankingPageProps> = ({ onViewChange }) => {
+  const [activeTab, setActiveTab] = useState<'ideas' | 'contributions'>('ideas');
   const [rankedPosts, setRankedPosts] = useState<Post[]>([]);
+  const [rankedComments, setRankedComments] = useState<RankedComment[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchRankedPosts = useCallback(async () => {
-    setLoading(true);
-    
     const { data: postsData, error: postsError } = await supabase
       .from('posts')
-      .select('id, user_id, title, target_entity, content, image_url, document_url, created_at, comments(count), start_date, end_date, project_status');
+      .select('id, user_id, title, target_entity, content, image_url, document_url, created_at, comments(count), start_date, end_date, project_status, type');
 
     if (postsError) {
       console.error('Erro ao buscar posts para ranking:', postsError);
-      setLoading(false);
-      return;
+      return [];
     }
 
     const userIds = [...new Set(postsData.map(p => p.user_id))];
+    const { data: profilesData } = await supabase.from('profiles').select('*').in('id', userIds);
+    const profilesMap = new Map(profilesData?.map((profile: Profile) => [profile.id, profile]));
 
-    const { data: profilesData, error: profilesError } = await supabase
-      .from('profiles')
-      .select('*')
-      .in('id', userIds);
+    const postIds = postsData.map(p => p.id);
+    const { data: ratingsData } = await supabase.from('ratings').select('post_id, rating').in('post_id', postIds);
     
-    if (profilesError) {
-        console.error('Erro ao buscar perfis para ranking:', profilesError);
-        setLoading(false);
-        return;
-    }
-    const profilesMap = new Map(profilesData.map((profile: Profile) => [profile.id, profile]));
-
-    const { data: ratingsData, error: ratingsError } = await supabase
-        .from('ratings')
-        .select('post_id, rating');
-    
-    if (ratingsError) console.error('Erro ao buscar avaliações para ranking:', ratingsError);
-
     const ratingsMap = new Map<string, { total: number; sum: number }>();
     ratingsData?.forEach(rating => {
         if (!ratingsMap.has(rating.post_id)) {
@@ -83,6 +70,7 @@ const RankingPage: React.FC<RankingPageProps> = ({ onViewChange }) => {
 
         return {
           id: post.id,
+          type: post.type || 'idea',
           title: post.title,
           target_entity: post.target_entity,
           content: post.content,
@@ -109,25 +97,54 @@ const RankingPage: React.FC<RankingPageProps> = ({ onViewChange }) => {
         return b.total_votes! - a.total_votes!;
     });
 
-    setRankedPosts(postsWithRatings);
-    setLoading(false);
+    return postsWithRatings;
+  }, []);
+
+  const fetchRankedComments = useCallback(async () => {
+    const { data, error } = await supabase.rpc('get_ranked_comments');
+
+    if (error) {
+      console.error('Error fetching ranked comments:', error);
+      return [];
+    }
+
+    const formattedComments: RankedComment[] = data.map((c: any) => ({
+      comment_id: c.comment_id,
+      comment_content: c.comment_content,
+      comment_created_at: c.comment_created_at,
+      agree_count: c.agree_count,
+      post_id: c.post_id,
+      post_title: c.post_title,
+      author: {
+        id: c.author_id,
+        name: c.author_name,
+        handle: c.author_handle,
+        avatarUrl: c.author_avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.author_name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
+        role: c.author_role || 'cidadão',
+      } as User,
+    }));
+    return formattedComments;
   }, []);
 
   useEffect(() => {
-    fetchRankedPosts();
-  }, [fetchRankedPosts]);
+    const fetchData = async () => {
+      setLoading(true);
+      const [posts, comments] = await Promise.all([
+        fetchRankedPosts(),
+        fetchRankedComments(),
+      ]);
+      setRankedPosts(posts);
+      setRankedComments(comments);
+      setLoading(false);
+    };
 
-  return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200">
-      <h1 className="text-2xl font-bold mb-6 flex items-center space-x-3">
-        <StarIcon className="h-7 w-7 text-amber-500 fill-amber-500" />
-        <span>Ranking de Ideias</span>
-      </h1>
+    fetchData();
+  }, [fetchRankedPosts, fetchRankedComments]);
+
+  const renderIdeasRanking = () => (
+    <>
       <p className="text-slate-500 mb-6">As ideias mais bem avaliadas pela comunidade, ordenadas por média de nota e número de votos.</p>
-      
-      {loading ? (
-        <p className="text-slate-500 text-center py-8">Carregando ranking...</p>
-      ) : rankedPosts.length === 0 ? (
+      {rankedPosts.length === 0 ? (
         <p className="text-slate-500 text-center py-8">Nenhuma ideia avaliada ainda.</p>
       ) : (
         <div className="space-y-4">
@@ -139,6 +156,60 @@ const RankingPage: React.FC<RankingPageProps> = ({ onViewChange }) => {
               onViewChange={onViewChange} 
             />
           ))}
+        </div>
+      )}
+    </>
+  );
+
+  const renderCommentsRanking = () => (
+    <>
+      <p className="text-slate-500 mb-6">As contribuições mais apoiadas pela comunidade, classificadas pelo número de 'Concordo'.</p>
+      {rankedComments.length === 0 ? (
+        <p className="text-slate-500 text-center py-8">Nenhuma contribuição foi votada ainda.</p>
+      ) : (
+        <div className="space-y-4">
+          {rankedComments.map((comment, index) => (
+            <RankedCommentCard 
+              key={comment.comment_id} 
+              rankedComment={comment} 
+              rank={index + 1} 
+              onViewChange={onViewChange} 
+            />
+          ))}
+        </div>
+      )}
+    </>
+  );
+
+  return (
+    <div className="bg-white p-6 rounded-xl border border-slate-200">
+      <h1 className="text-2xl font-bold mb-6">Ranking da Comunidade</h1>
+      
+      <div className="border-b border-slate-200 mb-6">
+        <nav className="flex -mb-px space-x-6">
+          <button
+            onClick={() => setActiveTab('ideas')}
+            className={`flex items-center space-x-2 py-3 px-1 font-semibold text-sm transition-colors duration-200 ${activeTab === 'ideas' ? 'border-b-2 border-primary text-primary' : 'border-b-2 border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'}`}
+          >
+            <StarIcon className="h-5 w-5" />
+            <span>Ideias</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('contributions')}
+            className={`flex items-center space-x-2 py-3 px-1 font-semibold text-sm transition-colors duration-200 ${activeTab === 'contributions' ? 'border-b-2 border-primary text-primary' : 'border-b-2 border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'}`}
+          >
+            <ThumbsUpIcon className="h-5 w-5" />
+            <span>Contribuições</span>
+          </button>
+        </nav>
+      </div>
+
+      {loading ? (
+        <p className="text-slate-500 text-center py-8">Carregando rankings...</p>
+      ) : (
+        <div>
+          {activeTab === 'ideas' && renderIdeasRanking()}
+          {activeTab === 'contributions' && renderCommentsRanking()}
         </div>
       )}
     </div>
