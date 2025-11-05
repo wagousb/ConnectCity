@@ -25,6 +25,8 @@ const PostEditModal: React.FC<PostEditModalProps> = ({ isOpen, onClose, post, on
   const [startDate, setStartDate] = useState(post.start_date || '');
   const [endDate, setEndDate] = useState(post.end_date || '');
   const [projectStatus, setProjectStatus] = useState(post.project_status || 'Não iniciado');
+  const [noStartDate, setNoStartDate] = useState(!post.start_date);
+  const [noEndDate, setNoEndDate] = useState(!post.end_date);
   
   const isIdea = post.type === 'idea';
   const isAnnouncement = post.type === 'announcement';
@@ -37,13 +39,22 @@ const PostEditModal: React.FC<PostEditModalProps> = ({ isOpen, onClose, post, on
       setStartDate(post.start_date || '');
       setEndDate(post.end_date || '');
       setProjectStatus(post.project_status || 'Não iniciado');
+      setNoStartDate(!post.start_date);
+      setNoEndDate(!post.end_date);
     }
   }, [isOpen, post]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim() || (isIdea && !targetEntity)) return;
-    onSave({ title, target_entity: targetEntity, content, start_date: startDate, end_date: endDate, project_status: projectStatus });
+    onSave({ 
+        title, 
+        target_entity: targetEntity, 
+        content, 
+        start_date: noStartDate ? undefined : startDate, 
+        end_date: noEndDate ? undefined : endDate, 
+        project_status: projectStatus 
+    });
   };
 
   if (!isOpen) return null;
@@ -87,14 +98,24 @@ const PostEditModal: React.FC<PostEditModalProps> = ({ isOpen, onClose, post, on
             </div>
           )}
           {isAnnouncement && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label htmlFor="edit-start-date" className="block text-xs font-medium text-slate-600 mb-1">Início</label>
-                    <input type="date" id="edit-start-date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full text-sm border-slate-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-200" />
-                </div>
-                <div>
-                    <label htmlFor="edit-end-date" className="block text-xs font-medium text-slate-600 mb-1">Fim</label>
-                    <input type="date" id="edit-end-date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full text-sm border-slate-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-200" />
+            <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label htmlFor="edit-start-date" className="block text-xs font-medium text-slate-600 mb-1">Início</label>
+                        <input type="date" id="edit-start-date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full text-sm border-slate-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-200 disabled:bg-slate-200 disabled:cursor-not-allowed" disabled={noStartDate} />
+                        <div className="mt-2 flex items-center">
+                            <input type="checkbox" id="edit-no-start-date" checked={noStartDate} onChange={(e) => { setNoStartDate(e.target.checked); if (e.target.checked) setStartDate(''); }} className="h-4 w-4 text-primary border-slate-300 rounded focus:ring-primary" />
+                            <label htmlFor="edit-no-start-date" className="ml-2 text-xs text-slate-600">Sem data de início</label>
+                        </div>
+                    </div>
+                    <div>
+                        <label htmlFor="edit-end-date" className="block text-xs font-medium text-slate-600 mb-1">Fim</label>
+                        <input type="date" id="edit-end-date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full text-sm border-slate-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-200 disabled:bg-slate-200 disabled:cursor-not-allowed" disabled={noEndDate} />
+                        <div className="mt-2 flex items-center">
+                            <input type="checkbox" id="edit-no-end-date" checked={noEndDate} onChange={(e) => { setNoEndDate(e.target.checked); if (e.target.checked) setEndDate(''); }} className="h-4 w-4 text-primary border-slate-300 rounded focus:ring-primary" />
+                            <label htmlFor="edit-no-end-date" className="ml-2 text-xs text-slate-600">Sem previsão de finalização</label>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <label htmlFor="edit-project-status" className="block text-xs font-medium text-slate-600 mb-1">Status</label>

@@ -27,6 +27,8 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFi
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [projectStatus, setProjectStatus] = useState<'Não iniciado' | 'Em andamento' | 'Concluído'>('Não iniciado');
+  const [noStartDate, setNoStartDate] = useState(false);
+  const [noEndDate, setNoEndDate] = useState(false);
 
   const [isPublishing, setIsPublishing] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -105,6 +107,8 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFi
     setStartDate('');
     setEndDate('');
     setProjectStatus('Não iniciado');
+    setNoStartDate(false);
+    setNoEndDate(false);
   };
 
   const handlePublish = async () => {
@@ -249,14 +253,24 @@ const PostComposer: React.FC<PostComposerProps> = ({ user, onPostPublished, isFi
             </select>
           )}
           {postType === 'announcement' && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <div>
-                    <label htmlFor="start-date" className="block text-xs font-medium text-slate-600 mb-1">Previsão de Início</label>
-                    <input type="date" id="start-date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full text-sm border-slate-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-200" />
-                </div>
-                <div>
-                    <label htmlFor="end-date" className="block text-xs font-medium text-slate-600 mb-1">Prazo de Finalização</label>
-                    <input type="date" id="end-date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full text-sm border-slate-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-200" />
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label htmlFor="start-date" className="block text-xs font-medium text-slate-600 mb-1">Previsão de Início</label>
+                        <input type="date" id="start-date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full text-sm border-slate-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-200 disabled:bg-slate-200 disabled:cursor-not-allowed" disabled={noStartDate} />
+                        <div className="mt-2 flex items-center">
+                            <input type="checkbox" id="no-start-date" checked={noStartDate} onChange={(e) => { setNoStartDate(e.target.checked); if (e.target.checked) setStartDate(''); }} className="h-4 w-4 text-primary border-slate-300 rounded focus:ring-primary" />
+                            <label htmlFor="no-start-date" className="ml-2 text-xs text-slate-600">Sem data de início</label>
+                        </div>
+                    </div>
+                    <div>
+                        <label htmlFor="end-date" className="block text-xs font-medium text-slate-600 mb-1">Prazo de Finalização</label>
+                        <input type="date" id="end-date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full text-sm border-slate-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-200 disabled:bg-slate-200 disabled:cursor-not-allowed" disabled={noEndDate} />
+                        <div className="mt-2 flex items-center">
+                            <input type="checkbox" id="no-end-date" checked={noEndDate} onChange={(e) => { setNoEndDate(e.target.checked); if (e.target.checked) setEndDate(''); }} className="h-4 w-4 text-primary border-slate-300 rounded focus:ring-primary" />
+                            <label htmlFor="no-end-date" className="ml-2 text-xs text-slate-600">Sem previsão de finalização</label>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <label htmlFor="project-status" className="block text-xs font-medium text-slate-600 mb-1">Status do Projeto</label>
