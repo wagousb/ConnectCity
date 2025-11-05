@@ -5,10 +5,14 @@ import { DownloadIcon } from './Icons';
 const PwaInstallPrompt: React.FC = () => {
   const [installPromptEvent, setInstallPromptEvent] = useState<any>(null);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [dismissPermanently, setDismissPermanently] = useState(false);
 
   useEffect(() => {
-    // Não mostra o prompt se já estiver no modo PWA ou se o usuário já dispensou permanentemente
-    if (window.matchMedia('(display-mode: standalone)').matches || localStorage.getItem('pwaInstallDismissed') === 'true') {
+    // Verifica se já está no modo PWA ou se o usuário dispensou permanentemente
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    const isDismissed = localStorage.getItem('pwaInstallDismissed') === 'true';
+
+    if (isStandalone || isDismissed) {
       return;
     }
 
@@ -27,6 +31,12 @@ const PwaInstallPrompt: React.FC = () => {
 
   const handleInstallClick = () => {
     if (!installPromptEvent) return;
+    
+    // Se o usuário marcou para não mostrar novamente, salvamos a preferência antes de tentar instalar
+    if (dismissPermanently) {
+        localStorage.setItem('pwaInstallDismissed', 'true');
+    }
+
     installPromptEvent.prompt();
     installPromptEvent.userChoice.then((choiceResult: { outcome: 'accepted' | 'dismissed' }) => {
       if (choiceResult.outcome === 'accepted') {
@@ -40,11 +50,9 @@ const PwaInstallPrompt: React.FC = () => {
   };
 
   const handleDismiss = () => {
-    setShowPrompt(false);
-  };
-
-  const handleDismissPermanently = () => {
-    localStorage.setItem('pwaInstallDismissed', 'true');
+    if (dismissPermanently) {
+        localStorage.setItem('pwaInstallDismissed', 'true');
+    }
     setShowPrompt(false);
   };
 
@@ -68,17 +76,25 @@ const PwaInstallPrompt: React.FC = () => {
           Baixar o aplicativo
         </button>
 
-        <button
-          onClick={handleDismiss}
-          className="mt-4 text-primary font-semibold hover:underline"
-        >
-          Usar no navegador
-        </button>
-
-        <div className="mt-8">
-          <button onClick={handleDismissPermanently} className="text-xs text-slate-400 hover:underline">
-            Não mostrar novamente
-          </button>
+        <div className="mt-4 flex items-center justify-center space-x-4">
+            <button
+              onClick={handleDismiss}
+              className="text-primary font-semibold hover:underline"
+            >
+              Usar no navegador
+            </button>
+            <div className="flex items-center">
+                <input 
+                    id="dismiss-pwa" 
+                    type="checkbox" 
+                    checked={dismissPermanently} 
+                    onChange={(e) => setDismissPermanently(e.target.checked)}
+                    className="h-4 w-4 text-primary border-slate-300 rounded focus:ring-primary"
+                />
+                <label htmlFor="dismiss-pwa" className="ml-2 text-sm text-slate-600">
+                    Não mostrar novamente
+                </label>
+            </div>
         </div>
       </div>
     </div>,
