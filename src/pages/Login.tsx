@@ -13,6 +13,7 @@ const Login: React.FC = () => {
   const title = isLoginView ? 'Bem-vindo de volta!' : 'Junte-se à comunidade';
   const subtitle = isLoginView ? 'Faça login para continuar' : 'Crie sua conta e comece a fazer a diferença';
 
+  // O botão de instalação só deve aparecer se for possível (canInstall) e se estiver em um dispositivo móvel (isMobile)
   const showInstallButton = canInstall && isMobile;
 
   return (
@@ -72,7 +73,6 @@ const Login: React.FC = () => {
             </button>
           </p>
 
-          {/* Botão de Download PWA movido para baixo da seção de login/cadastro */}
           {showInstallButton && (
             <div className="mt-8 pt-6 border-t border-slate-100">
                 <button
