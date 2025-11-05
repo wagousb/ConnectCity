@@ -22,7 +22,7 @@ const Login: React.FC = () => {
         {/* Coluna de Marketing/Boas-vindas (Esquerda) */}
         <div className="md:w-1/2 bg-primary-600 p-8 md:p-12 text-white flex flex-col justify-center space-y-6">
           <div className="flex items-center space-x-3">
-            <img src="/serra-da-logo-itamorotinga.png" alt="Serra de Itamorotinga" className="w-10 h-10" />
+            <img src="/logo-itamorotinga.png" alt="Itamorotinga Logo" className="w-10 h-10" />
             <h1 className="font-bold text-3xl font-script">Itamorotinga</h1>
           </div>
           <h2 className="text-3xl font-bold leading-snug">
