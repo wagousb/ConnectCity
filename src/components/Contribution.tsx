@@ -94,10 +94,10 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
         isSaving={isSavingEdit}
       />
       <div className="flex items-start space-x-3">
-        <div className="flex flex-col items-center flex-shrink-0">
+        <div className="relative flex-shrink-0">
           <img src={comment.author.avatarUrl} alt={comment.author.name} className="h-10 w-10 rounded-full" />
           {!comment.is_deleted && (
-            <div className="mt-1">
+            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-max">
               <RoleBadge role={comment.author.role} size="xs" />
             </div>
           )}
