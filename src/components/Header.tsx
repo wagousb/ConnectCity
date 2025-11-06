@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { User } from '@/types';
-import { HomeIcon, SearchIcon, BellIcon, SettingsIcon, LogoutIcon, ShieldCheckIcon, UserCircleIcon, StarIcon } from '@/components/Icons';
+import { SearchIcon, BellIcon, SettingsIcon, LogoutIcon, ShieldCheckIcon, UserCircleIcon, StarIcon } from '@/components/Icons';
 import { supabase } from '@/integrations/supabase/client';
 import ProfilePictureViewer from './ProfilePictureViewer'; // Importando o novo componente
 
@@ -68,11 +68,18 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotificati
             </div>
           </div>
           <div className="flex items-center space-x-2 md:space-x-6">
-            <button 
-              onClick={() => onViewChange({ view: 'Feed' })}
-              className="text-slate-500 hover:text-primary p-2 rounded-full hover:bg-primary-50 hidden md:flex">
-              <HomeIcon className="h-6 w-6" />
-            </button>
+            {/* Botão Feed (Home) removido conforme solicitado */}
+            
+            {isModerator && (
+                <button 
+                    onClick={() => onViewChange({ view: 'Moderação' })}
+                    className="text-slate-500 hover:text-primary p-2 rounded-full hover:bg-primary-50"
+                    title="Moderação"
+                >
+                    <ShieldCheckIcon className="h-6 w-6" />
+                </button>
+            )}
+
             <button 
               onClick={() => onViewChange({ view: 'Ranking' })}
               className="text-slate-500 hover:text-primary p-2 rounded-full hover:bg-primary-50">
