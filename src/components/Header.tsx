@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { User } from '@/types';
-import { SearchIcon, BellIcon, SettingsIcon, LogoutIcon, ShieldCheckIcon, UserCircleIcon, StarIcon } from '@/components/Icons';
+import { HomeIcon, SearchIcon, BellIcon, SettingsIcon, LogoutIcon, ShieldCheckIcon, UserCircleIcon, StarIcon } from '@/components/Icons';
 import { supabase } from '@/integrations/supabase/client';
 import ProfilePictureViewer from './ProfilePictureViewer'; // Importando o novo componente
 
@@ -54,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotificati
           <div className="flex items-center space-x-8">
             <button onClick={() => onViewChange({ view: 'Feed' })} className="flex items-center space-x-2 cursor-pointer">
               <img src="/logo-itamorotinga.png" alt="Itamorotinga Logo" className="w-10 h-10" />
-              <span className="font-bold text-3xl text-primary font-script">Itamorotinga</span>
+              <span className="font-bold text-3xl text-slate-800 font-script">Itamorotinga</span>
             </button>
             <div className="relative hidden md:block">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -63,23 +63,16 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotificati
               <input
                 type="text"
                 placeholder="Pesquisar..."
-                className="bg-slate-100 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-primary w-64"
+                className="bg-slate-100 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-primary-500 w-64"
               />
             </div>
           </div>
           <div className="flex items-center space-x-2 md:space-x-6">
-            {/* Botão Feed (Home) removido conforme solicitado */}
-            
-            {isModerator && (
-                <button 
-                    onClick={() => onViewChange({ view: 'Moderação' })}
-                    className="text-slate-500 hover:text-primary p-2 rounded-full hover:bg-primary-50"
-                    title="Moderação"
-                >
-                    <ShieldCheckIcon className="h-6 w-6" />
-                </button>
-            )}
-
+            <button 
+              onClick={() => onViewChange({ view: 'Feed' })}
+              className="text-slate-500 hover:text-primary p-2 rounded-full hover:bg-primary-50 hidden md:flex">
+              <HomeIcon className="h-6 w-6" />
+            </button>
             <button 
               onClick={() => onViewChange({ view: 'Ranking' })}
               className="text-slate-500 hover:text-primary p-2 rounded-full hover:bg-primary-50">

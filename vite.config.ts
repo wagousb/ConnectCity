@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
             name: 'Itamorotinga',
             short_name: 'Itamorotinga',
             description: 'Sua voz, o futuro da nossa cidade.',
-            theme_color: '#4f46e5', // Atualizado para indigo-600
+            theme_color: '#1e293b', // Atualizado para slate-800
             background_color: '#f8fafc',
             display: 'standalone',
             scope: '/',
