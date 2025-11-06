@@ -24,6 +24,8 @@ const timeAgo = (date: string | Date): string => {
     return Math.floor(seconds) + "s";
 }
 
+const DEFAULT_BANNER_URL = '/default-banner.jpg';
+
 const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -108,7 +110,7 @@ const App: React.FC = () => {
             name: profile.name,
             handle: profile.handle,
             avatarUrl: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=eef2ff&color=4f46e5&font-size=0.5`,
-            bannerUrl: profile.banner_url,
+            bannerUrl: profile.banner_url || DEFAULT_BANNER_URL,
             bio: profile.bio,
             role: profile.role || 'cidadão',
             is_moderator: profile.is_moderator,
@@ -178,7 +180,7 @@ const App: React.FC = () => {
             name: profileData.name || session.user.email || 'Usuário',
             handle: profileData.handle || 'usuário',
             avatarUrl: avatarUrl,
-            bannerUrl: profileData.banner_url || 'https://picsum.photos/seed/banner1/1500/500',
+            bannerUrl: profileData.banner_url || DEFAULT_BANNER_URL,
             bio: profileData.bio || 'Bem-vindo ao Itamorotinga!',
             date_of_birth: profileData.date_of_birth,
             is_public: profileData.is_public,
@@ -242,7 +244,7 @@ const App: React.FC = () => {
         const formattedProfile: User = {
             id: profileData.id, name: profileData.name || 'Usuário', handle: profileData.handle || 'usuário',
             avatarUrl: profileData.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
-            bannerUrl: profileData.banner_url || 'https://picsum.photos/seed/banner1/1500/500', bio: profileData.bio || '',
+            bannerUrl: profileData.banner_url || DEFAULT_BANNER_URL, bio: profileData.bio || '',
             role: profileData.role || 'cidadão',
             is_moderator: profileData.is_moderator,
         };
@@ -339,7 +341,7 @@ const App: React.FC = () => {
             name: profileData.name,
             handle: profileData.handle,
             avatarUrl: profileData.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.name || 'U')}&background=eef2ff&color=4f46e5&font-size=0.5`,
-            bannerUrl: profileData.banner_url,
+            bannerUrl: profileData.banner_url || DEFAULT_BANNER_URL,
             bio: profileData.bio,
             role: profileData.role || 'cidadão',
             is_moderator: profileData.is_moderator,
