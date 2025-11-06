@@ -8,7 +8,8 @@ import PostActionsDropdown from './PostActionsDropdown';
 import ConfirmationModal from './ConfirmationModal';
 import PostEditModal from './PostEditModal';
 import ReportPostModal from './ReportPostModal';
-import ProfilePictureViewer from './ProfilePictureViewer'; // Importando o novo componente
+import ProfilePictureViewer from './ProfilePictureViewer';
+import ImageModalViewer from './ImageModalViewer'; // Importando o novo componente
 
 interface PostCardProps {
   post: Post;
@@ -26,6 +27,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isReporting, setIsReporting] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false); // Novo estado
   
   const isAuthor = post.author.id === currentUser.id;
   const isIdea = post.type === 'idea';
@@ -208,6 +210,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
         onReport={handleReportPost}
         isSubmitting={isReporting}
       />
+      {post.imageUrl && (
+        <ImageModalViewer
+          isOpen={isImageModalOpen}
+          onClose={() => setIsImageModalOpen(false)}
+          imageUrl={post.imageUrl}
+          altText={post.title}
+        />
+      )}
 
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-4">
@@ -288,7 +298,12 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
 
       {post.imageUrl && (
         <div className="my-4">
-          <img src={post.imageUrl} alt="Imagem do projeto" className="rounded-lg max-h-96 w-full object-cover" />
+          <img 
+            src={post.imageUrl} 
+            alt="Imagem do projeto" 
+            className="rounded-lg max-h-96 w-full object-cover cursor-pointer transition-opacity hover:opacity-90" 
+            onClick={() => setIsImageModalOpen(true)}
+          />
         </div>
       )}
 
