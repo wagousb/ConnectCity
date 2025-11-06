@@ -187,6 +187,7 @@ const App: React.FC = () => {
             notifications_on_likes: profileData.notifications_on_likes,
             notifications_on_comments: profileData.notifications_on_comments,
             notifications_on_new_followers: profileData.notifications_on_new_followers,
+            notifications_on_implemented_projects: profileData.notifications_on_implemented_projects ?? true, // Novo campo
             role: profileData.role || 'cidadão',
             is_moderator: profileData.is_moderator,
           });
@@ -247,6 +248,7 @@ const App: React.FC = () => {
             bannerUrl: profileData.banner_url || DEFAULT_BANNER_URL, bio: profileData.bio || '',
             role: profileData.role || 'cidadão',
             is_moderator: profileData.is_moderator,
+            notifications_on_implemented_projects: profileData.notifications_on_implemented_projects ?? true,
         };
         setViewedProfile(formattedProfile);
         const { data: postsData, error: postsError } = await supabase.from('posts').select('*, comments(count)').eq('user_id', currentView.userId).order('created_at', { ascending: false });

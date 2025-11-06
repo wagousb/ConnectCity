@@ -12,6 +12,7 @@ const NotificationsSettings: React.FC<NotificationsSettingsProps> = ({ user, onB
   const [settings, setSettings] = useState({
     likes: user.notifications_on_likes ?? true,
     comments: user.notifications_on_comments ?? true,
+    implemented_projects: user.notifications_on_implemented_projects ?? true,
   });
   const [loading, setLoading] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -22,8 +23,24 @@ const NotificationsSettings: React.FC<NotificationsSettingsProps> = ({ user, onB
     setLoading(settingName);
     setMessage(null);
 
+    let dbFieldName: string;
+    switch (settingName) {
+        case 'likes':
+            dbFieldName = 'notifications_on_likes';
+            break;
+        case 'comments':
+            dbFieldName = 'notifications_on_comments';
+            break;
+        case 'implemented_projects':
+            dbFieldName = 'notifications_on_implemented_projects';
+            break;
+        default:
+            setLoading(null);
+            return;
+    }
+
     const updatePayload = {
-      ['notifications_on_' + settingName]: newSettings[settingName],
+      [dbFieldName]: newSettings[settingName],
     };
 
     const { error } = await supabase
@@ -45,6 +62,7 @@ const NotificationsSettings: React.FC<NotificationsSettingsProps> = ({ user, onB
   const notificationOptions = [
     { key: 'likes' as keyof typeof settings, label: 'Votos', description: 'Receber notificações sobre votos em suas publicações.' },
     { key: 'comments' as keyof typeof settings, label: 'Contribuições', description: 'Receber notificações quando alguém fizer uma contribuição em suas publicações.' },
+    { key: 'implemented_projects' as keyof typeof settings, label: 'Projetos Implementados', description: 'Receber notificações quando uma ideia for marcada como implementada.' },
   ];
 
   return (

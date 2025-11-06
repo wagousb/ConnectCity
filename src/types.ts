@@ -10,6 +10,7 @@ export interface Profile {
   notifications_on_likes?: boolean;
   notifications_on_comments?: boolean;
   notifications_on_new_followers?: boolean;
+  notifications_on_implemented_projects?: boolean;
   role: string;
   is_moderator?: boolean;
 }
@@ -25,8 +26,8 @@ export interface User {
   is_public?: boolean;
   notifications_on_likes?: boolean;
   notifications_on_comments?: boolean;
-
   notifications_on_new_followers?: boolean;
+  notifications_on_implemented_projects?: boolean;
   role: string;
   is_moderator?: boolean;
 }
