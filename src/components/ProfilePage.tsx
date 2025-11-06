@@ -9,6 +9,8 @@ import { useBannerImageManager } from '@/hooks/useBannerImageManager';
 import { supabase } from '@/integrations/supabase/client';
 import RoleBadge from './RoleBadge';
 import WelcomeBanner from './WelcomeBanner';
+import ImageModalViewer from './ImageModalViewer'; // Importando o modal genérico
+import ProfilePictureViewer from './ProfilePictureViewer'; // Importando o viewer
 
 interface ProfilePageProps {
   profileUser: User;
@@ -32,6 +34,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
   const [activeTab, setActiveTab] = useState('Ideias enviadas');
   const [contributions, setContributions] = useState<GroupedContribution[]>([]);
   const [loadingContributions, setLoadingContributions] = useState(false);
+  const [isBannerViewerOpen, setIsBannerViewerOpen] = useState(false); // Novo estado para visualização da capa
+  
   const tabs = ['Ideias enviadas', 'Contribuições'];
   const isOwnProfile = profileUser.id === currentUser.id;
 
@@ -127,36 +131,54 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
           />
         </>
       )}
+      
+      {/* Modal de visualização da capa para perfis de terceiros */}
+      {!isOwnProfile && profileUser.bannerUrl && (
+        <ImageModalViewer
+          isOpen={isBannerViewerOpen}
+          onClose={() => setIsBannerViewerOpen(false)}
+          imageUrl={profileUser.bannerUrl}
+          altText={`Capa de ${profileUser.name}`}
+        />
+      )}
+
       <div className="relative z-0 bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div className="relative">
+          {/* Foto de Capa */}
           <img
             src={profileUser.bannerUrl}
             alt={`${profileUser.name}'s banner`}
-            className="w-full h-48 md:h-64 object-cover"
+            className={`w-full h-48 md:h-64 object-cover ${!isOwnProfile ? 'cursor-pointer' : ''}`}
+            onClick={!isOwnProfile ? () => setIsBannerViewerOpen(true) : undefined}
           />
+          
           <div className="absolute top-full left-6 -translate-y-1/2">
             <div className="relative">
-                <button 
-                onClick={isOwnProfile ? openProfilePicModal : undefined}
-                className={`relative group rounded-full ${isOwnProfile ? '' : 'cursor-default'}`}
-                disabled={!isOwnProfile}
-                >
-                <img
-                    src={profileUser.avatarUrl}
-                    alt={profileUser.name}
-                    className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white group-hover:opacity-75 transition-opacity"
-                />
-                {isOwnProfile && (
-                    <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                    <PencilIcon className="h-8 w-8 text-white" />
-                    </div>
+                {/* Foto de Perfil */}
+                {isOwnProfile ? (
+                    <button 
+                        onClick={openProfilePicModal}
+                        className="relative group rounded-full"
+                    >
+                        <img
+                            src={profileUser.avatarUrl}
+                            alt={profileUser.name}
+                            className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white group-hover:opacity-75 transition-opacity"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                            <PencilIcon className="h-8 w-8 text-white" />
+                        </div>
+                    </button>
+                ) : (
+                    <ProfilePictureViewer user={profileUser} size="lg" />
                 )}
-                </button>
+                
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-max">
                     <RoleBadge role={profileUser.role} size="md" />
                 </div>
             </div>
           </div>
+          
           {isOwnProfile && (
             <div className="absolute top-4 right-4">
               <button
