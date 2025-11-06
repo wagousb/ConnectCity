@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { User, Report } from '@/types';
 import { ShieldCheckIcon, FileTextIcon } from '@/components/Icons';
 import ReportCard from '@/components/ReportCard';
+import UserPermissionRow from '@/components/UserPermissionRow';
 
 interface ModerationPageProps {
   onViewChange: (view: { view: string; postId?: string }) => void;
@@ -15,7 +16,8 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onViewChange }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('reports'); // Definindo 'reports' como aba inicial
+  const [activeTab, setActiveTab] = useState('reports');
+  const [initialUsers, setInitialUsers] = useState<User[]>([]); // Para rastrear se houve mudanças
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -24,6 +26,7 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onViewChange }) => {
       console.error('Error fetching users:', error);
       setError('Não foi possível carregar os usuários.');
       setUsers([]);
+      setInitialUsers([]);
     } else {
       const formattedUsers: User[] = data.map(profile => ({
         id: profile.id,
@@ -34,6 +37,7 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onViewChange }) => {
         is_moderator: profile.is_moderator,
       }));
       setUsers(formattedUsers);
+      setInitialUsers(formattedUsers);
     }
     setLoading(false);
   }, []);
@@ -76,17 +80,34 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onViewChange }) => {
 
   const handleRoleChange = (userId: string, newRole: string) => {
     setUsers(users.map(user => user.id === userId ? { ...user, role: newRole } : user));
+    setMessage(null); // Clear success/error message on change
   };
 
   const handleModeratorToggle = (userId: string) => {
     setUsers(users.map(user => user.id === userId ? { ...user, is_moderator: !user.is_moderator } : user));
+    setMessage(null); // Clear success/error message on change
   };
+
+  const hasChanges = JSON.stringify(users.map(u => ({ id: u.id, role: u.role, is_moderator: u.is_moderator }))) !== 
+                     JSON.stringify(initialUsers.map(u => ({ id: u.id, role: u.role, is_moderator: u.is_moderator })));
 
   const handleSaveChanges = async () => {
     setIsSaving(true);
     setMessage(null);
 
-    const updatePromises = users.map(user =>
+    // Filtra apenas os usuários que realmente tiveram mudanças
+    const usersToUpdate = users.filter(user => {
+        const initialUser = initialUsers.find(u => u.id === user.id);
+        return initialUser && (initialUser.role !== user.role || initialUser.is_moderator !== user.is_moderator);
+    });
+
+    if (usersToUpdate.length === 0) {
+        setMessage({ type: 'success', text: 'Nenhuma alteração para salvar.' });
+        setIsSaving(false);
+        return;
+    }
+
+    const updatePromises = usersToUpdate.map(user =>
       supabase
         .from('profiles')
         .update({ role: user.role, is_moderator: user.is_moderator })
@@ -104,6 +125,8 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onViewChange }) => {
       console.error('Failed updates:', failedUpdates);
     } else {
       setMessage({ type: 'success', text: 'Todas as permissões foram atualizadas com sucesso!' });
+      // Atualiza o estado inicial para refletir o estado salvo
+      setInitialUsers(users);
     }
   };
 
@@ -130,39 +153,12 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onViewChange }) => {
     return (
       <div className="space-y-4">
         {users.map(user => (
-          <div key={user.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-slate-200">
-            <div className="flex items-center space-x-4 flex-1 min-w-0 mb-3 sm:mb-0">
-              <img src={user.avatarUrl} alt={user.name} className="h-12 w-12 rounded-full flex-shrink-0" />
-              <div className="min-w-0">
-                <div className="flex items-center space-x-2 truncate">
-                  <p className="font-bold text-slate-800 truncate">{user.name}</p>
-                  {user.is_moderator && <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200 flex-shrink-0">Moderador</span>}
-                </div>
-                <p className="text-sm text-slate-500 truncate">@{user.handle}</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4 flex-shrink-0">
-              <select
-                value={user.role}
-                onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                className="bg-white border border-slate-300 rounded-md shadow-sm py-2 px-3 text-sm focus:outline-none focus:ring-primary focus:border-primary"
-              >
-                <option value="cidadão">Cidadão</option>
-                <option value="secretário">Secretário</option>
-                <option value="vereador">Vereador</option>
-                <option value="prefeito">Prefeito</option>
-              </select>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={!!user.is_moderator}
-                  onChange={() => handleModeratorToggle(user.id)}
-                  className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
-                />
-                <span className="text-sm font-medium text-slate-700">Moderador</span>
-              </label>
-            </div>
-          </div>
+          <UserPermissionRow 
+            key={user.id} 
+            user={user} 
+            onRoleChange={handleRoleChange} 
+            onModeratorToggle={handleModeratorToggle} 
+          />
         ))}
       </div>
     );
@@ -204,7 +200,7 @@ const ModerationPage: React.FC<ModerationPageProps> = ({ onViewChange }) => {
         {activeTab === 'permissions' && (
           <button
             onClick={handleSaveChanges}
-            disabled={isSaving}
+            disabled={isSaving || !hasChanges}
             className="bg-primary text-white font-semibold px-6 py-2 rounded-md hover:bg-primary-700 transition-colors disabled:bg-primary-300 disabled:cursor-not-allowed"
           >
             {isSaving ? 'Salvando...' : 'Salvar Alterações'}
