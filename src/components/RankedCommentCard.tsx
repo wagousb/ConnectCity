@@ -2,6 +2,7 @@ import React from 'react';
 import type { User } from '@/types';
 import { ThumbsUpIcon } from '@/components/Icons';
 import RoleBadge from './RoleBadge';
+import ProfilePictureViewer from './ProfilePictureViewer'; // Importando o novo componente
 
 const timeAgo = (date: string | Date): string => {
     const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
@@ -31,7 +32,7 @@ export interface RankedComment {
 interface RankedCommentCardProps {
   rankedComment: RankedComment;
   rank: number;
-  onViewChange: (view: { view: string; postId?: string }) => void;
+  onViewChange: (view: { view: string; userId?: string; postId?: string }) => void;
 }
 
 const RankedCommentCard: React.FC<RankedCommentCardProps> = ({ rankedComment, rank, onViewChange }) => {
@@ -54,11 +55,11 @@ const RankedCommentCard: React.FC<RankedCommentCardProps> = ({ rankedComment, ra
       </div>
       
       <div className="flex-1 min-w-0">
-        <div className="flex items-center space-x-2 mb-2">
-            <img src={author.avatarUrl} alt={author.name} className="h-8 w-8 rounded-full" />
+        <div className="flex items-center space-x-2 mb-2" onClick={(e) => e.stopPropagation()}>
+            <ProfilePictureViewer user={author} size="sm" onClick={() => onViewChange({ view: 'Profile', userId: author.id })} />
             <div>
                 <div className="flex items-center space-x-2">
-                    <p className="text-sm font-semibold text-slate-800 truncate">{author.name}</p>
+                    <p className="text-sm font-semibold text-slate-800 truncate cursor-pointer hover:underline" onClick={() => onViewChange({ view: 'Profile', userId: author.id })}>{author.name}</p>
                     <RoleBadge role={author.role} size="xs" />
                 </div>
                 <p className="text-xs text-slate-500">@{author.handle} &middot; {timeAgo(comment_created_at)}</p>

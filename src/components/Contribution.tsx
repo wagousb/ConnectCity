@@ -4,6 +4,7 @@ import { ThumbsUpIcon, ThumbsDownIcon, TrashIcon, PencilIcon, ReplyIcon } from '
 import RoleBadge from './RoleBadge';
 import { supabase } from '@/integrations/supabase/client';
 import EditCommentModal from './EditCommentModal';
+import ProfilePictureViewer from './ProfilePictureViewer'; // Importando o novo componente
 
 const timeAgo = (date: string | Date): string => {
     const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
@@ -95,7 +96,7 @@ const Contribution: React.FC<ContributionProps> = ({ comment, currentUser, onPos
       />
       <div className="flex items-start space-x-3">
         <div className="relative flex-shrink-0">
-          <img src={comment.author.avatarUrl} alt={comment.author.name} className="h-10 w-10 rounded-full" />
+          <ProfilePictureViewer user={comment.author} size="sm" />
           {!comment.is_deleted && (
             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-max">
               <RoleBadge role={comment.author.role} size="xs" />

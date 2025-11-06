@@ -2,11 +2,12 @@ import React from 'react';
 import type { Post } from '@/types';
 import { StarIcon, MessageCircleIcon } from '@/components/Icons';
 import RoleBadge from './RoleBadge';
+import ProfilePictureViewer from './ProfilePictureViewer'; // Importando o novo componente
 
 interface RankingCardProps {
   post: Post;
   rank: number;
-  onViewChange: (view: { view: string; postId?: string }) => void;
+  onViewChange: (view: { view: string; userId?: string; postId?: string }) => void;
 }
 
 const RankingCard: React.FC<RankingCardProps> = ({ post, rank, onViewChange }) => {
@@ -27,9 +28,9 @@ const RankingCard: React.FC<RankingCardProps> = ({ post, rank, onViewChange }) =
       </div>
       
       <div className="flex-1 min-w-0">
-        <div className="flex items-center space-x-2 mb-1">
-            <img src={post.author.avatarUrl} alt={post.author.name} className="h-6 w-6 rounded-full" />
-            <p className="text-sm font-semibold text-slate-800 truncate">{post.author.name.split(' ')[0]}</p>
+        <div className="flex items-center space-x-2 mb-1" onClick={(e) => e.stopPropagation()}>
+            <ProfilePictureViewer user={post.author} size="sm" onClick={() => onViewChange({ view: 'Profile', userId: post.author.id })} />
+            <p className="text-sm font-semibold text-slate-800 truncate cursor-pointer hover:underline" onClick={() => onViewChange({ view: 'Profile', userId: post.author.id })}>{post.author.name.split(' ')[0]}</p>
             <RoleBadge role={post.author.role} size="xs" />
         </div>
         <h3 className="text-lg font-bold text-slate-800 truncate hover:underline">

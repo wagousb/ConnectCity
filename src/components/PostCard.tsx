@@ -8,6 +8,7 @@ import PostActionsDropdown from './PostActionsDropdown';
 import ConfirmationModal from './ConfirmationModal';
 import PostEditModal from './PostEditModal';
 import ReportPostModal from './ReportPostModal';
+import ProfilePictureViewer from './ProfilePictureViewer'; // Importando o novo componente
 
 interface PostCardProps {
   post: Post;
@@ -211,10 +212,13 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote, onViewCh
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-4">
           <div 
-            className="relative cursor-pointer"
-            onClick={() => onViewChange({ view: 'Profile', userId: post.author.id })}
+            className="relative"
           >
-            <img src={post.author.avatarUrl} alt={post.author.name} className="h-12 w-12 rounded-full" />
+            <ProfilePictureViewer 
+                user={post.author} 
+                size="md" 
+                onClick={() => onViewChange({ view: 'Profile', userId: post.author.id })}
+            />
             <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-max">
               <RoleBadge role={post.author.role} size="xs" />
             </div>

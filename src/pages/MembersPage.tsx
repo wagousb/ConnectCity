@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@/types';
 import RoleBadge from '@/components/RoleBadge';
+import ProfilePictureViewer from '@/components/ProfilePictureViewer'; // Importando o novo componente
 
 interface MembersPageProps {
   currentUser: User;
@@ -54,8 +55,8 @@ const MembersPage: React.FC<MembersPageProps> = ({ currentUser, onViewChange }) 
               className="flex items-start space-x-4 p-3 rounded-lg hover:bg-slate-50 cursor-pointer"
               onClick={() => onViewChange({ view: 'Profile', userId: member.id })}
             >
-              <div className="flex flex-col items-center">
-                <img src={member.avatarUrl} alt={member.name} className="h-12 w-12 rounded-full" />
+              <div className="flex flex-col items-center flex-shrink-0">
+                <ProfilePictureViewer user={member} size="md" />
                 <div className="mt-1">
                   <RoleBadge role={member.role} size="xs" />
                 </div>

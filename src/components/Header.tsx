@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { User } from '@/types';
 import { HomeIcon, SearchIcon, BellIcon, SettingsIcon, LogoutIcon, ShieldCheckIcon, UserCircleIcon, StarIcon } from '@/components/Icons';
 import { supabase } from '@/integrations/supabase/client';
+import ProfilePictureViewer from './ProfilePictureViewer'; // Importando o novo componente
 
 interface HeaderProps {
   user: User;
@@ -89,7 +90,7 @@ const Header: React.FC<HeaderProps> = ({ user, onViewChange, hasUnreadNotificati
               <button 
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="flex items-center space-x-3 cursor-pointer p-1 rounded-full hover:bg-slate-100">
-                <img src={user.avatarUrl} alt={user.name} className="h-9 w-9 rounded-full" />
+                <ProfilePictureViewer user={user} size="sm" />
                 <div className="hidden lg:block text-sm text-left">
                   <p className="font-semibold text-slate-800 whitespace-nowrap">{user.name}</p>
                   <p className="text-slate-500">@{user.handle}</p>

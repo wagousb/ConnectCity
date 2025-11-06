@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Notification, User } from '@/types';
 import { MessageCircleIcon, StarIcon, ThumbsUpIcon, ThumbsDownIcon, CheckCircleIcon, MegaphoneIcon } from '@/components/Icons';
+import ProfilePictureViewer from '@/components/ProfilePictureViewer'; // Importando o novo componente
 
 const timeAgo = (date: string | Date): string => {
     const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
@@ -160,7 +161,7 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ user, onViewChang
             <div>{icon}</div>
         ) : (
             <div className="cursor-pointer" onClick={(e) => { e.stopPropagation(); onViewChange({ view: 'Profile', userId: actor.id })}}>
-                <img src={actor.avatarUrl} alt={actor.name} className="h-10 w-10 rounded-full" />
+                <ProfilePictureViewer user={actor} size="sm" onClick={() => onViewChange({ view: 'Profile', userId: actor.id })} />
             </div>
         )}
         <div className="flex-1">

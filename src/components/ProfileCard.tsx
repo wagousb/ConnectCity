@@ -1,6 +1,7 @@
 import React from 'react';
 import type { User } from '../types';
 import RoleBadge from './RoleBadge';
+import ProfilePictureViewer from './ProfilePictureViewer'; // Importando o novo componente
 
 interface ProfileCardProps {
   user: User;
@@ -11,13 +12,11 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, onViewChange }) => {
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200 text-center">
       <div className="relative w-20 h-20 mx-auto">
-        <button onClick={() => onViewChange('Meu Perfil')} className="rounded-full">
-          <img
-            src={user.avatarUrl}
-            alt={user.name}
-            className="w-20 h-20 rounded-full border-4 border-white hover:opacity-75 transition-opacity"
-          />
-        </button>
+        <ProfilePictureViewer 
+            user={user} 
+            size="lg" 
+            onClick={() => onViewChange('Meu Perfil')} 
+        />
         <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-max">
           <RoleBadge role={user.role} />
         </div>
